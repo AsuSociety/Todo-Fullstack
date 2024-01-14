@@ -8,6 +8,7 @@ import { EditTodoForm } from "./EditTodoForm";
 
 export const TodoWrapper = () => {
   // Retrieve tasks from local storage or use an empty array if there are none
+  // TODO : fetch API ( fetch todos backend)
   const initialTodos = JSON.parse(localStorage.getItem("todos")) || [];
   const [todos, setTodos] = useState(initialTodos);
 
