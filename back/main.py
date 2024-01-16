@@ -1,96 +1,70 @@
-from typing import Union
-
-from fastapi import FastAPI
-
-from models import Tasks
-
-from users import User
-
+from fastapi import FastAPI, Depends
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.middleware.cors import CORSMiddleware
+from typing import List
 import sqlite3
+from models import Tasks, User
 
 conn = sqlite3.connect('users.db')
 
-c= conn.cursor()
-# c.execute("""CREATE TABLE users(
-#             name text,
-#             password text
-#             )""")
-
-# c.execute("INSERT INTO users VALUES ('Omer', '123456')")
-
-def insert_user(user):
-    with conn:
-        c.execute("INSERT INTO users VALUES (?,?)",(user.name,user.password))
-
-def get_user_by_name(name):
-    c.execute("SELECT * FROM users WHERE name =:name")
-    return c.fetchall()
-
-def update_password(user, password):
-    with conn:
-        c.execute("""UPDATE users SET password = :password
-                    WHERE name = :name""",
-                  {'name': user.name, 'password': password})
-
-
-def remove_user(user):
-    with conn:
-        c.execute("DELETE from users WHERE name = :name",
-                  {'name': user.name})
-
-
-
-user_1 = User('alon', '987654')
-user_2= User('David', 'alonhomo')
-user_3= User('Bar', 'USA')
-
-insert_user(user_2)
-insert_user(user_3)
-
-update_password(user_2, 'alonSharmota')
-remove_user(user_1)
-
-# users = get_user_by_name('David')
-# print(users)
-
-conn.close()
-
 app = FastAPI()
 
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:8000",
+    "http://localhost:3000",
 
-todos = []
+]
+# Enable CORS using CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.get("/")
+# Include the OAuth2PasswordBearer for authentication
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# Function to get current user from token (you need to implement this)
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    # Replace this with your authentication logic
+    # This could involve decoding the token, checking the database, etc.
+    return User(name="fakeuser", password="fakepassword")
+
+# Update your 'create_todos' endpoint
+@app.post("/todos")
+async def create_todos(task: Tasks, current_user: User = Depends(get_current_user)):
+    # Assign the username associated with the current user to the task
+    task.username = current_user.name
+
+    # Add logic to save the task to the database (use your own logic here)
+    insert_task(task)
+
+    return {"message": "Task has been added"}
+
+# Create a new function to insert the task into the 'todos' table
+def insert_task(task: Tasks):
+    with conn:
+        c = conn.cursor()
+        c.execute("INSERT INTO todos (id, description, username) VALUES (?, ?, ?)",
+                  (task.id, task.description, task.username))
+
+# Add a new endpoint to get all tasks
+@app.get("/todos", response_model=List[Tasks])
 async def get_todos():
-    return {"todos": todos}
+    # Retrieve tasks from the database (use your own logic here)
+    tasks = get_all_tasks()
+    return {"todos": tasks}
 
-@app.get("/{task_id}")
-async def get_todo(task_id:int):
-    for task in todos:
-        if task.id == task_id:
-            return{"task": task}
-    return {"message": "No task found"}
-
-@app.post("/")
-async def create_todos(task: Tasks):
-    todos.append(task)
-    return {"message": "task has been added"}
-
-
-@app.put("/{task_id}")
-async def update_todo(task_id:int, task_obj: Tasks):
-    for task in todos:
-        if task.id == task_id:
-            task.id = task_id
-            task.description = task_obj.description
-            return{"task": task}
-    return {"message": "No task found to update"}
-
-
-@app.delete("/{task_id}")
-async def delete_todo(task_id:int):
-    for task in todos:
-        if task.id == task_id:
-            todos.remove(task)
-            return{"message": "Task has been deleted"}
-    return {"message": "No task found"}
+# Create a new function to get all tasks from the 'todos' table
+def get_all_tasks():
+    with conn:
+        c = conn.cursor()
+        c.execute("SELECT * FROM todos")
+        tasks = c.fetchall()
+    return tasks
