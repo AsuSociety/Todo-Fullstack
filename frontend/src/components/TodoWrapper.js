@@ -8,17 +8,35 @@ import { EditTodoForm } from "./EditTodoForm";
 export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]);
 
-  const fetchTodos = async () => {
+  const fetchTodos = async (id = "") => {
     try {
-      const response = await fetch("http://localhost:8000/todos", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const url = id
+        ? `http://localhost:8000/todos/${id}`
+        : "http://localhost:8000";
+      console.log("Fetching todos from:", url);
+
+      const response = await fetch(url);
+      console.log("Response status:", response.status);
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch todos: ${response.status} - ${response.statusText}`
+        );
+      }
+
+      const rawData = await response.text(); // Try reading the raw response text
+      console.log("Raw response data:", rawData);
+
       const data = await response.json();
-      setTodos(data);
+      console.log("Response data:", data);
+
+      setTodos(Array.isArray(data) ? data : [data.todos]);
     } catch (error) {
-      console.error("Error fetching todos:", error);
+      debugger;
+      console.error(
+        `Error fetching todos${id ? ` with ID ${id}` : ""}:`,
+        error
+      );
     }
   };
 

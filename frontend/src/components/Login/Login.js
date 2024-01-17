@@ -24,28 +24,30 @@ export const Login = ({ onLogin, onRegister }) => {
   return (
     <div>
       <h2>Login Page</h2>
-      <input
-        type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <button onClick={handleLogin} className="btn">
-        Login
-      </button>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <p>
+      <div className="login-form">
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <button onClick={handleLogin} className="btn">
+          Login
+        </button>
+      </div>
+      <p className="register-message">
         Not registered?{" "}
         <button onClick={onRegister} className="btn">
           Register
         </button>
       </p>
+      {error && <p style={{ color: "red" }}>{error}</p>}
     </div>
   );
 };
