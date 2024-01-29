@@ -4,23 +4,11 @@ import React, { useState, useEffect } from "react";
 import { Todo } from "./Todo";
 import { TodoForm } from "./TodoForm";
 import { EditTodoForm } from "./EditTodoForm";
-// import axios from "axios";
 
 // Defining a functional component named TodoWrapper
 export const TodoWrapper = () => {
   // State to manage the list of todos
   const [todos, setTodos] = useState([]);
-
-  // // State to keep track of the next ID for new todos
-  // const [nextId, setNextId] = useState(1);
-
-  // // Function to generate a unique ID for a new todo
-  // const generateId = () => {
-  //   const id = nextId;
-  //   setNextId((prevId) => prevId + 1);
-  //   console.log(id);
-  //   return id;
-  // };
 
   // Function to fetch todos from the server
   const fetchTodos = async (id = "") => {
