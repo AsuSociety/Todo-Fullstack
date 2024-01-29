@@ -6,30 +6,26 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 // Todo component: displays a single task with options to edit, delete, and mark as completed
-export const Todo = ({ task, deleteTodo, editTodo, toggleComplete }) => {
+export const Todo = ({ task, deleteTodo, editTodo }) => {
   return (
     <div className="Todo">
-      {/* Display the task with a class based on completion status */}
-      <p
-        className={`${task.completed ? "completed" : "incompleted"}`}
-        onClick={() => toggleComplete(task.id)}
-      >
-        {task.task}
-      </p>
+      {/* Display the task description */}
+      {task.description}
 
       {/* Icons for editing and deleting tasks */}
       <div>
         {/* Edit icon triggers the editTodo function */}
         <FontAwesomeIcon
-          className="edit-icon"
-          icon={faPen}
-          onClick={() => editTodo(task.id)}
+          className="edit-icon" // Styling class for the edit icon
+          icon={faPen} // FontAwesome pen icon
+          onClick={() => editTodo(task.id)} // Call editTodo function when clicked, passing task ID
         />
+
         {/* Delete icon triggers the deleteTodo function */}
         <FontAwesomeIcon
-          className="delete-icon"
-          icon={faTrash}
-          onClick={() => deleteTodo(task.id)}
+          className="delete-icon" // Styling class for the delete icon
+          icon={faTrash} // FontAwesome trash icon
+          onClick={() => deleteTodo(task.id)} // Call deleteTodo function when clicked, passing task ID
         />
       </div>
     </div>
