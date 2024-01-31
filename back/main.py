@@ -6,21 +6,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse  # Import JSONResponse here
 from typing import List
 import sqlite3
-from models import Tasks
+from models import Tasks, addTasksPayload
+import uuid
 
 # Connect to the SQLite database named 'users.db'
 conn = sqlite3.connect('users.db')
 
 # Create a FastAPI application
 app = FastAPI()
-next_id = 1  # Initial value for the next ID
-
-@app.get("/generate_id")
-def generate_id():
-    global next_id
-    generated_id = next_id
-    next_id += 1
-    return JSONResponse(content={"id": generated_id})
 
 # Initialize an empty list to store tasks temporarily
 tasks = []
@@ -38,8 +31,10 @@ app.add_middleware(
 
 # Define a POST endpoint for creating tasks
 @app.post("/todos")
-async def create_todos(task: Tasks):
+async def create_todos(taskdescription: addTasksPayload):
     # Add the received task to the temporary list (simulating database insertion)
+    rand_id = uuid.uuid4()
+    task = Tasks(id=rand_id, description= taskdescription.description)
     tasks.append(task)
     print(f"==========POST=========")
     return task
@@ -64,7 +59,7 @@ async def get_all_todos():
 # Define a GET endpoint to retrieve a task by its ID
 # get by id without database
 @app.get("/{task_id}")
-async def get_todo_by_id(task_id: int):
+async def get_todo_by_id(task_id: uuid.UUID):
     # Retrieve a specific task from the temporary list by ID
     for task in tasks:
         if task.id == task_id:
@@ -95,7 +90,7 @@ def get_all_tasks():
     return tasks
 
 # Function to retrieve a task by its ID from the 'todos' table in the SQLite database
-def get_task_by_id(task_id: int):
+def get_task_by_id(task_id: uuid.UUID):
     with conn:
         c = conn.cursor()
         c.execute("SELECT * FROM todos WHERE id = ?", (task_id,))
@@ -105,7 +100,7 @@ def get_task_by_id(task_id: int):
 
 # Define a PUT endpoint to update a task by its ID
 @app.put("/{task_id}")
-async def update_todo(task_id: int, task_obj: Tasks):
+async def update_todo(task_id: uuid.UUID, task_obj: Tasks):
     # Logic to update a task with the specified ID (placeholder for future implementation)
     for task in tasks:
         if task.id == task_id:
@@ -117,14 +112,10 @@ async def update_todo(task_id: int, task_obj: Tasks):
 
 # Define a DELETE endpoint to delete a task by its ID
 @app.delete("/{task_id}")
-async def delete_todo(task_id: int):
-    global next_id
+async def delete_todo(task_id: uuid.UUID):
     # Logic to delete a task with the specified ID (placeholder for future implementation)
     for task in tasks:
         if task.id == task_id:
             tasks.remove(task)
-            if task_id == next_id - 1:
-                next_id -=1
-
             return{"message": "Task has been deleted"}
     return {"message": "No task found"}

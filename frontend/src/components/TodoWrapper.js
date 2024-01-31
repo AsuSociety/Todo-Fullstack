@@ -11,10 +11,39 @@ export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]);
 
   // Function to fetch todos from the server
-  const fetchTodos = async (id = "") => {
+  // const fetchTodos = async (id = "") => {
+  //   try {
+  //     // Constructing the URL based on whether an ID is provided or not
+  //     const url = id ? `http://localhost:8000/${id}` : "http://localhost:8000";
+  //     console.log("Fetching todos from:", url);
+
+  //     // Fetching data from the server
+  //     const response = await fetch(url);
+  //     console.log("Response status:", response.status);
+
+  //     // Handling the response data
+  //     if (!response.ok) {
+  //       throw new Error(
+  //         `Failed to fetch todos: ${response.status} - ${response.statusText}`
+  //       );
+  //     }
+
+  //     const data = await response.json();
+  //     console.log("Response data:", data);
+
+  //     // Updating the local state with fetched data
+  //     setTodos(data);
+  //   } catch (error) {
+  //     console.error(
+  //       `Error fetching todos${id ? ` with ID ${id}` : ""}:`,
+  //       error
+  //     );
+  //   }
+  // };
+  const fetchAllTodos = async () => {
     try {
       // Constructing the URL based on whether an ID is provided or not
-      const url = id ? `http://localhost:8000/${id}` : "http://localhost:8000";
+      const url = "http://localhost:8000";
       console.log("Fetching todos from:", url);
 
       // Fetching data from the server
@@ -32,43 +61,54 @@ export const TodoWrapper = () => {
       console.log("Response data:", data);
 
       // Updating the local state with fetched data
-      setTodos(Array.isArray(data) ? data : [data.todos]);
+      setTodos(data);
     } catch (error) {
-      console.error(
-        `Error fetching todos${id ? ` with ID ${id}` : ""}:`,
-        error
-      );
+      console.error(`Error fetching todos${""}:`, error);
+    }
+  };
+  const fetchTodosByID = async (id = "") => {
+    try {
+      // Constructing the URL based on whether an ID is provided or not
+      const url = `http://localhost:8000/${id}`;
+      console.log("Fetching todos from:", url);
+
+      // Fetching data from the server
+      const response = await fetch(url);
+      console.log("Response status:", response.status);
+
+      // Handling the response data
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch todos: ${response.status} - ${response.statusText}`
+        );
+      }
+
+      const data = await response.json();
+      console.log("Response data:", data);
+
+      // Updating the local state with fetched data
+      setTodos(data);
+    } catch (error) {
+      console.error(`Error fetching todos${` with ID ${id}`}:`, error);
     }
   };
 
   // Use useEffect to fetch todos when the component mounts
   useEffect(() => {
-    fetchTodos();
+    fetchAllTodos();
+    fetchTodosByID();
   }, []);
-
-  const fetchNextId = async () => {
-    try {
-      const response = await fetch("http://localhost:8000/generate_id");
-      const data = await response.json(); // Extract JSON content
-      const newId = data.id;
-      console.log(newId);
-      return newId;
-    } catch (error) {
-      console.error("Error fetching new ID:", error);
-    }
-  };
 
   // Function to add a new todo
   const addTodo = async (todo) => {
     try {
-      const newId = await fetchNextId();
       // Sending a POST request to the server with the new todo's description
       const response = await fetch("http://localhost:8000/todos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ id: newId, description: todo }),
+        body: JSON.stringify({ description: todo }),
       });
 
       // Handling the response
