@@ -1,5 +1,4 @@
 // TodoWrapper.js
-// Importing necessary components and hooks from React and other files
 import React, { useState, useEffect } from "react";
 import { Todo } from "./Todo";
 import { TodoForm } from "./TodoForm";
@@ -7,62 +6,117 @@ import { EditTodoForm } from "./EditTodoForm";
 
 export const API_URL = "http://localhost:8000";
 
-// Defining a functional component named TodoWrapper
+const fetchAllTodos = async () => {
+  try {
+    const url = `${API_URL}/todos`;
+    console.log("Fetching todos from:", url);
+
+    const response = await fetch(url);
+    console.log("Response status:", response.status);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch todos: ${response.status} - ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    console.log("Response data:", data);
+
+    return data;
+  } catch (error) {
+    console.error(`Error fetching todos${""}:`, error);
+    return [];
+  }
+};
+
+const fetchTodoByID = async (id = "") => {
+  try {
+    const url = `${API_URL}/todo/${id}`;
+    console.log("Fetching todos from:", url);
+
+    const response = await fetch(url);
+    console.log("Response status:", response.status);
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch todos: ${response.status} - ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    console.log("Response data:", data);
+
+    return data;
+  } catch (error) {
+    console.error(`Error fetching todos${` with ID ${id}`}:`, error);
+    return [];
+  }
+};
+
+const addTodo = async (todo) => {
+  try {
+    const response = await fetch(`${API_URL}/todo`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ description: todo }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to add todo: ${response.status} - ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    console.log("New todo data:", data);
+
+    return data;
+  } catch (error) {
+    console.error("Error adding todo:", error);
+    return null;
+  }
+};
+
+const deleteTodo = async (id) => {
+  try {
+    await fetch(`${API_URL}/todo/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return id;
+  } catch (error) {
+    console.error("Error deleting todo:", error);
+    return null;
+  }
+};
+
+const editTask = async (task, id) => {
+  try {
+    const response = await fetch(`${API_URL}/todo/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: id, description: task }),
+    });
+
+    const updatedTodo = await response.json();
+
+    return updatedTodo;
+  } catch (error) {
+    console.error("Error updating task:", error);
+    return null;
+  }
+};
+
 export const TodoWrapper = () => {
-  // State to manage the list of todos
   const [todos, setTodos] = useState([]);
-
-  const fetchAllTodos = async () => {
-    try {
-      const url = `${API_URL}/todo`;
-      console.log("Fetching todos from:", url);
-
-      // Fetching data from the server
-      const response = await fetch(url);
-      console.log("Response status:", response.status);
-
-      // Handling the response data
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch todos: ${response.status} - ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-      console.log("Response data:", data);
-
-      // Updating the local state with fetched data
-      setTodos(data);
-    } catch (error) {
-      console.error(`Error fetching todos${""}:`, error);
-    }
-  };
-
-  const fetchTodoByID = async (id = "") => {
-    try {
-      const url = `${API_URL}/todo/${id}`;
-      console.log("Fetching todos from:", url);
-
-      // Fetching data from the server
-      const response = await fetch(url);
-      console.log("Response status:", response.status);
-
-      // Handling the response data
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch todos: ${response.status} - ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-      console.log("Response data:", data);
-
-      // Updating the local state with fetched data
-      setTodos(data);
-    } catch (error) {
-      console.error(`Error fetching todos${` with ID ${id}`}:`, error);
-    }
-  };
 
   // Use useEffect to fetch todos when the component mounts
   useEffect(() => {
@@ -70,56 +124,35 @@ export const TodoWrapper = () => {
     // fetchTodoByID();
   }, []);
 
-  // Function to add a new todo
-  const addTodo = async (todo) => {
-    try {
-      // Sending a POST request to the server with the new todo's description
-      const response = await fetch(`${API_URL}/todo`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ description: todo }),
-      });
+  const handleAddTodo = async (todo) => {
+    const newTodo = await addTodo(todo);
 
-      // Handling the response
-      if (!response.ok) {
-        throw new Error(
-          `Failed to add todo: ${response.status} - ${response.statusText}`
-        );
-      }
+    if (newTodo) {
+      // Update the state with the new todo
+      setTodos((prevTodos) => [...prevTodos, newTodo]);
+    }
+  };
+  const handleDeleteTodo = async (id) => {
+    const deletedId = await deleteTodo(id);
 
-      const data = await response.json();
-      console.log("New todo data:", data);
-      console.log("Previous todos:", todos);
-
-      // Updating the local state with the new todo
-      setTodos((prevTodos) => [...prevTodos, data]);
-    } catch (error) {
-      console.error("Error adding todo:", error);
+    if (deletedId) {
+      setTodos((prevTodos) =>
+        prevTodos.filter((todo) => todo.id !== deletedId)
+      );
     }
   };
 
-  // Function to delete a todo
-  const deleteTodo = async (id) => {
-    try {
-      // Sending a DELETE request to the server with the todo's ID
-      await fetch(`${API_URL}/todo/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+  const handleEditTask = async (task, id) => {
+    const updatedTask = await editTask(task, id);
 
-      // Updating the local state by removing the deleted todo
-      setTodos((prevTodos) => prevTodos.filter((todo) => todo.id !== id));
-    } catch (error) {
-      console.error("Error deleting todo:", error);
+    if (updatedTask) {
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
+      );
     }
   };
 
-  // Function to toggle the editing state of a todo
-  const editTodo = (id) => {
+  const markForEdit = (id) => {
     setTodos((prevTodos) =>
       prevTodos.map((todo) =>
         todo.id === id ? { ...todo, isEditing: !todo.isEditing } : todo
@@ -127,50 +160,24 @@ export const TodoWrapper = () => {
     );
   };
 
-  // Function to edit the description of a todo
-  const editTask = async (task, id) => {
-    try {
-      // Sending a PUT request to the server with the updated task description and ID
-      const response = await fetch(`${API_URL}/todo/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ id: id, description: task }),
-      });
-
-      // Handling the response
-      const updatedTodo = await response.json();
-
-      // Updating the local state with the modified todo
-      setTodos((prevTodos) =>
-        prevTodos.map((todo) => (todo.id === id ? updatedTodo : todo))
-      );
-    } catch (error) {
-      console.error("Error updating task:", error);
-    }
-  };
-
-  // JSX for rendering the component
   return (
     <div className="TodoWrapper">
       <h1>My To-Do List!</h1>
 
-      {/* TodoForm component for adding todos */}
-      <TodoForm addTodo={addTodo} />
+      <TodoForm handleAddTodo={handleAddTodo} />
 
-      {/* Mapping through todos to render either EditTodoForm or Todo component */}
       {todos.map((todo) =>
         todo.isEditing ? (
-          // Render EditTodoForm if todo is in editing mode
-          <EditTodoForm editTodo={editTask} task={todo} />
+          <EditTodoForm
+            editTodo={(task) => handleEditTask(task, todo.id)}
+            task={todo}
+          />
         ) : (
-          // Render Todo component otherwise
           <Todo
             key={todo.id}
             task={todo}
-            deleteTodo={deleteTodo}
-            editTodo={editTodo}
+            deleteTodo={handleDeleteTodo}
+            editTodo={markForEdit}
           />
         )
       )}

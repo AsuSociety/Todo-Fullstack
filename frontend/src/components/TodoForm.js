@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 
 // TodoForm component: allows adding new tasks
-export const TodoForm = ({ addTodo }) => {
+export const TodoForm = ({ handleAddTodo }) => {
   // State to manage the input value for new tasks
   const [value, setValue] = useState(""); // Set up a state variable 'value' to hold the input value
 
@@ -16,7 +16,7 @@ export const TodoForm = ({ addTodo }) => {
     // Check if the input value is not empty
     if (value) {
       // Call the addTodo function to add a new task
-      addTodo(value); // Pass the current input value to the 'addTodo' function
+      handleAddTodo(value); // Pass the current input value to the 'addTodo' function
       // Clear the form input after submission
       setValue(""); // Reset the input value to an empty string
     }
