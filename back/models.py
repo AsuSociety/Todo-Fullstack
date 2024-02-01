@@ -4,11 +4,11 @@ import uuid
 
 
 class Tasks(BaseModel):
-    id: UUID4
+    id: uuid.UUID
     description: str
     # username: str  # Add this field for associating tasks with a user
 
-class addTasksPayload(BaseModel):
+class AddTasksPayload(BaseModel):
     description: str
 
 # class Users(BaseModel):

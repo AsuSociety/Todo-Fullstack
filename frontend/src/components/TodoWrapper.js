@@ -5,45 +5,16 @@ import { Todo } from "./Todo";
 import { TodoForm } from "./TodoForm";
 import { EditTodoForm } from "./EditTodoForm";
 
+export const API_URL = "http://localhost:8000";
+
 // Defining a functional component named TodoWrapper
 export const TodoWrapper = () => {
   // State to manage the list of todos
   const [todos, setTodos] = useState([]);
 
-  // Function to fetch todos from the server
-  // const fetchTodos = async (id = "") => {
-  //   try {
-  //     // Constructing the URL based on whether an ID is provided or not
-  //     const url = id ? `http://localhost:8000/${id}` : "http://localhost:8000";
-  //     console.log("Fetching todos from:", url);
-
-  //     // Fetching data from the server
-  //     const response = await fetch(url);
-  //     console.log("Response status:", response.status);
-
-  //     // Handling the response data
-  //     if (!response.ok) {
-  //       throw new Error(
-  //         `Failed to fetch todos: ${response.status} - ${response.statusText}`
-  //       );
-  //     }
-
-  //     const data = await response.json();
-  //     console.log("Response data:", data);
-
-  //     // Updating the local state with fetched data
-  //     setTodos(data);
-  //   } catch (error) {
-  //     console.error(
-  //       `Error fetching todos${id ? ` with ID ${id}` : ""}:`,
-  //       error
-  //     );
-  //   }
-  // };
   const fetchAllTodos = async () => {
     try {
-      // Constructing the URL based on whether an ID is provided or not
-      const url = "http://localhost:8000";
+      const url = `${API_URL}/todo`;
       console.log("Fetching todos from:", url);
 
       // Fetching data from the server
@@ -66,10 +37,10 @@ export const TodoWrapper = () => {
       console.error(`Error fetching todos${""}:`, error);
     }
   };
-  const fetchTodosByID = async (id = "") => {
+
+  const fetchTodoByID = async (id = "") => {
     try {
-      // Constructing the URL based on whether an ID is provided or not
-      const url = `http://localhost:8000/${id}`;
+      const url = `${API_URL}/todo/${id}`;
       console.log("Fetching todos from:", url);
 
       // Fetching data from the server
@@ -96,14 +67,14 @@ export const TodoWrapper = () => {
   // Use useEffect to fetch todos when the component mounts
   useEffect(() => {
     fetchAllTodos();
-    fetchTodosByID();
+    // fetchTodoByID();
   }, []);
 
   // Function to add a new todo
   const addTodo = async (todo) => {
     try {
       // Sending a POST request to the server with the new todo's description
-      const response = await fetch("http://localhost:8000/todos", {
+      const response = await fetch(`${API_URL}/todo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -133,7 +104,7 @@ export const TodoWrapper = () => {
   const deleteTodo = async (id) => {
     try {
       // Sending a DELETE request to the server with the todo's ID
-      await fetch(`http://localhost:8000/${id}`, {
+      await fetch(`${API_URL}/todo/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -160,7 +131,7 @@ export const TodoWrapper = () => {
   const editTask = async (task, id) => {
     try {
       // Sending a PUT request to the server with the updated task description and ID
-      const response = await fetch(`http://localhost:8000/${id}`, {
+      const response = await fetch(`${API_URL}/todo/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
