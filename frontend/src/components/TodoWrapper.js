@@ -117,15 +117,29 @@ const editTask = async (task, id) => {
 
 export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]);
-
   // Use useEffect to fetch todos when the component mounts
+  // useEffect(() => {
+  //   fetchAllTodos();
+  //   setTodos(fetchAllTodos());
+  //   // fetchTodoByID();
+  // }, []);
+
   useEffect(() => {
-    fetchAllTodos();
-    // fetchTodoByID();
+    const fetchData = async () => {
+      try {
+        const fetchedTodos = await fetchAllTodos();
+        setTodos(fetchedTodos);
+      } catch (error) {
+        console.error("Error fetching todos:", error);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleAddTodo = async (todo) => {
     const newTodo = await addTodo(todo);
+    // console.log("foooo", todos);
 
     if (newTodo) {
       // Update the state with the new todo
@@ -134,6 +148,7 @@ export const TodoWrapper = () => {
   };
   const handleDeleteTodo = async (id) => {
     const deletedId = await deleteTodo(id);
+    console.log("foooo", id);
 
     if (deletedId) {
       setTodos((prevTodos) =>

@@ -2,11 +2,13 @@ from fastapi import FastAPI
 from pydantic import BaseModel, UUID4
 import uuid
 
-
-class Tasks(BaseModel):
+class Task(BaseModel):
     id: uuid.UUID
     description: str
-    # username: str  # Add this field for associating tasks with a user
+
+
+class DB(BaseModel):
+    tasks: dict[str,Task]
 
 class AddTasksPayload(BaseModel):
     description: str

@@ -1,0 +1,7 @@
+{
+    "python.pythonPath": "/Users/asus/Library/Caches/pypoetry/virtualenvs/todo_--RAaYEN0-py3.11/bin/python",
+    "python.testing.cwd": "${workspaceFolder}",
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.terminal.activateEnvInCurrentTerminal": true
+  }
+  
