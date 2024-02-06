@@ -1,5 +1,4 @@
-// UserContext.js
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 // Step 1: Create a context
 const UserContext = createContext();

@@ -33,10 +33,13 @@
     border: none;
     padding: 0.55rem;
     cursor: pointer;
+    margin-right: 10px; /* Add margin to the right of the button */
   }
+  
   input {
     width: 100%;
     padding: 10px;
     margin: 8px 0;
     box-sizing: border-box;
+    margin-bottom: 10px; /* Add margin below the input */
   }

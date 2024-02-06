@@ -1,117 +1,183 @@
 // TodoWrapper.js
-
-// Import React and useState hook
 import React, { useState, useEffect } from "react";
 import { Todo } from "./Todo";
 import { TodoForm } from "./TodoForm";
 import { EditTodoForm } from "./EditTodoForm";
 
-export const TodoWrapper = () => {
-  // Retrieve tasks from local storage or use an empty array if there are none
-  // TODO : fetch API ( fetch todos backend)
-  const initialTodos = JSON.parse(localStorage.getItem("todos")) || [];
-  const [todos, setTodos] = useState(initialTodos);
+export const API_URL = "http://localhost:8000";
 
-  // State to keep track of the next ID for new todos
-  const [nextId, setNextId] = useState(
-    Math.max(...initialTodos.map((todo) => todo.id), 0) + 1
-  );
+const fetchAllTodos = async () => {
+  try {
+    const url = `${API_URL}/todos`;
+    console.log("Fetching todos from:", url);
 
-  // Function to generate a unique ID for a new todo
-  const generateId = () => {
-    const id = nextId;
-    setNextId((prevId) => prevId + 1);
-    console.log(id);
-    return id;
-  };
+    const response = await fetch(url);
+    console.log("Response status:", response.status);
 
-  // Function to add a new todo to the list
-  const addTodo = (todo) => {
-    const newTodo = {
-      id: generateId(),
-      task: todo,
-      completed: false,
-      isEditing: false,
-    };
-    setTodos([...todos, newTodo]);
-    saveToLocalStorage([...todos, newTodo]);
-  };
-
-  // Function to delete a todo from the list
-  const deleteTodo = (id) => {
-    const updatedTodos = todos.filter((todo) => todo.id !== id);
-    setTodos(updatedTodos);
-
-    if (updatedTodos.length === 0) {
-      // If all tasks are deleted, reset nextId to 1
-      setNextId(1);
-    } else {
-      // If not all tasks are deleted, find the maximum ID
-      const maxId = Math.max(...updatedTodos.map((todo) => todo.id));
-
-      // Update nextId to the maximum ID + 1
-      setNextId(maxId + 1);
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch todos: ${response.status} - ${response.statusText}`
+      );
     }
 
-    saveToLocalStorage(updatedTodos);
-  };
+    const data = await response.json();
+    console.log("Response data:", data);
 
-  // Function to toggle the completion status of a todo
-  const toggleComplete = (id) => {
-    const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, completed: !todo.completed } : todo
-    );
-    setTodos(updatedTodos);
-    saveToLocalStorage(updatedTodos);
-  };
+    return data;
+  } catch (error) {
+    console.error(`Error fetching todos${""}:`, error);
+    return [];
+  }
+};
 
-  // Function to toggle the editing status of a todo
-  const editTodo = (id) => {
-    const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, isEditing: !todo.isEditing } : todo
-    );
-    setTodos(updatedTodos);
-    saveToLocalStorage(updatedTodos);
-  };
+const fetchTodoByID = async (id = "") => {
+  try {
+    const url = `${API_URL}/todo/${id}`;
+    console.log("Fetching todos from:", url);
 
-  // Function to edit the task of a todo
-  const editTask = (task, id) => {
-    const updatedTodos = todos.map((todo) =>
-      todo.id === id ? { ...todo, task, isEditing: !todo.isEditing } : todo
-    );
-    setTodos(updatedTodos);
-    saveToLocalStorage(updatedTodos);
-  };
+    const response = await fetch(url);
+    console.log("Response status:", response.status);
 
-  // Function to save todos to local storage
-  const saveToLocalStorage = (todos) => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  };
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch todos: ${response.status} - ${response.statusText}`
+      );
+    }
 
-  // Cleanup local storage and re-save todos when the component unmounts
+    const data = await response.json();
+    console.log("Response data:", data);
+
+    return data;
+  } catch (error) {
+    console.error(`Error fetching todos${` with ID ${id}`}:`, error);
+    return [];
+  }
+};
+
+const addTodo = async (todo) => {
+  try {
+    const response = await fetch(`${API_URL}/todo`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ description: todo }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to add todo: ${response.status} - ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    console.log("New todo data:", data);
+
+    return data;
+  } catch (error) {
+    console.error("Error adding todo:", error);
+    return null;
+  }
+};
+
+const deleteTodo = async (id) => {
+  try {
+    await fetch(`${API_URL}/todo/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return id;
+  } catch (error) {
+    console.error("Error deleting todo:", error);
+    return null;
+  }
+};
+
+const editTask = async (task, id) => {
+  try {
+    const response = await fetch(`${API_URL}/todo/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ id: id, description: task }),
+    });
+
+    const updatedTodo = await response.json();
+
+    return updatedTodo;
+  } catch (error) {
+    console.error("Error updating task:", error);
+    return null;
+  }
+};
+
+export const TodoWrapper = () => {
+  const [todos, setTodos] = useState([]);
+
+  // Use useEffect to fetch todos when the component mounts
   useEffect(() => {
-    return () => localStorage.removeItem("todos");
+    fetchAllTodos();
+    // fetchTodoByID();
   }, []);
 
-  // Return the main component JSX with the to-do list
+  const handleAddTodo = async (todo) => {
+    const newTodo = await addTodo(todo);
+
+    if (newTodo) {
+      // Update the state with the new todo
+      setTodos((prevTodos) => [...prevTodos, newTodo]);
+    }
+  };
+  const handleDeleteTodo = async (id) => {
+    const deletedId = await deleteTodo(id);
+
+    if (deletedId) {
+      setTodos((prevTodos) =>
+        prevTodos.filter((todo) => todo.id !== deletedId)
+      );
+    }
+  };
+
+  const handleEditTask = async (task, id) => {
+    const updatedTask = await editTask(task, id);
+
+    if (updatedTask) {
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
+      );
+    }
+  };
+
+  const markForEdit = (id) => {
+    setTodos((prevTodos) =>
+      prevTodos.map((todo) =>
+        todo.id === id ? { ...todo, isEditing: !todo.isEditing } : todo
+      )
+    );
+  };
+
   return (
     <div className="TodoWrapper">
       <h1>My To-Do List!</h1>
-      {/* Render the form to add new todos */}
-      <TodoForm addTodo={addTodo} />
-      {/* Display todos based on editing status */}
+
+      <TodoForm handleAddTodo={handleAddTodo} />
+
       {todos.map((todo) =>
         todo.isEditing ? (
-          // Render the edit form if the todo is being edited
-          <EditTodoForm key={todo.id} editTodo={editTask} task={todo} />
+          <EditTodoForm
+            editTodo={(task) => handleEditTask(task, todo.id)}
+            task={todo}
+          />
         ) : (
-          // Render the Todo component for displaying and managing individual todos
           <Todo
             key={todo.id}
             task={todo}
-            deleteTodo={deleteTodo}
-            editTodo={editTodo}
-            toggleComplete={toggleComplete}
+            deleteTodo={handleDeleteTodo}
+            editTodo={markForEdit}
           />
         )
       )}
