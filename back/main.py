@@ -65,13 +65,16 @@ def save_todos_on_shutdown():
 
 # Define a POST endpoint for creating tasks
 @app.post("/todo")
-async def create_todos(task_description: AddTasksPayload):
+async def create_todos(task_payload: AddTasksPayload):
     # Add the received task to the temporary list (simulating database insertion)
     task_id = uuid.uuid4()
-    db.tasks[task_id] = {"id": task_id, "description": task_description.description}
-    # db = tasks.copy()
-    print(f"**foooo**{db}****")
-
+    # Extract title and body from the payload
+    print(f"**foooo**{task_payload}****")
+    title = task_payload.title
+    body = task_payload.body
+    # Add the received task to the database
+    db.tasks[task_id] = {"id": task_id, "title": title, "body": body}
+    # print(f"**foooo**{db}****")
     return db.tasks[task_id]
 
 # Define a GET endpoint to retrieve all tasks
@@ -102,14 +105,17 @@ async def get_todo_by_id(task_id: uuid.UUID):
 # Define a PUT endpoint to update a task by its ID
 @app.put("/todo/{task_id}")
 async def update_todo(task_id: uuid.UUID, task_obj: Task):
-    # Logic to update a task with the specified ID in the dictionary (placeholder for future implementation)
+    # Logic to update a task with the specified ID in the dictionary or as an instance of Task
     task = db.tasks.get(task_id)
     if task:
-        task.description = task_obj.description
-        # db = db.copy()
-        print(f"$$$${db}$$$$")
-
-        return task
+        if isinstance(task, dict):
+            # If task is a dictionary, update its values directly
+            db.tasks[task_id].update({"title": task_obj.title, "body": task_obj.body})
+        else:
+            # If task is an instance of Task, update its attributes
+            task.title = task_obj.title
+            task.body = task_obj.body
+        return db.tasks[task_id]  # Return the updated task
     # Raise an exception if the task is not found
     raise HTTPException(status_code=404, detail="Task not found")
 
@@ -118,11 +124,11 @@ async def update_todo(task_id: uuid.UUID, task_obj: Task):
 @app.delete("/todo/{task_id}")
 async def delete_todo(task_id: uuid.UUID):
     # Logic to delete a task with the specified ID from the dictionary (placeholder for future implementation)
-    print(f"======================")
-    print(f"******{task_id}******")
-    print(f"^^^^^^{db}^^^^^^")
+    # print(f"======================")
+    # print(f"******{task_id}******")
+    # print(f"^^^^^^{db}^^^^^^")
     task = db.tasks.pop(task_id, None)
-    print(f"bol- {task} -bol")
+    # print(f"bol- {task} -bol")
     if task:
         # db = tasks.copy()
         print(f"==========={task}===========")

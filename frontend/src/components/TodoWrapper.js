@@ -61,7 +61,7 @@ const addTodo = async (todo) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ description: todo }),
+      body: JSON.stringify(todo), // Assuming `todo` is already in the correct format
     });
 
     if (!response.ok) {
@@ -103,7 +103,7 @@ const editTask = async (task, id) => {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id: id, description: task }),
+      body: JSON.stringify({ id: id, title: task.title, body: task.body }), // Include both body and title properties
     });
 
     const updatedTodo = await response.json();
@@ -158,13 +158,16 @@ export const TodoWrapper = () => {
   };
 
   const handleEditTask = async (task, id) => {
+    console.log("foooo1", task);
     const updatedTask = await editTask(task, id);
+    console.log("foooo", task);
 
     if (updatedTask) {
       setTodos((prevTodos) =>
         prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
       );
     }
+    console.log("blalalal", todos);
   };
 
   const markForEdit = (id) => {

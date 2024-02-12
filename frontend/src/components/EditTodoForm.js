@@ -7,14 +7,15 @@ import React, { useState } from "react";
 export const EditTodoForm = ({ editTodo, task }) => {
   // State to manage the input value for editing
 
-  const [value, setValue] = useState(task.task);
+  const [title, setTitle] = useState(task.title);
+  const [body, setBody] = useState(task.body);
 
   // Function to handle form submission
   const handleSubmit = (e) => {
     // Prevent the default form submission behavior
     e.preventDefault();
     // Call the editTodo function to update the task with the new value
-    editTodo(value, task.id);
+    editTodo({ title, body }, task.id);
   };
 
   // Return a form with an input field and a submit button
@@ -23,10 +24,16 @@ export const EditTodoForm = ({ editTodo, task }) => {
       {/* Input field for updating the task */}
       <input
         type="text"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        className="todo-input"
-        placeholder="Update task"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        // className="todo-input"
+        placeholder="Update title"
+      />
+      <input
+        type="text"
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        placeholder="Update body"
       />
 
       {/* Submit button to apply the changes */}

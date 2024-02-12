@@ -9,8 +9,11 @@ import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
 export const Todo = ({ task, deleteTodo, editTodo }) => {
   return (
     <div className="Todo">
-      {/* Display the task description */}
-      {task.description}
+      {/* Display the task title and body */}
+      <div>
+        <h3>{task.title}</h3>
+        <p>{task.body}</p>
+      </div>
 
       {/* Icons for editing and deleting tasks */}
       <div>

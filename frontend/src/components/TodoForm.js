@@ -6,7 +6,9 @@ import React, { useState } from "react";
 // TodoForm component: allows adding new tasks
 export const TodoForm = ({ handleAddTodo }) => {
   // State to manage the input value for new tasks
-  const [value, setValue] = useState(""); // Set up a state variable 'value' to hold the input value
+
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
 
   // Function to handle form submission
   const handleSubmit = (e) => {
@@ -14,11 +16,11 @@ export const TodoForm = ({ handleAddTodo }) => {
     e.preventDefault();
 
     // Check if the input value is not empty
-    if (value) {
+    if (title && body) {
       // Call the addTodo function to add a new task
-      handleAddTodo(value); // Pass the current input value to the 'addTodo' function
-      // Clear the form input after submission
-      setValue(""); // Reset the input value to an empty string
+      handleAddTodo({ title, body });
+      setTitle("");
+      setBody("");
     }
   };
 
@@ -28,10 +30,18 @@ export const TodoForm = ({ handleAddTodo }) => {
       {/* Input field for entering a new task */}
       <input
         type="text"
-        value={value} // The current value of the input field is displayed
-        onChange={(e) => setValue(e.target.value)} // Update the 'value' as the user types
+        value={title} // The current value of the input field is displayed
+        onChange={(e) => setTitle(e.target.value)}
         className="todo-input"
-        placeholder="What is the task today?"
+        placeholder="Title"
+      />
+
+      <input
+        type="text"
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        className="todo-input"
+        placeholder="Body"
       />
 
       {/* Submit button to add the new task */}
