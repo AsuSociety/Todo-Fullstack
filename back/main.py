@@ -1,3 +1,5 @@
+# main.py
+
 # Import necessary modules and classes from FastAPI and Python
 from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer
@@ -9,7 +11,6 @@ import sqlite3
 from models import Task, AddTasksPayload, DB
 import uuid
 import json
-from tasksEncoder import TasksEncoder
 from pathlib import Path
 
 

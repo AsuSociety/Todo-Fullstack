@@ -1,3 +1,5 @@
+/* App.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
 
 * {
@@ -22,6 +24,10 @@ h1 {
   color: #fff;
   margin-bottom: 0.5rem;
   font-size: 1.75rem;
+}
+
+h3{
+  text-align: left;
 }
 
 .TodoWrapper {
@@ -106,15 +112,7 @@ input {
   box-sizing: border-box;
 }
 
-/* button {
-  background: #4caf50;
-  color: #fff;
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  width: 100%;
-} */
+
 
 button:hover {
   background: #45a049;

@@ -1,42 +1,50 @@
-import React, { useState } from "react";
-import "./App.css";
-import { TodoWrapper } from "./components/TodoWrapper";
-import { UserProvider } from "./components/UserContext";
-import Modal from "./components/Modal";
-import { Login } from "./components/Login/Login";
-import { Register } from "./components/Register/Register";
+// App.js
 
+// Import necessary modules and components
+import React, { useState } from "react"; // Import React and useState hook for state management
+import "./App.css"; // Import CSS file for styling
+import { TodoWrapper } from "./components/TodoWrapper"; // Import TodoWrapper component
+import { UserProvider } from "./components/UserContext"; // Import UserProvider component for user context
+import Modal from "./components/Modal"; // Import Modal component for displaying modals
+import { Login } from "./components/Login/Login"; // Import Login component for user login
+import { Register } from "./components/Register/Register"; // Import Register component for user registration
+
+// Define App function component
 function App() {
-  const [currentStep, setCurrentStep] = useState("Login");
+  // State management with useState hook
+  const [currentStep, setCurrentStep] = useState("Login"); // Initialize state variable 'currentStep' with default value "Login"
 
+  // Event handlers
   const openModal = () => {
-    // Implement your logic if needed
-    setCurrentStep("Login");
+    setCurrentStep("Login"); // Update currentStep state to "Login" to open the login modal
   };
 
   const closeModal = () => {
-    // Implement your logic if needed
-    setCurrentStep("TodoWrapper");
+    setCurrentStep("TodoWrapper"); // Update currentStep state to "TodoWrapper" to close the modal and show the main TodoWrapper component
   };
 
   const handleLogin = () => {
-    console.log("Handling login...");
-    setCurrentStep("Login");
+    setCurrentStep("Login"); // Handle login action by updating currentStep state to "Login"
   };
 
   const handleRegister = () => {
-    setCurrentStep("Register");
+    setCurrentStep("Register"); // Handle register action by updating currentStep state to "Register"
   };
 
+  // JSX structure returned by the App component
   return (
     <div className="App">
       <UserProvider>
-        {currentStep !== "TodoWrapper" && (
+        {" "}
+        {/* UserProvider wraps the entire application, providing user context */}
+        {currentStep !== "TodoWrapper" && ( // Conditional rendering based on currentStep state
           <Modal onClose={closeModal}>
-            {currentStep === "Login" && (
+            {" "}
+            {/* Render modal component */}
+            {currentStep === "Login" && ( // Conditionally render Login component if currentStep is "Login"
               <Login onLogin={handleLogin} onRegister={handleRegister} />
             )}
-            {currentStep === "Register" && (
+            {currentStep === "Register" && ( // Conditionally render Register component if currentStep is "Register"
               <Register
                 onRegister={handleRegister}
                 onBackToLogin={handleLogin}
@@ -44,7 +52,7 @@ function App() {
             )}
           </Modal>
         )}
-        {currentStep === "TodoWrapper" && (
+        {currentStep === "TodoWrapper" && ( // Render TodoWrapper component if currentStep is "TodoWrapper"
           <TodoWrapper openModal={openModal} handleLogin={handleLogin} />
         )}
       </UserProvider>
@@ -52,25 +60,4 @@ function App() {
   );
 }
 
-export default App;
-
-//   return (
-//     <div className="App">
-//       <Router>
-//         <UserProvider>
-//           <Routes>
-//             <Route path="/login" element={<Login />} />
-//             <Route path="/register" element={<Register />} />
-//             <Route path="/" element={<TodoWrapper />} />
-//           </Routes>
-//         </UserProvider>
-//       </Router>
-//     </div>
-//   );
-// }
-
-// <div className="App">
-//   <UserProvider>
-//     <TodoWrapper />
-//   </UserProvider>
-// </div>
+export default App; // Export App component as the default export
