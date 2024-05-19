@@ -3,7 +3,7 @@
 // Import necessary modules and components
 import React, { useState } from "react"; // Import React and useState hook for state management
 import "./App.css"; // Import CSS file for styling
-import { TodoWrapper } from "./components/TodoWrapper"; // Import TodoWrapper component
+import { TodoWrapper } from "./components/Todos/TodoWrapper"; // Import TodoWrapper component
 import { UserProvider } from "./components/UserContext"; // Import UserProvider component for user context
 import Modal from "./components/Modal"; // Import Modal component for displaying modals
 import { Login } from "./components/Login/Login"; // Import Login component for user login
@@ -35,11 +35,9 @@ function App() {
   return (
     <div className="App">
       <UserProvider>
-        {" "}
         {/* UserProvider wraps the entire application, providing user context */}
         {currentStep !== "TodoWrapper" && ( // Conditional rendering based on currentStep state
           <Modal onClose={closeModal}>
-            {" "}
             {/* Render modal component */}
             {currentStep === "Login" && ( // Conditionally render Login component if currentStep is "Login"
               <Login onLogin={handleLogin} onRegister={handleRegister} />

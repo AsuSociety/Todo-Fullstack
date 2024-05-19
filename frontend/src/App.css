@@ -1,80 +1,95 @@
 /* App.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Lato:wght@400;700&display=swap');
 
 * {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  background: #797979;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  margin: 0;
+  font-family: 'Lato', serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(#d0d6d9, #b1b4ba);
+  color: #d9e2f1;
+  min-height: 100vh;
 }
 
-.App {
+header {
+  display: flex;
+  justify-content: center !important;
+  margin: 2rem 0;
   text-align: center;
 }
 
-h1 {
-  color: #fff;
-  margin-bottom: 0.5rem;
-  font-size: 1.75rem;
+h1{
+    display: flex;
+  justify-content: center !important;
+  margin: 2rem 0;
+  text-align: center;
 }
 
-h3{
-  text-align: left;
+.container {
+  width: 100%; /* Ensure the container takes up the full width */
 }
+
 
 .TodoWrapper {
-  background: #222224;
-  margin-top: 5rem;
+  width: 90%;
+  max-width: 40rem;
+  margin: 3rem auto;
+  justify-content: center;
+  align-items: center;
   padding: 2rem;
-  border-radius: 5px;
+  background: linear-gradient(180deg, #253c3c, #1d4949);
+  border-radius: 8px;
+  box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.5);
+  padding: 2rem; /* Increased padding */
 }
 
-.TodoForm {
-  width: 100%;
-  margin-bottom: 1rem;
+.toggle-add-todo-btn {
+  display: block;
+  margin: 0 auto;
+  padding: 0.75rem 1.5rem; /* Increased padding */
+  font-size: 1.1rem; /* Increased font size */
+  border-radius: 4px;
+  border: none;
+  background-color: #147b73;
+  color: #d9e2f1;
+  cursor: pointer;
+  margin-bottom: 1.5rem; /* Increased margin */
 }
 
-.todo-input {
-  outline: none;
-  background: none;
-  border: 1px solid #3ccb78;
-  padding: 0.5rem 1rem;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-  width: 300px;
-  color: #fff;
+.AddTodo, .EditTodoForm {
+  margin-bottom: 1.5rem; /* Increased margin */
 }
 
-.todo-input::placeholder {
-  color: #ffffff4d;
+.TodoForm input {
+  padding: 0.75rem; /* Increased padding */
+  margin-bottom: 1rem; /* Increased margin */
+  border-radius: 4px;
+  border: 1px solid #ccc;
 }
 
 .todo-btn {
-  background: #3ccb78;
-  color: #fff;
+  padding: 0.75rem 1.5rem; /* Increased padding */
+  font-size: 1.1rem; /* Increased font size */
+  border-radius: 4px;
   border: none;
-  padding: 0.55rem;
+  background-color: #147b73;
+  color: #d9e2f1;
   cursor: pointer;
 }
 
 .Todo {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #3fbb69;
-  color: #fff;
-  padding: 0.75rem 1rem;
-  border-radius: 5px;
-  margin-bottom: 1rem;
+  background-color: #2f8f8f;
+  padding: 1rem; /* Increased padding */
+  margin-bottom: 1rem; /* Increased margin */
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
+
 
 .fa-trash {
   margin-left: 0.75rem;
@@ -115,10 +130,11 @@ input {
 
 
 button:hover {
-  background: #45a049;
+  background:  #147b73;
 }
 
 .error-message {
   color: red;
   margin-top: 10px;
 }
+

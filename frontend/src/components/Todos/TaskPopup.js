@@ -86,10 +86,8 @@ export const TaskPopup = ({ task, onClose, deleteTodo, setTodos }) => {
   // Render the popup
   return (
     <div className="task-popup-overlay">
-      {" "}
       {/* Popup overlay */}
       <div className="task-popup">
-        {" "}
         {/* Popup content */}
         {/* Close button */}
         <span className="task-popup-close" onClick={onClose}>

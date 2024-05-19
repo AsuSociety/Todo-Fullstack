@@ -11,7 +11,7 @@ Overall, it provides a convenient way for you to organize and keep track of your
 // Import necessary modules and components
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 import { Todo } from "./Todo"; // Import Todo component
-import { TodoForm } from "./TodoForm"; // Import TodoForm component for adding todos
+import { AddTodo } from "./AddTodo"; // Import AddTodo component for adding todos
 import { EditTodoForm } from "./EditTodoForm"; // Import EditTodoForm component for editing todos
 
 // Define API_URL constant for API endpoint
@@ -109,6 +109,7 @@ const editTask = async (task, id) => {
 // TodoWrapper functional component
 export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]); // State hook to store todos
+  const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
 
   // useEffect hook to fetch todos when component mounts
   useEffect(() => {
@@ -164,9 +165,21 @@ export const TodoWrapper = () => {
   // JSX structure returned by the TodoWrapper component
   return (
     <div className="TodoWrapper">
-      <h1>My To-Do List!</h1>
-      <TodoForm handleAddTodo={handleAddTodo} />{" "}
-      {/* Render TodoForm component for adding todos */}
+      <h1>
+        <span role="img" aria-label="date" class="emoji">
+          My To-Do List 📋📝
+        </span>
+      </h1>
+      {/* <AddTodo handleAddTodo={handleAddTodo} /> */}
+      <button
+        onClick={() => setIsAddTodoVisible(!isAddTodoVisible)}
+        className="toggle-add-todo-btn"
+      >
+        {isAddTodoVisible ? "Hide Add Task" : " Add Task"}
+      </button>
+      {isAddTodoVisible && <AddTodo handleAddTodo={handleAddTodo} />}
+
+      {/* Render AddTodo component for adding todos */}
       {/* Map through todos array and render Todo or EditTodoForm component for each todo */}
       {todos.map((todo) =>
         todo.isEditing ? ( // Check if todo is being edited

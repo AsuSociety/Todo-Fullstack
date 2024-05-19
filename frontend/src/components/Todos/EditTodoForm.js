@@ -10,6 +10,7 @@ Overall, this component facilitates the editing process for tasks in the to-do l
 
 // Import React and useState hook
 import React, { useState } from "react";
+import "./EditTodoForm.css";
 
 // EditTodoForm component: allows editing an existing task
 // export const EditTodoForm = ({ editTodo, task }) => {
@@ -28,7 +29,7 @@ export const EditTodoForm = (props) => {
 
   // Return a form with an input field and a submit button
   return (
-    <form onSubmit={handleSubmit} className="TodoForm">
+    <form onSubmit={handleSubmit} className="EditTodoForm">
       {/* Input field for updating the task title */}
       <input
         type="text"

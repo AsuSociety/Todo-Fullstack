@@ -1,3 +1,4 @@
+/* Register.css */
 @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Lato:wght@400;700&display=swap');
 * {
   box-sizing: border-box;
@@ -103,6 +104,13 @@ fieldset {
   color: #d9e2f1;
 }
 
+h2{
+display: flex;
+justify-content: center !important;
+margin: 2rem 0;
+text-align: center;
+}
+
 .control-error {
   color: #ffca99;
   font-size: 0.8rem;
@@ -135,13 +143,6 @@ fieldset {
   background-color: #147b73;
   color: #d9e2f1;
   cursor: pointer;
-}
-
-h2{
-display: flex;
-justify-content: center !important;
-margin: 2rem 0;
-text-align: center;
 }
 
 .button:hover,

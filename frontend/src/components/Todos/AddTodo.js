@@ -1,4 +1,4 @@
-// TodoForm.js
+// AddTodo.js
 
 /*
 This component manages the input of new tasks with two controlled input fields for the title and body. 
@@ -8,10 +8,11 @@ This component ensures a user-friendly interface for seamlessly adding tasks to 
 
 // Import React and useState hook
 import React, { useState } from "react";
+import "./AddTodo.css";
 
-// TodoForm component: allows adding new tasks
-// export const TodoForm = ({ handleAddTodo }) => {
-export const TodoForm = (props) => {
+// AddTodo component: allows adding new tasks
+// export const AddTodo = ({ handleAddTodo }) => {
+export const AddTodo = (props) => {
   // State to manage the input value for new tasks
   const [title, setTitle] = useState(""); // State for task title
   const [body, setBody] = useState(""); // State for task body
@@ -33,7 +34,7 @@ export const TodoForm = (props) => {
 
   // Return a form with input fields for title and body, and a submit button
   return (
-    <form onSubmit={handleSubmit} className="TodoForm">
+    <form onSubmit={handleSubmit} className="AddTodo">
       {/* Input field for entering the title of the task */}
       <input
         type="text"

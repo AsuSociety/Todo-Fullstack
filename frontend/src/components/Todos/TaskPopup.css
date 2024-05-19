@@ -13,7 +13,7 @@
   }
   
   .task-popup {
-    background: #3ccb78;
+    background:  #147b73;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
@@ -45,7 +45,7 @@
   }
   
   .task-popup-button {
-    background: #3ccb78;
+    background:  #147b73;
     color: #fff;
     border: none;
     padding: 8px 16px;
@@ -54,7 +54,7 @@
   }
   
   .task-popup-button:hover {
-    background: #2ba362;
+    background:  #135f59;
   }
   
   .task-popup-input {
