@@ -87,14 +87,19 @@ const deleteTodo = async (id) => {
 };
 
 // Function to edit a todo
-const editTask = async (task, id) => {
+const editTask = async (task, id, color) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ id: id, title: task.title, body: task.body }), // Include both body and title properties
+      body: JSON.stringify({
+        id: id,
+        title: task.title,
+        body: task.body,
+        color: color,
+      }), // Include both body and title properties
     });
 
     const updatedTodo = await response.json(); // Parse response data
@@ -162,11 +167,24 @@ export const TodoWrapper = () => {
     ); // Toggle isEditing property of todo
   };
 
+  // Function to update the task color
+  const updateTaskColor = async (taskId, color) => {
+    const taskToUpdate = todos.find((todo) => todo.id === taskId);
+    if (taskToUpdate) {
+      const updatedTask = await editTask(taskToUpdate, taskId, color);
+      if (updatedTask) {
+        setTodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
+        );
+      }
+    }
+  };
+
   // JSX structure returned by the TodoWrapper component
   return (
     <div className="TodoWrapper">
       <h1>
-        <span role="img" aria-label="date" class="emoji">
+        <span role="img" aria-label="date" className="emoji">
           My To-Do List 📋📝
         </span>
       </h1>
@@ -184,7 +202,7 @@ export const TodoWrapper = () => {
       {todos.map((todo) =>
         todo.isEditing ? ( // Check if todo is being edited
           <EditTodoForm // Render EditTodoForm component for editing todo
-            // key={todo.id}
+            key={todo.id}
             editTodo={(task) => handleEditTask(task, todo.id)} // Pass editTodo function as prop
             task={todo} // Pass todo as prop
           />
@@ -195,6 +213,7 @@ export const TodoWrapper = () => {
             deleteTodo={handleDeleteTodo} // Pass deleteTodo function as prop
             editTodo={markForEdit} // Pass markForEdit function as prop
             setTodos={setTodos}
+            updateTaskColor={updateTaskColor}
           />
         )
       )}

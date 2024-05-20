@@ -28,6 +28,7 @@ app = FastAPI()
 # p=Path(file_path)
 # # db=  DB(tasks={})
 # db=DB.parse_raw(p.read_text())
+
 file_path = Path("/Users/asus/Developer/todo fullstuck/back/todos.json")
 p=Path(file_path)
 if file_path.exists():
@@ -73,8 +74,9 @@ async def create_todos(task_payload: AddTasksPayload):
     print(f"**foooo**{task_payload}****")
     title = task_payload.title
     body = task_payload.body
+    color = task_payload.color
     # Add the received task to the database
-    db.tasks[task_id] = {"id": task_id, "title": title, "body": body}
+    db.tasks[task_id] = {"id": task_id, "title": title, "body": body, "color": color}
     # print(f"**foooo**{db}****")
     return db.tasks[task_id]
 
@@ -111,11 +113,13 @@ async def update_todo(task_id: uuid.UUID, task_obj: Task):
     if task:
         if isinstance(task, dict):
             # If task is a dictionary, update its values directly
-            db.tasks[task_id].update({"title": task_obj.title, "body": task_obj.body})
+            db.tasks[task_id].update({"title": task_obj.title, "body": task_obj.body, "color": task_obj.color})
         else:
             # If task is an instance of Task, update its attributes
             task.title = task_obj.title
             task.body = task_obj.body
+            task.color = task_obj.color
+            
         return db.tasks[task_id]  # Return the updated task
     # Raise an exception if the task is not found
     raise HTTPException(status_code=404, detail="Task not found")

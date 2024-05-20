@@ -83,9 +83,9 @@ h1{
 }
 
 .Todo {
-  background-color: #2f8f8f;
-  padding: 1rem; /* Increased padding */
-  margin-bottom: 1rem; /* Increased margin */
+  /* background-color: #52acac; */
+  padding: 1rem; 
+  margin-bottom: 1rem; 
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -109,8 +109,13 @@ h1{
 .edit-icon,
 .delete-icon {
   cursor: pointer;
+  /* padding: 3px; */
+
 }
- 
+.palette-icon{
+  margin-right: auto;
+  padding-left: 2%;
+}
 .container {
   background: #fff;
   border-radius: 8px;
@@ -138,3 +143,20 @@ button:hover {
   margin-top: 10px;
 }
 
+.color-picker {
+  display: flex;
+  margin-top: 0.5rem;
+}
+
+.color-option {
+  width: 20px;
+  height: 20px;
+  margin: 0 5px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  border-radius: 50%;
+}
+
+.color-option:hover {
+  border: 1px solid #000;
+}

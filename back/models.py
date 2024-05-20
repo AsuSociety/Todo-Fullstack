@@ -8,6 +8,7 @@ class Task(BaseModel):
     id: uuid.UUID
     title: str
     body: str
+    color: str = None
 
 
 class DB(BaseModel):
@@ -16,6 +17,7 @@ class DB(BaseModel):
 class AddTasksPayload(BaseModel):
     title: str
     body: str
+    color: str = None
 
     
 # class Users(BaseModel):
