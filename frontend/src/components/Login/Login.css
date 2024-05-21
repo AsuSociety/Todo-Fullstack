@@ -34,11 +34,7 @@ form {
   margin: 3rem auto;
   justify-content: center;
   align-items: center;
-
   padding: 2rem;
-  /* background: linear-gradient(180deg, #253c3c, #1d4949); */
-  /* border-radius: 8px; */
-  /* box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.5); */
 }
 
 .control,
