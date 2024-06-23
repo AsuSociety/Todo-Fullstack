@@ -1,30 +1,35 @@
 // TodoWrapper.js
 
 /*
-This code sets up a web application where you can manage your to-do list. 
-It allows you to add new tasks, delete completed tasks, and edit existing tasks. 
-The application communicates with a server to fetch, add, delete, and update tasks. 
-It presents your to-do list in a user-friendly format on the screen. 
+This code sets up a web application where you can manage your to-do list.
+It allows you to add new tasks, delete completed tasks, and edit existing tasks.
+The application communicates with a server to fetch, add, delete, and update tasks.
+It presents your to-do list in a user-friendly format on the screen.
 Overall, it provides a convenient way for you to organize and keep track of your tasks online.
 */
 
 // Import necessary modules and components
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 import { Todo } from "./Todo"; // Import Todo component
+import { useUser } from "../UserContext";
 import { AddTodo } from "./AddTodo"; // Import AddTodo component for adding todos
 import { EditTodoForm } from "./EditTodoForm"; // Import EditTodoForm component for editing todos
 
 // Define API_URL constant for API endpoint
 export const API_URL = "http://localhost:8000";
+// Define an array of colors
+const colors = ["#2f8f8f", "#1d9c9c", "#136c6c", "#095050", "#52acac"];
 
 // Function to fetch all todos from the API
-const fetchAllTodos = async () => {
+const fetchAllTodos = async (token) => {
   try {
-    const url = `${API_URL}/todos`; // Construct API URL
+    const url = `${API_URL}/todo`; // Construct API URL
     console.log("Fetching todos from:", url); // Log fetching todos URL
-
-    const response = await fetch(url); // Fetch todos from API
-    console.log("Response status:", response.status); // Log response status
+    const response = await fetch(`${API_URL}/todo/`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error(
@@ -43,12 +48,13 @@ const fetchAllTodos = async () => {
 };
 
 // Function to add a new todo
-const addTodo = async (todo) => {
+const addTodo = async (todo, token) => {
   try {
     const response = await fetch(`${API_URL}/todo`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(todo), // Convert todo object to JSON string
     });
@@ -70,14 +76,18 @@ const addTodo = async (todo) => {
 };
 
 // Function to delete a todo by ID
-const deleteTodo = async (id) => {
+const deleteTodo = async (id, token) => {
   try {
-    await fetch(`${API_URL}/todo/${id}`, {
+    const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "DELETE",
       headers: {
-        "Content-Type": "application/json",
+        // "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
     });
+    if (!response.ok) {
+      throw new Error("Failed to delete todo");
+    }
 
     return id; // Return deleted todo ID
   } catch (error) {
@@ -87,12 +97,14 @@ const deleteTodo = async (id) => {
 };
 
 // Function to edit a todo
-const editTask = async (task, id, color) => {
+
+const editTask = async (task, id, token, color = null) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         id: id,
@@ -101,6 +113,12 @@ const editTask = async (task, id, color) => {
         color: color,
       }), // Include both body and title properties
     });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to update task: ${response.status} - ${response.statusText}`
+      );
+    }
 
     const updatedTodo = await response.json(); // Parse response data
 
@@ -113,34 +131,57 @@ const editTask = async (task, id, color) => {
 
 // TodoWrapper functional component
 export const TodoWrapper = () => {
+  const { user, logout } = useUser();
   const [todos, setTodos] = useState([]); // State hook to store todos
   const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
+
+  // State to keep track of the current color index
+  const [colorIndex, setColorIndex] = useState(0);
 
   // useEffect hook to fetch todos when component mounts
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const fetchedTodos = await fetchAllTodos(); // Fetch all todos
-        setTodos(fetchedTodos); // Set todos state with fetched todos
-      } catch (error) {
-        console.error("Error fetching todos:", error); // Log error if fetching todos fails
+      if (user && user.token) {
+        try {
+          console.log("User token:", user.token); // Log user token
+          const fetchedTodos = await fetchAllTodos(user.token);
+          setTodos(fetchedTodos);
+          // console.log("fooooooooo", user);
+        } catch (error) {
+          console.error("Error fetching todos:", error);
+          setTodos([]); // Clear todos on error to avoid showing stale data
+        }
+      } else {
+        setTodos([]); // Clear todos when user is not authenticated
       }
     };
 
-    fetchData(); // Call fetchData function
-  }, []); // Empty dependency array to run effect only once
+    fetchData();
+  }, [user]);
 
   // Function to handle adding a new todo
+  // const handleAddTodo = async (todo) => {
+  //   const newTodo = await addTodo(todo); // Add new todo
+  //   if (newTodo) {
+  //     setTodos((prevTodos) => [...prevTodos, newTodo]); // Update todos state with new todo
+  //   }
+  // };
+
   const handleAddTodo = async (todo) => {
-    const newTodo = await addTodo(todo); // Add new todo
+    // Assign a color from the colors array
+    const newColor = colors[colorIndex];
+    const newTodo = await addTodo({ ...todo, color: newColor }, user.token);
     if (newTodo) {
-      setTodos((prevTodos) => [...prevTodos, newTodo]); // Update todos state with new todo
+      setTodos((prevTodos) => [...prevTodos, newTodo]);
+      // Update the color index to the next color
+      setColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
+      setIsAddTodoVisible(false); // Hide the add todo form after successful addition
     }
   };
 
   // Function to handle deleting a todo
   const handleDeleteTodo = async (id) => {
-    const deletedId = await deleteTodo(id); // Delete todo by ID
+    const deletedId = await deleteTodo(id, user.token); // Delete todo by ID
     if (deletedId) {
       setTodos((prevTodos) =>
         prevTodos.filter((todo) => todo.id !== deletedId)
@@ -150,7 +191,7 @@ export const TodoWrapper = () => {
 
   // Function to handle editing a todo
   const handleEditTask = async (task, id) => {
-    const updatedTask = await editTask(task, id); // Edit todo
+    const updatedTask = await editTask(task, id, user.token); // Edit todo
     if (updatedTask) {
       setTodos((prevTodos) =>
         prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
@@ -171,7 +212,12 @@ export const TodoWrapper = () => {
   const updateTaskColor = async (taskId, color) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
     if (taskToUpdate) {
-      const updatedTask = await editTask(taskToUpdate, taskId, color);
+      const updatedTask = await editTask(
+        taskToUpdate,
+        taskId,
+        user.token,
+        color
+      );
       if (updatedTask) {
         setTodos((prevTodos) =>
           prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
@@ -196,7 +242,10 @@ export const TodoWrapper = () => {
         {isAddTodoVisible ? "Hide Add Task" : " Add Task"}
       </button>
       {isAddTodoVisible && <AddTodo handleAddTodo={handleAddTodo} />}
-
+      <button onClick={logout} className="logout-btn">
+        Logout
+      </button>
+      {/* <div className="todo-list"> */}
       {/* Render AddTodo component for adding todos */}
       {/* Map through todos array and render Todo or EditTodoForm component for each todo */}
       {todos.map((todo) =>
@@ -218,5 +267,6 @@ export const TodoWrapper = () => {
         )
       )}
     </div>
+    // </div>
   );
 };

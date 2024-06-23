@@ -2,17 +2,16 @@
 
 # Import necessary modules and classes from FastAPI and Python
 from fastapi import FastAPI, Depends
-from fastapi.security import OAuth2PasswordBearer
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse  # Import JSONResponse here
-from typing import List
+from typing import Annotated, List
 import sqlite3
-from models import Task, AddTasksPayload, DB
-import uuid
-import json
-from pathlib import Path
 
+
+import models
+from database import engine, SessionLocal
+from routers import auth, todos, admin, user
 
 
 # Connect to the SQLite database named 'users.db'
@@ -21,14 +20,17 @@ conn = sqlite3.connect('users.db')
 # Create a FastAPI application
 app = FastAPI()
 
-# Initialize an empty list to store tasks temporarily
-# tasks = {}
-# File path for storing todos
-# file_path = "todos.json"
-# p=Path(file_path)
-# # db=  DB(tasks={})
-# db=DB.parse_raw(p.read_text())
+# models.Base.metadata.drop_all(bind=engine)
+models.Base.metadata.create_all(bind=engine)
+app.include_router(auth.router)
+app.include_router(todos.router)
+app.include_router(admin.router)
+app.include_router(user.router)
 
+
+
+
+'''
 file_path = Path("/Users/asus/Developer/todo fullstuck/back/todos.json")
 p=Path(file_path)
 if file_path.exists():
@@ -38,7 +40,7 @@ if file_path.exists():
 else:
     print(f"Error: File not found - {file_path}")
 # print(f"bla**{db}**bla")
-
+'''
 
 # Define allowed origins for CORS (Cross-Origin Resource Sharing)
 origins = ["http://localhost:3000"]
@@ -51,8 +53,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-
+'''
 @app.on_event("shutdown")
 def save_todos_on_shutdown():
     # Save todos to file when the server shuts down
@@ -61,25 +62,27 @@ def save_todos_on_shutdown():
     # p.write_text(db.json())
     db_str_keys = {str(key): value for key, value in db.tasks.items()}
     p.write_text(DB(tasks=db_str_keys).json())
+'''
 
 
-
-
-# Define a POST endpoint for creating tasks
+'''
+# Define a POST endpoint for creating tasks without DB
 @app.post("/todo")
 async def create_todos(task_payload: AddTasksPayload):
     # Add the received task to the temporary list (simulating database insertion)
     task_id = uuid.uuid4()
     # Extract title and body from the payload
-    print(f"**foooo**{task_payload}****")
+    # print(f"**foooo**{task_payload}****")
     title = task_payload.title
     body = task_payload.body
     color = task_payload.color
     # Add the received task to the database
     db.tasks[task_id] = {"id": task_id, "title": title, "body": body, "color": color}
-    # print(f"**foooo**{db}****")
     return db.tasks[task_id]
+''' 
 
+
+'''
 # Define a GET endpoint to retrieve all tasks
 # get without database
 @app.get("/todos")
@@ -102,9 +105,10 @@ async def get_todo_by_id(task_id: uuid.UUID):
     # Raise an exception if the task is not found
     raise HTTPException(status_code=404, detail="Task not found")
 
+'''
 
 
-
+'''
 # Define a PUT endpoint to update a task by its ID
 @app.put("/todo/{task_id}")
 async def update_todo(task_id: uuid.UUID, task_obj: Task):
@@ -123,8 +127,9 @@ async def update_todo(task_id: uuid.UUID, task_obj: Task):
         return db.tasks[task_id]  # Return the updated task
     # Raise an exception if the task is not found
     raise HTTPException(status_code=404, detail="Task not found")
+'''
 
-
+'''
 # Define a DELETE endpoint to delete a task by its ID
 @app.delete("/todo/{task_id}")
 async def delete_todo(task_id: uuid.UUID):
@@ -141,3 +146,4 @@ async def delete_todo(task_id: uuid.UUID):
         return {"message": "Task has been deleted"}
     # Raise an exception if the task is not found
     raise HTTPException(status_code=404, detail="Task not found")
+'''

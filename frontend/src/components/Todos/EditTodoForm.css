@@ -4,29 +4,6 @@
   box-sizing: border-box;
 }
 
-body {
-  margin: 0;
-  font-family: 'Lato', serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(#d0d6d9, #b1b4ba);
-  color: #d9e2f1;
-  min-height: 100vh;
-}
-
-header {
-  margin: 2rem 0;
-  text-align: center;
-}
-
-header h1 {
-  font-family: 'Quicksand', sans-serif;
-  font-weight: 700;
-  font-size: 3rem;
-  margin: 1rem 0;
-  letter-spacing: 0.2rem;
-  color: #2f4444;
-}
 
 .EditTodoForm {
   width: 90%;
@@ -42,8 +19,7 @@ header h1 {
   box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.5);
 }
 
-
-
+/* 
 .todo-btn {
   padding: 0.5rem 1rem;
   font-size: 1rem;
@@ -52,4 +28,4 @@ header h1 {
   background-color: #147b73; 
   color: #d9e2f1;
   cursor: pointer;
-}
+} */

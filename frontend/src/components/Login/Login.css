@@ -3,7 +3,7 @@
   box-sizing: border-box;
 }
 
-body {
+/* body {
   margin: 0;
   font-family: 'Lato', serif;
   -webkit-font-smoothing: antialiased;
@@ -11,9 +11,9 @@ body {
   background: linear-gradient(#d0d6d9, #b1b4ba);
   color: #d9e2f1;
   min-height: 100vh;
-}
+} */
 
-header {
+/* header {
   margin: 2rem 0;
   text-align: center;
 }
@@ -25,17 +25,17 @@ header h1 {
   margin: 1rem 0;
   letter-spacing: 0.2rem;
   color: #2f4444;
-}
+} */
 
 
-form {
+/* form {
   width: 90%;
   max-width: 40rem;
   margin: 3rem auto;
   justify-content: center;
   align-items: center;
   padding: 2rem;
-}
+} */
 
 .control,
 fieldset {

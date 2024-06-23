@@ -8,7 +8,13 @@ import { UserProvider } from "./components/UserContext"; // Import UserProvider 
 import Modal from "./components/Modal"; // Import Modal component for displaying modals
 import { Login } from "./components/Login/Login"; // Import Login component for user login
 import { Register } from "./components/Register/Register"; // Import Register component for user registration
+// import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
+// const router = createBrowserRouter([
+//   { path: "/", element: <Login /> },
+//   { path: "/register", element: <Register /> },
+//   { path: "/todos", element: <TodoWrapper /> },
+// ]);
 // Define App function component
 function App() {
   // State management with useState hook
@@ -20,17 +26,17 @@ function App() {
   };
 
   const closeModal = () => {
-    setCurrentStep("TodoWrapper"); // Update currentStep state to "TodoWrapper" to close the modal and show the main TodoWrapper component
+    // setCurrentStep("TodoWrapper"); // Update currentStep state to "TodoWrapper" to close the modal and show the main TodoWrapper component
   };
 
   const handleLogin = () => {
-    setCurrentStep("Login"); // Handle login action by updating currentStep state to "Login"
+    setCurrentStep("TodoWrapper"); // Handle login action by updating currentStep state to "Login"
   };
 
   const handleRegister = () => {
     setCurrentStep("Register"); // Handle register action by updating currentStep state to "Register"
   };
-
+  // return <RouterProvider router={router} />;
   // JSX structure returned by the App component
   return (
     <div className="App">

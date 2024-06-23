@@ -1,22 +1,44 @@
-// Register.js
 import React, { useState } from "react";
-import { useUser } from "../UserContext";
+import AuthService from "../AuthService";
 import "./Register.css";
 
 export const Register = ({ onBackToLogin }) => {
-  console.log("Register  !!!!!"); // Add this line
-
-  const { login } = useUser();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [role, setRole] = useState("");
+  const [error, setError] = useState("");
 
   const handleRegister = async () => {
-    // Implement registration logic (e.g., make a request to your backend)
-    const userData = { username, password };
-    // Assume a successful registration returns user data
-    login(userData);
-    // Go back to login
-    onBackToLogin();
+    try {
+      // Clear any existing session data or tokens
+      AuthService.logout();
+
+      // Perform registration
+      await AuthService.register(
+        email,
+        username,
+        password,
+        firstName,
+        lastName,
+        role
+      );
+
+      // Reset input fields after successful registration
+      setUsername("");
+      setPassword("");
+      setEmail("");
+      setFirstName("");
+      setLastName("");
+      setRole("");
+
+      // Navigate back to login screen or any other logic
+      onBackToLogin();
+    } catch (error) {
+      setError("Registration failed: " + error.message);
+    }
   };
 
   return (
@@ -24,10 +46,24 @@ export const Register = ({ onBackToLogin }) => {
       <h2>Welcome on board!</h2>
       <p>
         We just need a little bit of data from you to get you started{" "}
-        <span role="img" aria-label="missle">
+        <span role="img" aria-label="rocket">
           🚀
         </span>
       </p>
+
+      {error && <p className="error">{error}</p>}
+
+      <div className="control-row">
+        <div className="control no-margin">
+          <input
+            type="text"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="control-row">
         <div className="control no-margin">
           <input
@@ -46,6 +82,34 @@ export const Register = ({ onBackToLogin }) => {
           />
         </div>
       </div>
+      <hr />
+
+      <div className="control-row">
+        <div className="control no-margin">
+          <input
+            type="text"
+            placeholder="First Name"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+        </div>
+        <div className="control no-margin">
+          <input
+            type="text"
+            placeholder="Last Name"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+        </div>
+        <div className="control no-margin">
+          <input
+            type="text"
+            placeholder="Role"
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+          />
+        </div>
+      </div>
 
       <p className="form-actions">
         <button type="button" onClick={handleRegister} className="button">
@@ -55,11 +119,6 @@ export const Register = ({ onBackToLogin }) => {
           Back to Login
         </button>
       </p>
-      {/* <p className="form-actions">
-        <button type="reset" className="button button-flat">
-          Reset
-        </button>
-      </p> */}
     </form>
   );
 };

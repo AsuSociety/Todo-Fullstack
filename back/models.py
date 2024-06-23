@@ -1,25 +1,65 @@
 # models.py
-
+from database import Base
 from fastapi import FastAPI
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel, UUID4, Field
 import uuid
+from sqlalchemy import Boolean, Column,  String, ForeignKey, UUID as PG_UUID
 
-class Task(BaseModel):
-    id: uuid.UUID
-    title: str
-    body: str
-    color: str = None
+class Users(Base):
+    __tablename__= 'users'
+
+    id= Column(PG_UUID(as_uuid=True), primary_key=True,default=uuid.uuid4, index=True)
+    email = Column(String, unique=True)
+    username = Column(String, unique=True)
+    firstname = Column(String)
+    lastname= Column(String)
+    hashed_password = Column(String)
+    isactive = Column(Boolean, default=True)
+    role= Column(String)
 
 
-class DB(BaseModel):
-    tasks: dict[str,Task]
+# Add Priority 
+class Todos(Base):
+    __tablename__= 'todos'
+
+    id= Column(PG_UUID(as_uuid=True), primary_key=True,default=uuid.uuid4, index=True)
+    title = Column(String)
+    body = Column(String)
+    color = Column(String)
+    owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
+
+
 
 class AddTasksPayload(BaseModel):
     title: str
     body: str
     color: str = None
-
+    # owner_id: uuid.UUID
     
-# class Users(BaseModel):
-#     name: str
-#     password: str
+
+class AddUsersPayload(BaseModel):
+    email: str = Field(min_length=8)
+    username: str = Field(min_length=3)
+    password: str = Field(min_length=5)
+    firstname: str= Field(min_length=2)
+    lastname: str = Field(min_length=2)
+    role: str = Field(min_length=3)
+
+class Token(BaseModel):
+    access_token: str
+    type_of_token: str
+
+class UserVerification(BaseModel):
+    password: str
+    new_password: str
+
+
+# class Task(BaseModel):
+#     id: uuid.UUID
+#     title: str
+#     body: str
+#     color: str = None
+
+
+# class DB(BaseModel):
+#     tasks: dict[str,Task]

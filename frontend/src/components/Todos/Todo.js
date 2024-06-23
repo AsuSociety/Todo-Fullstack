@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash, faPalette } from "@fortawesome/free-solid-svg-icons";
 import { TaskPopup } from "./TaskPopup";
+
 export const Todo = (props) => {
   // Define an array of colors
   const colors = ["#2f8f8f", "#1d9c9c", "#136c6c", "#095050", "#52acac"];
@@ -24,10 +25,7 @@ export const Todo = (props) => {
   };
 
   return (
-    <div
-      className="Todo"
-      style={{ backgroundColor: taskColor }} // Set background color dynamically
-    >
+    <div className="Todo" style={{ backgroundColor: taskColor }}>
       <div>
         <h3 onClick={handleTitleClick}>{props.task.title}</h3>
         <p>{props.task.body}</p>
