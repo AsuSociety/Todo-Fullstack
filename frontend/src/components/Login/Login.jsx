@@ -4,6 +4,7 @@ import { useUser } from "../UserContext";
 import AuthService from "../AuthService";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 
 export const Login = () => {
   const { login } = useUser();
@@ -31,7 +32,7 @@ export const Login = () => {
       <h2>Login</h2>
       <div className="control-row">
         <div className="control no-margin">
-          <input
+          <Input
             type="text"
             placeholder="Username"
             value={username}
@@ -39,7 +40,7 @@ export const Login = () => {
           />
         </div>
         <div className="control no-margin">
-          <input
+          <Input
             type="password"
             placeholder="Password"
             value={password}

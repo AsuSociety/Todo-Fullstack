@@ -3,7 +3,6 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import reportWebVitals from "./reportWebVitals";
 import { UserProvider } from "./components/UserContext";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
