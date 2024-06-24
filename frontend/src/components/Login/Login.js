@@ -3,24 +3,28 @@ import React, { useState } from "react";
 import { useUser } from "../UserContext";
 import AuthService from "../AuthService";
 import "./Login.css";
+import { useNavigate } from "react-router-dom";
 
-export const Login = ({ onLogin, onRegister }) => {
-  // console.log("Login  !!!!!");
-
+export const Login = () => {
   const { login } = useUser();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
       const userData = await AuthService.login(username, password);
       login(userData);
-      onLogin(); // Notify parent about successful login
+      navigate("/todos");
     } catch (error) {
       setError("Invalid username or password");
     }
   };
+
+  function handleRegister() {
+    navigate("/register");
+  }
 
   return (
     <form>
@@ -46,7 +50,7 @@ export const Login = ({ onLogin, onRegister }) => {
 
       <p className="form-actions">
         <label>Not registered?</label>
-        <button type="button" onClick={onRegister} className="button">
+        <button type="button" onClick={handleRegister} className="button">
           Register
         </button>
         <button type="button" onClick={handleLogin} className="button">

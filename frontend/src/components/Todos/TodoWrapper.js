@@ -14,6 +14,7 @@ import { Todo } from "./Todo"; // Import Todo component
 import { useUser } from "../UserContext";
 import { AddTodo } from "./AddTodo"; // Import AddTodo component for adding todos
 import { EditTodoForm } from "./EditTodoForm"; // Import EditTodoForm component for editing todos
+import { useNavigate } from "react-router-dom";
 
 // Define API_URL constant for API endpoint
 export const API_URL = "http://localhost:8000";
@@ -134,6 +135,7 @@ export const TodoWrapper = () => {
   const { user, logout } = useUser();
   const [todos, setTodos] = useState([]); // State hook to store todos
   const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
+  const navigate = useNavigate();
 
   // State to keep track of the current color index
   const [colorIndex, setColorIndex] = useState(0);
@@ -158,14 +160,6 @@ export const TodoWrapper = () => {
 
     fetchData();
   }, [user]);
-
-  // Function to handle adding a new todo
-  // const handleAddTodo = async (todo) => {
-  //   const newTodo = await addTodo(todo); // Add new todo
-  //   if (newTodo) {
-  //     setTodos((prevTodos) => [...prevTodos, newTodo]); // Update todos state with new todo
-  //   }
-  // };
 
   const handleAddTodo = async (todo) => {
     // Assign a color from the colors array
@@ -226,6 +220,11 @@ export const TodoWrapper = () => {
     }
   };
 
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
+
   // JSX structure returned by the TodoWrapper component
   return (
     <div className="TodoWrapper">
@@ -242,7 +241,7 @@ export const TodoWrapper = () => {
         {isAddTodoVisible ? "Hide Add Task" : " Add Task"}
       </button>
       {isAddTodoVisible && <AddTodo handleAddTodo={handleAddTodo} />}
-      <button onClick={logout} className="logout-btn">
+      <button onClick={handleLogout} className="logout-btn">
         Logout
       </button>
       {/* <div className="todo-list"> */}

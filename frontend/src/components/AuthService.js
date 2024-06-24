@@ -3,7 +3,6 @@ export const API_URL = "http://localhost:8000";
 
 class AuthService {
   static async login(username, password) {
-    // console.log("fooooooooo", username);
     const response = await fetch(`${API_URL}/auth/token`, {
       method: "POST",
       headers: {
@@ -27,7 +26,6 @@ class AuthService {
   }
 
   static getToken() {
-    // console.log("blabla", localStorage.getItem("token"));
     return localStorage.getItem("token");
   }
 

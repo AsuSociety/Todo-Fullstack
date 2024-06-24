@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import AuthService from "../AuthService";
 import "./Register.css";
+import { useNavigate } from "react-router-dom";
 
-export const Register = ({ onBackToLogin }) => {
+export const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
@@ -10,6 +11,7 @@ export const Register = ({ onBackToLogin }) => {
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState("");
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleRegister = async () => {
     try {
@@ -34,13 +36,15 @@ export const Register = ({ onBackToLogin }) => {
       setLastName("");
       setRole("");
 
-      // Navigate back to login screen or any other logic
-      onBackToLogin();
+      // Navigate back to login screen
+      navigate("/login");
     } catch (error) {
       setError("Registration failed: " + error.message);
     }
   };
-
+  function handleLogin() {
+    navigate("/login");
+  }
   return (
     <form>
       <h2>Welcome on board!</h2>
@@ -115,7 +119,7 @@ export const Register = ({ onBackToLogin }) => {
         <button type="button" onClick={handleRegister} className="button">
           Register
         </button>
-        <button type="button" onClick={onBackToLogin} className="button">
+        <button type="button" onClick={handleLogin} className="button">
           Back to Login
         </button>
       </p>

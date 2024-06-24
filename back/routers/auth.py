@@ -81,6 +81,7 @@ async def create_user(dataBase: dataBase_dependency,
     user_model.id=uuid.uuid4()
     dataBase.add(user_model)
     dataBase.commit()
+    return user_model
 
 
 @router.post("/token", response_model=Token)
@@ -92,3 +93,14 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         
         token = create_access_token(user.username, user.id, user.role, timedelta(minutes=20))
         return {'access_token': token, 'type_of_token': 'bearer'}
+
+
+@router.delete("/{user_id}")
+async def delete_user(user_id: uuid.UUID, dataBase: dataBase_dependency):
+    user = dataBase.query(Users).filter(Users.id == user_id).first()
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    
+    dataBase.delete(user)
+    dataBase.commit()
+    return {"detail": "User deleted successfully"}
