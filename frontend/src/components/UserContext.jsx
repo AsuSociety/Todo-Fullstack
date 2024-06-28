@@ -7,6 +7,8 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
+
+
   useEffect(() => {
     const token = AuthService.getToken();
     if (token) {
@@ -14,8 +16,12 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
+
   const login = (userData) => {
-    setUser(userData);
+    setUser(prevUser =>({ 
+      ...prevUser,
+      ...userData}));
+        // console.log('Fetched%%%%%%%%%%% user:', userData); // Log userData
   };
 
   const logout = () => {

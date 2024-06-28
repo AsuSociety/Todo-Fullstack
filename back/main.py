@@ -43,7 +43,7 @@ else:
 '''
 
 # Define allowed origins for CORS (Cross-Origin Resource Sharing)
-origins = ["http://localhost:3000"]
+origins = ["http://localhost:5173"]
 # Enable CORS using CORSMiddleware
 app.add_middleware(
     CORSMiddleware,

@@ -1,7 +1,18 @@
 import React, { useState } from "react";
 import AuthService from "../AuthService";
-import "./Register.css";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+
 
 export const Register = () => {
   const [username, setUsername] = useState("");
@@ -46,84 +57,69 @@ export const Register = () => {
     navigate("/login");
   }
   return (
-    <form>
-      <h2>Welcome on board!</h2>
-      <p>
-        We just need a little bit of data from you to get you started{" "}
-        <span role="img" aria-label="rocket">
-          🚀
-        </span>
-      </p>
+    <Card className="mx-auto max-w-sm">
+      <CardHeader>
+        <CardTitle className="text-xl">Sign Up</CardTitle>
+        <CardDescription>
+            We just need a little bit of data from you to get you started{" "}
+            <span role="img" aria-label="rocket">
+            🚀
+            </span>
+          </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-4">
+          <div className="grid grid-cols-2 gap-4">
 
-      {error && <p className="error">{error}</p>}
-
-      <div className="control-row">
-        <div className="control no-margin">
-          <input
-            type="text"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+            <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <Input id="username" placeholder="Username" value={username}
+            onChange={(e) => setUsername(e.target.value)} required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="role">Role</Label>
+              <Input id="role" placeholder="User" value={role} onChange={(e) => setRole(e.target.value)} required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="first-name">First name</Label>
+              <Input id="first-name" placeholder="First Name" value={firstName}
+            onChange={(e) => setFirstName(e.target.value)} required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="last-name">Last name</Label>
+              <Input id="last-name" placeholder="Last Name" value={lastName}
+            onChange={(e) => setLastName(e.target.value)} required />
+            </div>
+          </div>
+          
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="m@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" value={password}
+            onChange={(e) => setPassword(e.target.value)} />
+          </div>
+          <Button type="submit" onClick={handleRegister} className="w-full">
+            Create an account
+          </Button>
         </div>
-      </div>
-
-      <div className="control-row">
-        <div className="control no-margin">
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+        <div className="mt-4 text-center text-sm">
+          Already have an account?{" "}
+          <Button type="submit" onClick={handleLogin} className="w-full">
+            Sign in
+          </Button>
         </div>
-        <div className="control no-margin">
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-      </div>
-      <hr />
-
-      <div className="control-row">
-        <div className="control no-margin">
-          <input
-            type="text"
-            placeholder="First Name"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
-        <div className="control no-margin">
-          <input
-            type="text"
-            placeholder="Last Name"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-        <div className="control no-margin">
-          <input
-            type="text"
-            placeholder="Role"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <p className="form-actions">
-        <button type="button" onClick={handleRegister} className="button">
-          Register
-        </button>
-        <button type="button" onClick={handleLogin} className="button">
-          Back to Login
-        </button>
-      </p>
-    </form>
+      </CardContent>
+    </Card>
   );
 };
 

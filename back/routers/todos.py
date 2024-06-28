@@ -92,7 +92,8 @@ async def update_todo(user:user_dependency, dataBase:dataBase_dependency,todo_id
     todo_model.title = task_payload.title
     todo_model.body = task_payload.body
     todo_model.color= task_payload.color
-
+    todo_model.status = task_payload.status
+    
     dataBase.add(todo_model)
     dataBase.commit()
     dataBase.refresh(todo_model)

@@ -2,7 +2,7 @@ import React, { useState } from "react"; // Import React and useState hook
 import { useUser } from "../UserContext"; // Import useUser hook for user context
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"; // Import FontAwesomeIcon for icons
 import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons"; // Import icons
-import "./TaskPopup.css"; // Import styles
+// import "./TaskPopup.css"; // Import styles
 
 export const TaskPopup = ({ task, onClose, deleteTodo, setTodos }) => {
   const { user } = useUser(); // Get user context

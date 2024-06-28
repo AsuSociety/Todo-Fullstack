@@ -8,7 +8,12 @@ This component ensures a user-friendly interface for seamlessly adding tasks to 
 
 // Import React and useState hook
 import React, { useState } from "react";
-import "./AddTodo.css";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormItem,
+} from "@/components/ui/form"
 
 // AddTodo component: allows adding new tasks
 // export const AddTodo = ({ handleAddTodo }) => {
@@ -34,9 +39,11 @@ export const AddTodo = (props) => {
 
   // Return a form with input fields for title and body, and a submit button
   return (
+    <Form >
     <form onSubmit={handleSubmit} className="AddTodo">
       {/* Input field for entering the title of the task */}
-      <input
+      <FormItem>
+      <Input
         type="text"
         value={title} // Value of the input field is set to the current value of 'title' state
         onChange={(e) => setTitle(e.target.value)} // Update 'title' state as user types
@@ -45,18 +52,19 @@ export const AddTodo = (props) => {
       />
 
       {/* Input field for entering the body of the task */}
-      <input
+      <Input
         type="text"
         value={body} // Value of the input field is set to the current value of 'body' state
         onChange={(e) => setBody(e.target.value)} // Update 'body' state as user types
         className="todo-input"
         placeholder="Body"
       />
-
+</FormItem>
       {/* Submit button to add the new task */}
-      <button type="submit" className="todo-btn">
+      <Button variant="ghost" type="submit" >
         Add Task
-      </button>
+      </Button>
     </form>
+    </Form>
   );
 };

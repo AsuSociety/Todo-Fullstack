@@ -26,6 +26,7 @@ class Todos(Base):
     title = Column(String)
     body = Column(String)
     color = Column(String)
+    status= Column(String)
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
 
 
@@ -34,8 +35,7 @@ class AddTasksPayload(BaseModel):
     title: str
     body: str
     color: str = None
-    # owner_id: uuid.UUID
-    
+    status: str
 
 class AddUsersPayload(BaseModel):
     email: str = Field(min_length=8)

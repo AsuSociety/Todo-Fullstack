@@ -65,6 +65,13 @@ async def get_current_user(token: Annotated[str,Depends(oauth2_bearer)]):
 async def get_user(dataBase: dataBase_dependency):
     return dataBase.query(Users).all()
 
+@router.get("/{username}")
+async def get_user_by_username(dataBase: dataBase_dependency, username:str):
+    user= dataBase.query(Users).filter(Users.username==username).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return user
+
 
 @router.post("/")
 async def create_user(dataBase: dataBase_dependency, 
@@ -84,7 +91,7 @@ async def create_user(dataBase: dataBase_dependency,
     return user_model
 
 
-@router.post("/token", response_model=Token)
+@router.post("/token")
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,Depends()],
                                      dataBase: dataBase_dependency ):
         user= authenticate_user(form_data.username,form_data.password, dataBase)
@@ -92,8 +99,18 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
         
         token = create_access_token(user.username, user.id, user.role, timedelta(minutes=20))
-        return {'access_token': token, 'type_of_token': 'bearer'}
-
+        # return {'access_token': token, 'type_of_token': 'bearer', 'username':user.username, 'email': user.email, 'first_name': user.firstname, 'last_name': user.lastname, 'role': user.role}
+        response = {
+        'access_token': token,
+        'type_of_token': 'bearer',
+        'username': user.username,
+        'email': user.email,
+        'first_name': user.firstname,
+        'last_name': user.lastname,
+        'role': user.role
+        }
+        print("Response:", response)  # Log the response
+        return response
 
 @router.delete("/{user_id}")
 async def delete_user(user_id: uuid.UUID, dataBase: dataBase_dependency):

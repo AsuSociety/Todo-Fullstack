@@ -1,0 +1,224 @@
+//Profile.jsx
+import React, { useState } from "react"; // Import React and necessary hooks
+
+
+import {
+    Avatar,
+    AvatarFallback,
+    AvatarImage,
+  } from "@/components/ui/avatar"
+  import { Button } from "@/components/ui/button"
+  import { Label } from "@/components/ui/label";
+  import { Input } from "@/components/ui/input";
+  import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
+    DropdownMenuTrigger,
+  } from "@/components/ui/dropdown-menu"
+  import {
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogDescription
+  } from "@/components/ui/dialog";
+  import {
+    Command,
+    CommandEmpty,
+    CommandGroup,
+    CommandInput,
+    CommandItem,
+    CommandList,
+  } from "@/components/ui/command"
+  import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+  } from "@/components/ui/popover"
+  
+  
+
+  import { useUser } from "../UserContext";
+  import { useNavigate } from "react-router-dom";
+
+
+const profiles = [
+  {
+    value: "batman",
+    label: "Batman",
+    icon_src: "https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-1024.png"
+  },
+  {
+    value: "charmander",
+    label: "Charmander",
+    icon_src: "https://cdn-icons-png.flaticon.com/128/188/188990.png"
+  },
+  {
+    value: "pikachu",
+    label: "Pikachu",
+    icon_src: "https://cdn-icons-png.flaticon.com/128/188/188987.png"
+  },
+  {
+    value: "balbazor",
+    label: "Balbazor",
+    icon_src: "https://cdn-icons-png.flaticon.com/128/188/188989.png"
+  },
+  {
+    value: "meowth",
+    label: "Meowth",
+    icon_src: "https://cdn-icons-png.flaticon.com/128/188/188997.png"
+  },
+];
+
+export const Profile = ({username,email}) => {
+    const { logout } = useUser();
+    const navigate = useNavigate();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [open, setOpen] = useState(false)
+    const [selectedIcon, setSelectedIcon] = useState( null)
+    
+    const handleStatus=(icon, src) =>{
+      // props.updateTaskStatus(id, color, icon)
+      // props.updateTaskColor(id, color)
+
+      setSelectedIcon(
+        profiles.find((priority) => priority.value === icon) ||
+          null
+      )
+      setOpen(false)  
+  }
+
+    function handleLogout() {
+        logout();
+        navigate("/login");
+      }
+    
+  return (
+    <div>
+
+    <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+        <Avatar className="h-9 w-9">
+          <AvatarImage src="https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-1024.png" alt="@avatar-icon" />
+          <AvatarFallback>User</AvatarFallback>
+        </Avatar>
+      </Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent className="w-56" align="end" forceMount>
+      <DropdownMenuLabel className="font-normal">
+        <div className="flex flex-col space-y-1">
+          <p className="text-sm font-medium leading-none">                  
+            {username}
+          </p>
+          <p className="text-xs leading-none text-muted-foreground">
+            {email}
+          </p>
+        </div>
+      </DropdownMenuLabel>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
+          Profile
+          <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={handleLogout}>
+        Log out
+        <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+
+
+  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+  <DialogTrigger asChild>
+    <div />
+  </DialogTrigger>
+  <DialogContent className="sm:max-w-[500px]">
+    <DialogHeader>
+      <DialogTitle>Edit Profile</DialogTitle>
+      <DialogDescription>
+        Make changes to your profile here. Click save when you're done.
+      </DialogDescription>
+    </DialogHeader>
+    <div className="grid gap-4 py-4">
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="title" className="text-center">
+          Profile Icon
+        </Label>
+        <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-[120px] justify-center border border-black"
+
+          >
+            {selectedIcon ? (
+              <>
+                <img src={selectedIcon.icon_src} className="mr-2 h-4 w-4 shrink-0" alt="Profile Icon" />
+                {selectedIcon.label}
+              </>
+            ) : (
+              <>+ Set profile</>
+            )}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="p-0 w-[200px]" side="right" align="start">
+          <Command>
+            <CommandInput placeholder="Change profile..." />
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandGroup>
+                {profiles.map((profile) => (
+                  <CommandItem
+                    key={profile.value}
+                    value={profile.value}
+                    onSelect={(value) => handleStatus(profile.value, profile.icon_src)}
+                  >
+                    <img src={profile.icon_src} className="mr-2 h-4 w-4 shrink-0" alt="Profile Icon" />
+                    <span>{profile.label}</span>
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+      </div>
+      <div className="grid grid-cols-4 items-center gap-4">
+        <Label htmlFor="body" className="text-center">
+          Change Password
+        </Label>
+        <Input
+          // id="body"
+          // value={editedBody}
+          // onChange={(e) => setEditedBody(e.target.value)}
+          // className="col-span-3"
+        />
+      </div>
+    </div>
+    <DialogFooter className="flex justify-end">
+      <button
+        type="button"
+        // onClick={handleSaves}
+        className="py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded transition duration-300"
+      >
+        Save changes
+      </button>
+    </DialogFooter>
+  </DialogContent>
+  </Dialog>
+  </div>
+
+  )
+}
