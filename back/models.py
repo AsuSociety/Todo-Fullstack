@@ -16,6 +16,7 @@ class Users(Base):
     hashed_password = Column(String)
     isactive = Column(Boolean, default=True)
     role= Column(String)
+    icon= Column(String)
 
 
 # Add Priority 
@@ -37,6 +38,7 @@ class AddTasksPayload(BaseModel):
     color: str = None
     status: str
 
+
 class AddUsersPayload(BaseModel):
     email: str = Field(min_length=8)
     username: str = Field(min_length=3)
@@ -44,6 +46,10 @@ class AddUsersPayload(BaseModel):
     firstname: str= Field(min_length=2)
     lastname: str = Field(min_length=2)
     role: str = Field(min_length=3)
+    icon : str
+
+class UpdateIconPayload(BaseModel):
+    icon: str
 
 class Token(BaseModel):
     access_token: str

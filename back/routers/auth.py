@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Annotated, Union
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import SessionLocal
-from models import Token, Users,AddUsersPayload
+from models import Token, Users,AddUsersPayload, UserVerification, UpdateIconPayload
 from passlib.context import CryptContext
 from database import  SessionLocal
 from sqlalchemy.orm import Session
@@ -82,6 +82,7 @@ async def create_user(dataBase: dataBase_dependency,
         firstname= user_payload.firstname,
         lastname= user_payload.lastname,
         role= user_payload.role,
+        icon = user_payload.icon,
         hashed_password= bcrypt_context.hash(user_payload.password),
         isactive= True
     )
@@ -107,7 +108,9 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         'email': user.email,
         'first_name': user.firstname,
         'last_name': user.lastname,
-        'role': user.role
+        'role': user.role,
+        'id': user.id,
+        'icon': user.icon
         }
         print("Response:", response)  # Log the response
         return response
@@ -121,3 +124,48 @@ async def delete_user(user_id: uuid.UUID, dataBase: dataBase_dependency):
     dataBase.delete(user)
     dataBase.commit()
     return {"detail": "User deleted successfully"}
+
+
+@router.put("/{user_id}/icon")
+async def update_user_icon(
+    user_id: Union[str, uuid.UUID], 
+    user_payload: UpdateIconPayload, 
+    dataBase: dataBase_dependency, 
+    token: str = Depends(oauth2_bearer)
+):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
+        user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+        
+        user = dataBase.query(Users).filter(Users.id == user_uuid).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        user.icon = user_payload.icon
+        dataBase.commit()
+        
+        return {'message': 'Icon updated successfully'}
+
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't validate the user")
+
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user_id format")
+    
+# @router.put("/password")
+# async def update_password(dataBase:dataBase_dependency, user_verifi: UserVerification):
+#     user = dataBase.query(Users).filter(Users.id == user_id).first()
+#     if user is None:
+#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
+#     user_model = dataBase.query(Users).filter(Users.id==uuid.UUID(user.get('id'))).first()
+
+#     if not bcrypt_context.verify(user_verifi.password,user_model.hashed_password):
+#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Error on password change!")
+#     user_model.hashed_password= bcrypt_context.hash(user_verifi.new_password)
+
+#     dataBase.add(user_model)
+#     dataBase.commit()
+#     dataBase.refresh(user_model)
+#     return user_model
+

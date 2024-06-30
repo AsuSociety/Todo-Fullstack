@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button"
 // Define API_URL constant for API endpoint
 export const API_URL = "http://localhost:8000";
 // Define an array of colors
-const colors = ["#ef4444", "#f59e0b", "#84cc16", "#99f6e4", "#bfdbfe"];
+const colors = ["#ef4444", "#f59e0b", "#84cc16", "#71717a"];
 
 // Function to fetch all todos from the API
 const fetchAllTodos = async (token) => {
@@ -135,13 +135,40 @@ const editTask = async (task, id, token, color=null, status = null) => {
   }
 };
 
+const updateIcon = async (userId, icon, token) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/${userId}/icon`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ icon: icon }),
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to update icon: ${response.status} - ${response.statusText}`
+      );
+    }
+
+    const result = await response.json();
+    // console.log("Icon updated successfully:", result);
+    return result;
+
+  } catch (error) {
+    console.error("Error updating icon:", error);
+    return null;
+  }
+};
+
 // TodoWrapper functional component
 export const TodoWrapper = () => {
   const { user } = useUser();
   const [todos, setTodos] = useState([]); // State hook to store todos
   const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
   // State to keep track of the current color index
-  const [colorIndex, setColorIndex] = useState(0);
+  // const [colorIndex, setColorIndex] = useState(3);
 
 // Function to handle opening the edit dialog
 
@@ -160,18 +187,18 @@ export const TodoWrapper = () => {
         setTodos([]); // Clear todos when user is not authenticated
       }
     };
-
+    // console.log("fooooooooooo",user)
     fetchData();
   }, [user]);
 
   const handleAddTodo = async (todo) => {
     // Assign a color from the colors array
-    const newColor = colors[colorIndex];
+    const newColor = colors[3];
     const newTodo = await addTodo({ ...todo, color: newColor,status : '' }, user.token);
     if (newTodo) {
       setTodos((prevTodos) => [...prevTodos, newTodo]);
       // Update the color index to the next color
-      setColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
+      // setColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
       setIsAddTodoVisible(false); // Hide the add todo form after successful addition
     }
   };
@@ -235,6 +262,16 @@ const handleSave = async (task,id) => {
     }
   };
 
+  const updatUserIcon = async (userId,icon) => {
+    const updatedUser = await updateIcon(userId, icon, user.token);
+    if (updatedUser) {
+      // console.log("Icon updated successfully");
+    } else {
+      console.error("Task update failed.");
+    }
+  };
+  
+
   // JSX structure returned by the TodoWrapper component
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -246,7 +283,7 @@ const handleSave = async (task,id) => {
             </p>
           </div>
           <div className="flex items-center space-x-2">
-            <Profile username={user.username} email={user.email} />
+            <Profile username={user.username} email={user.email} updateIcon={updatUserIcon} id= {user.id} user={user}/>
           </div>
         </div>
     <div className="flex flex-col items-center space-y-4">

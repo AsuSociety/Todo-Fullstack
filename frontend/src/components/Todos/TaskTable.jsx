@@ -2,6 +2,7 @@ import React, { useState } from "react"; // Import React and necessary hooks
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash, faPalette } from "@fortawesome/free-solid-svg-icons";
 import { ChangeStatus } from "./ChangeStatus";
+import { DatePicker } from "./DatePicker";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -49,23 +50,12 @@ export const TaskTable = (props) => {
     };
 
     
-    // Function to toggle color picker for a specific row
-    // const toggleColorPicker = (id) => {
-    //     setSelectedRowId((prevId) => (prevId === id ? null : id));
-    //     setShowColorPicker(!showColorPicker)
-    //  };
-
     // Function to handle saving the changes
     const handleSaves = () => {
         props.handleSave({ title: editedTitle, body: editedBody , color: editedColor, status: editedStatus}, editedTask);
         setIsDialogOpen(false);
     };
     
-    // const handleColor=( id, color) =>{
-    //     props.updateTaskColor(id, color)
-    //     setShowColorPicker(false);
-
-    // }
        
     return(
         <div>
@@ -74,9 +64,9 @@ export const TaskTable = (props) => {
           <TableRow>
           <TableHead className="w-[200px] border border-gray-300">Task</TableHead>
       <TableHead className="text-center  w-[80px] border border-gray-300">Status</TableHead>
+      <TableHead className="text-center w-[60px] border border-gray-300" >Date</TableHead>
       <TableHead className="text-center border border-gray-300" style={{ width: '15px', padding: '0px' }}>Edit</TableHead>
       <TableHead className="text-center border border-gray-300" style={{ width: '15px', padding: '0px' }}>Delete</TableHead>
-      {/* <TableHead className="text-center w-[50px] border border-gray-300">Color</TableHead> */}
     </TableRow>
         </TableHeader>
         <TableBody>
@@ -88,10 +78,13 @@ export const TaskTable = (props) => {
             </TableCell>
             <TableCell className="text-center border border-gray-300  " style={{ backgroundColor: todo.color } } >
               <ChangeStatus updateTaskStatus= {props.updateTaskStatus}
-                            // updateTaskColor = {props.updateTaskColor}
                             id= {todo.id}
                             currentStatus = {todo.status}
                             />
+           
+            </TableCell>
+            <TableCell className="text-center border border-gray-300">
+              <DatePicker />
             </TableCell>
             <TableCell className="text-center border border-gray-300 " >
               <FontAwesomeIcon
@@ -107,25 +100,6 @@ export const TaskTable = (props) => {
                 onClick={() => props.deleteTodo(todo.id)}
               />
             </TableCell>
-            {/* <TableCell className="text-center border border-gray-300">
-      <FontAwesomeIcon
-        icon={faPalette}
-        className="text-gray-600 cursor-pointer hover:text-yellow-500"
-        onClick={() => toggleColorPicker(todo.id)}
-      />
-      {showColorPicker && selectedRowId === todo.id && (
-        <div className="mt-2 flex space-x-2 p-2 bg-white rounded-lg shadow-lg border border-gray-200">
-          {colors.map((color) => (
-            <div
-              key={color}
-              className="w-8 h-8 rounded-lg cursor-pointer"
-              style={{ backgroundColor: color }}
-              onClick={() => handleColor(todo.id, color)}
-            ></div>
-                  ))}
-                </div>
-              )}
-            </TableCell> */}
             </TableRow>
           ))}
         </TableBody>

@@ -60,7 +60,6 @@ export const ChangeStatus = (props) => {
 
     const handleStatus=( id, status, color) =>{
       props.updateTaskStatus(id, color, status)
-      // props.updateTaskColor(id, color)
 
       setSelectedStatus(
         statuses.find((priority) => priority.value === status) ||
@@ -71,7 +70,6 @@ export const ChangeStatus = (props) => {
 
   return (
     <div className="text-center flex items-center space-x-4 justify-center">
-      {/* <p className="text-sm text-muted-foreground">Status</p> */}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button

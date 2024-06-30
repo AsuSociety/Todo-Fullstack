@@ -21,6 +21,7 @@ export const Register = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState("");
+  const [icon, setIcon] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -36,7 +37,8 @@ export const Register = () => {
         password,
         firstName,
         lastName,
-        role
+        role,
+        icon
       );
 
       // Reset input fields after successful registration
@@ -46,7 +48,8 @@ export const Register = () => {
       setFirstName("");
       setLastName("");
       setRole("");
-
+      setIcon("")
+      
       // Navigate back to login screen
       navigate("/login");
     } catch (error) {

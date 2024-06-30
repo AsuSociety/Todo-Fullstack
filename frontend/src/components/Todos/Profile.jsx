@@ -1,6 +1,7 @@
 //Profile.jsx
-import React, { useState } from "react"; // Import React and necessary hooks
-
+import React, { useState, useEffect } from "react"; // Import React and necessary hooks
+import { useUser } from "../UserContext";
+import { useNavigate } from "react-router-dom";
 
 import {
     Avatar,
@@ -45,8 +46,6 @@ import {
   
   
 
-  import { useUser } from "../UserContext";
-  import { useNavigate } from "react-router-dom";
 
 
 const profiles = [
@@ -77,23 +76,35 @@ const profiles = [
   },
 ];
 
-export const Profile = ({username,email}) => {
+export const Profile = ({updateIcon,user}) => {
     const { logout } = useUser();
     const navigate = useNavigate();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [open, setOpen] = useState(false)
     const [selectedIcon, setSelectedIcon] = useState( null)
-    
-    const handleStatus=(icon, src) =>{
-      // props.updateTaskStatus(id, color, icon)
-      // props.updateTaskColor(id, color)
+    const [selectedIconTemp, setSelectedIconTemp] = useState(null);
 
-      setSelectedIcon(
+    useEffect(() => {
+      const initialIcon = profiles.find(
+        (profile) => profile.value === user.icon
+      );
+      setSelectedIcon(initialIcon || null);
+    }, [user.icon]);
+
+    
+    const handleProfile=(icon, src) =>{
+      updateIcon(user.id,icon)
+
+      setSelectedIconTemp(
         profiles.find((priority) => priority.value === icon) ||
           null
       )
       setOpen(false)  
   }
+  const handleSaves = () => {
+    setSelectedIcon(selectedIconTemp);
+    setIsDialogOpen(false);
+  };
 
     function handleLogout() {
         logout();
@@ -107,7 +118,12 @@ export const Profile = ({username,email}) => {
     <DropdownMenuTrigger asChild>
       <Button variant="ghost" className="relative h-8 w-8 rounded-full">
         <Avatar className="h-9 w-9">
-          <AvatarImage src="https://cdn4.iconfinder.com/data/icons/avatars-xmas-giveaway/128/batman_hero_avatar_comics-1024.png" alt="@avatar-icon" />
+          <AvatarImage src={ selectedIcon
+                    ? selectedIcon.icon_src
+                    : null
+                }
+                alt="@avatar-icon"
+              />
           <AvatarFallback>User</AvatarFallback>
         </Avatar>
       </Button>
@@ -116,10 +132,10 @@ export const Profile = ({username,email}) => {
       <DropdownMenuLabel className="font-normal">
         <div className="flex flex-col space-y-1">
           <p className="text-sm font-medium leading-none">                  
-            {username}
+            {user.username}
           </p>
           <p className="text-xs leading-none text-muted-foreground">
-            {email}
+            {user.email}
           </p>
         </div>
       </DropdownMenuLabel>
@@ -163,10 +179,10 @@ export const Profile = ({username,email}) => {
             className="w-[120px] justify-center border border-black"
 
           >
-            {selectedIcon ? (
+            {selectedIconTemp ? (
               <>
-                <img src={selectedIcon.icon_src} className="mr-2 h-4 w-4 shrink-0" alt="Profile Icon" />
-                {selectedIcon.label}
+                <img src={selectedIconTemp.icon_src} className="mr-2 h-4 w-4 shrink-0" alt="Profile Icon" />
+                {selectedIconTemp.label}
               </>
             ) : (
               <>+ Set profile</>
@@ -183,7 +199,7 @@ export const Profile = ({username,email}) => {
                   <CommandItem
                     key={profile.value}
                     value={profile.value}
-                    onSelect={(value) => handleStatus(profile.value, profile.icon_src)}
+                    onSelect={(value) => handleProfile(profile.value, profile.icon_src)}
                   >
                     <img src={profile.icon_src} className="mr-2 h-4 w-4 shrink-0" alt="Profile Icon" />
                     <span>{profile.label}</span>
@@ -210,7 +226,7 @@ export const Profile = ({username,email}) => {
     <DialogFooter className="flex justify-end">
       <button
         type="button"
-        // onClick={handleSaves}
+        onClick={handleSaves}
         className="py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded transition duration-300"
       >
         Save changes
