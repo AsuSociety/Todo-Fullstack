@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; 
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
@@ -12,11 +12,45 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-export const DatePicker = () => {
+
+
+// Function to normalize date to start of the day in local timezone
+const normalizeDate = (date) => {
+    const newDate = new Date(date);
+    newDate.setHours(0, 0, 0, 0);
+    return newDate;
+  };
+
+  // Convert local date to UTC ISO string, fix the problem with the different time
+const convertToUTCISO = (date) => {
+    const localDate = new Date(date);
+    const utcDate = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()));
+    return utcDate.toISOString();
+  };
+  
+export const DatePicker = (props) => {
   const [date, setDate] = useState(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    // Check if the date prop is provided and update the state
+    if (props.currentDeadline) {
+      setDate(new Date(props.currentDeadline));
+    }
+  }, [props.currentDeadline]); 
+
+
+  const handleDeadline=(date) =>{
+    if(date){
+        const normalizedDate = normalizeDate(date);
+        setDate(normalizedDate);
+        props.updateDeadline(props.id, convertToUTCISO(normalizedDate));
+        setOpen(false)
+    }
+  }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
@@ -29,11 +63,12 @@ export const DatePicker = () => {
           {date ? format(date, "PPP") : <span>Pick a date</span>}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0">
+      <PopoverContent className="w-auto p-0 max-h-[250px] overflow-auto">
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+        //   onSelect={setDate}
+          onSelect={(selected) => handleDeadline(selected)}
           initialFocus
         />
       </PopoverContent>

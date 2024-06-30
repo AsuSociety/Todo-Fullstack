@@ -103,7 +103,7 @@ const deleteTodo = async (id, token) => {
 
 // Function to edit a todo
 
-const editTask = async (task, id, token, color=null, status = null) => {
+const editTask = async (task, id, token, color=null, status = null,date) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "PUT",
@@ -116,6 +116,7 @@ const editTask = async (task, id, token, color=null, status = null) => {
         body: task.body,
         color: color,
         status: status,
+        deadline : date,
 
       }), // Include both body and title properties
     });
@@ -127,7 +128,7 @@ const editTask = async (task, id, token, color=null, status = null) => {
     }
 
     const updatedTodo = await response.json(); // Parse response data
-    console.log("EDIT TASK##########")
+    // console.log("EDIT TASK##########")
     return updatedTodo; // Return updated todo
   } catch (error) {
     console.error("Error updating task:", error); // Log error if updating task fails
@@ -224,25 +225,6 @@ const handleSave = async (task,id) => {
   }
 };
 
-  // Function to update the task color
-  const updateTaskColor = async (taskId, color) => {
-    const taskToUpdate = todos.find((todo) => todo.id === taskId);
-    if (taskToUpdate) {
-      const updatedTask = await editTask(
-        taskToUpdate,
-        taskId,
-        user.token,
-        color,
-        taskToUpdate.status
-      );
-      if (updatedTask) {
-        setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
-        );
-      }
-    }
-  };
-
     // Function to update the task status
   const updateTaskStatus = async (taskId,color, status) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
@@ -262,6 +244,27 @@ const handleSave = async (task,id) => {
     }
   };
 
+  // Function to update the deadline status
+  const updateDeadline = async (taskId, date) => {
+    const taskToUpdate = todos.find((todo) => todo.id === taskId);
+    if (taskToUpdate) {
+      const updatedTask = await editTask(
+        taskToUpdate,
+        taskId,
+        user.token,
+        taskToUpdate.color,
+        taskToUpdate.status,
+        date,
+      );
+      if (updatedTask) {
+        console.log("EDIT Date ##########")
+
+        setTodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
+        );
+      }
+    }
+  };
   const updatUserIcon = async (userId,icon) => {
     const updatedUser = await updateIcon(userId, icon, user.token);
     if (updatedUser) {
@@ -303,9 +306,8 @@ const handleSave = async (task,id) => {
         tasks={todos} // Pass todo as prop
         deleteTodo={handleDeleteTodo} // Pass deleteTodo function as prop
         handleSave={handleSave} // Pass markForEdit function as prop
-        setTodos={setTodos}
-        updateTaskColor={updateTaskColor}
         updateTaskStatus = {updateTaskStatus}
+        updateDeadline = {updateDeadline}
         />
   </div>
   );

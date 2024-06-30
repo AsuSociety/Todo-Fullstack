@@ -1,9 +1,11 @@
 # models.py
+from datetime import datetime
+from typing import Optional
 from database import Base
 from fastapi import FastAPI
 from pydantic import BaseModel, UUID4, Field
 import uuid
-from sqlalchemy import Boolean, Column,  String, ForeignKey, UUID as PG_UUID
+from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID
 
 class Users(Base):
     __tablename__= 'users'
@@ -28,6 +30,7 @@ class Todos(Base):
     body = Column(String)
     color = Column(String)
     status= Column(String)
+    deadline = Column(DateTime, nullable=True)  
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
 
 
@@ -37,6 +40,8 @@ class AddTasksPayload(BaseModel):
     body: str
     color: str = None
     status: str
+    deadline: Optional[datetime] = None  
+
 
 
 class AddUsersPayload(BaseModel):

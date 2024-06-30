@@ -84,7 +84,10 @@ export const TaskTable = (props) => {
            
             </TableCell>
             <TableCell className="text-center border border-gray-300">
-              <DatePicker />
+              <DatePicker updateDeadline = {props.updateDeadline}
+                                            id= {todo.id}
+                                            currentDeadline ={todo.deadline}
+                                           />
             </TableCell>
             <TableCell className="text-center border border-gray-300 " >
               <FontAwesomeIcon
