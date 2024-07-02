@@ -17,16 +17,30 @@ import {
 // Function to normalize date to start of the day in local timezone
 const normalizeDate = (date) => {
     const newDate = new Date(date);
-    newDate.setHours(0, 0, 0, 0);
+    const now = new Date();
+
+    newDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
     return newDate;
   };
 
   // Convert local date to UTC ISO string, fix the problem with the different time
-const convertToUTCISO = (date) => {
+  const convertToUTCISO = (date) => {
+    // Assuming date is a Date object
     const localDate = new Date(date);
-    const utcDate = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()));
+    // Get year, month, date, hours, minutes, seconds, and milliseconds
+    const year = localDate.getFullYear();
+    const month = localDate.getMonth();
+    const day = localDate.getDate();
+    const hours = localDate.getHours();
+    const minutes = localDate.getMinutes();
+    const seconds = localDate.getSeconds();
+    const milliseconds = localDate.getMilliseconds();
+    
+    // Create a new UTC date object
+    const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds));
     return utcDate.toISOString();
-  };
+};
+
   
 export const DatePicker = (props) => {
   const [date, setDate] = useState(null);

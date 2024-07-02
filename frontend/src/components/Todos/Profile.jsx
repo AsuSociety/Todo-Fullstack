@@ -211,7 +211,7 @@ export const Profile = ({updateIcon,user}) => {
         </PopoverContent>
       </Popover>
       </div>
-      <div className="grid grid-cols-4 items-center gap-4">
+      {/* <div className="grid grid-cols-4 items-center gap-4">
         <Label htmlFor="body" className="text-center">
           Change Password
         </Label>
@@ -221,7 +221,7 @@ export const Profile = ({updateIcon,user}) => {
           // onChange={(e) => setEditedBody(e.target.value)}
           // className="col-span-3"
         />
-      </div>
+      </div> */}
     </div>
     <DialogFooter className="flex justify-end">
       <button

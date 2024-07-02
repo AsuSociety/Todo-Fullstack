@@ -38,6 +38,8 @@ export const TaskTable = (props) => {
     const [editedBody, setEditedBody] = useState("");
     const [editedColor, setEditedColor] = useState("");
     const [editedStatus, setEditedStatus] = useState("");
+    const [editedDate, setEditedDate] = useState("");
+
     
     // Function to handle opening the edit dialog
     const openEditDialog = (task) => {
@@ -46,13 +48,14 @@ export const TaskTable = (props) => {
         setEditedBody(task.body);
         setEditedColor(task.color);
         setEditedStatus(task.status);
+        setEditedDate(task.deadline)
         setIsDialogOpen(true);
     };
 
     
     // Function to handle saving the changes
     const handleSaves = () => {
-        props.handleSave({ title: editedTitle, body: editedBody , color: editedColor, status: editedStatus}, editedTask);
+        props.handleSave({ title: editedTitle, body: editedBody , color: editedColor, status: editedStatus, deadline: editedDate}, editedTask);
         setIsDialogOpen(false);
     };
     

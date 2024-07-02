@@ -13,6 +13,7 @@ import React, { useState, useEffect } from "react"; // Import React and necessar
 import { useUser } from "../UserContext";
 import { AddTodo } from "./AddTodo"; // Import AddTodo component for adding todos
 import { TaskTable } from "./TaskTable";
+import axios from 'axios';
 
 import { Profile } from "./Profile";
 
@@ -103,7 +104,7 @@ const deleteTodo = async (id, token) => {
 
 // Function to edit a todo
 
-const editTask = async (task, id, token, color=null, status = null,date) => {
+const editTask = async (task, id, token, color=null, status = null, date) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "PUT",
@@ -163,6 +164,36 @@ const updateIcon = async (userId, icon, token) => {
   }
 };
 
+const sendEmail = async (email, token) => {
+  try {
+    // Append the email to the URL as a query parameter
+    const response = await fetch(`${API_URL}/todo/send-test-email?email=${encodeURIComponent(email)}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      // No body needed since email is in the query string
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Failed to send email: ${response.status} - ${response.statusText}. Error details: ${JSON.stringify(errorData)}`);
+    }
+
+    const result = await response.json();
+    console.log("Email sent successfully:", result);
+    return result;
+  } catch (error) {
+    console.error("Error sending email:", error.message);
+    return null;
+  }
+};
+
+
+
+
+
 // TodoWrapper functional component
 export const TodoWrapper = () => {
   const { user } = useUser();
@@ -214,8 +245,8 @@ export const TodoWrapper = () => {
     }
   };
 
-const handleSave = async (task,id) => {
-  const updatedTask = await editTask(task, id, user.token,task.color, task.status);
+  const handleSave = async (task,id) => {
+  const updatedTask = await editTask(task, id, user.token,task.color, task.status, task.deadline);
   if (updatedTask) {
     setTodos((prevTodos) =>
       prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
@@ -223,7 +254,7 @@ const handleSave = async (task,id) => {
   } else {
     console.error("Task update failed.");
   }
-};
+  };
 
     // Function to update the task status
   const updateTaskStatus = async (taskId,color, status) => {
@@ -234,7 +265,8 @@ const handleSave = async (task,id) => {
         taskId,
         user.token,
         color,
-        status
+        status,
+        taskToUpdate.deadline
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
@@ -254,17 +286,17 @@ const handleSave = async (task,id) => {
         user.token,
         taskToUpdate.color,
         taskToUpdate.status,
-        date,
+        date 
       );
       if (updatedTask) {
-        console.log("EDIT Date ##########")
-
         setTodos((prevTodos) =>
           prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
         );
       }
     }
   };
+  
+  
   const updatUserIcon = async (userId,icon) => {
     const updatedUser = await updateIcon(userId, icon, user.token);
     if (updatedUser) {
@@ -274,7 +306,22 @@ const handleSave = async (task,id) => {
     }
   };
   
-
+  // test for the mail service
+  // const handleClick = async () => {
+  //   if (user && user.token) {
+  //     const result = await sendEmail('omerasus3@gmail.com', user.token);
+      
+  //     if (result) {
+  //       alert('Test email sent!');
+  //     } else {
+  //       alert('Failed to send test email.');
+  //     }
+  //   } else {
+  //     alert('User is not authenticated.');
+  //   }
+  // };
+  
+  
   // JSX structure returned by the TodoWrapper component
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
@@ -302,6 +349,9 @@ const handleSave = async (task,id) => {
         </div>
       )}
     </div>
+    
+    {/* <Button onClick={handleClick}>Send Test Email</Button> */}
+
       <TaskTable 
         tasks={todos} // Pass todo as prop
         deleteTodo={handleDeleteTodo} // Pass deleteTodo function as prop

@@ -1,9 +1,9 @@
 # models.py
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from database import Base
 from fastapi import FastAPI
-from pydantic import BaseModel, UUID4, Field
+from pydantic import BaseModel, UUID4, EmailStr, Field
 import uuid
 from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID
 
@@ -64,13 +64,9 @@ class UserVerification(BaseModel):
     password: str
     new_password: str
 
+# class EmailSchema(BaseModel):
+#     email: List[EmailStr]
 
-# class Task(BaseModel):
-#     id: uuid.UUID
-#     title: str
-#     body: str
-#     color: str = None
-
-
-# class DB(BaseModel):
-#     tasks: dict[str,Task]
+# class EmailContent(BaseModel):
+#     message : str
+#     subject : str
