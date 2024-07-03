@@ -146,6 +146,7 @@ async def update_todo(user:user_dependency, dataBase:dataBase_dependency,todo_id
     todo_model.color = task_payload.color
     todo_model.status = task_payload.status
     todo_model.deadline = task_payload.deadline
+    todo_model.remainder = task_payload.remainder
     
     dataBase.add(todo_model)
     dataBase.commit()
@@ -168,10 +169,12 @@ async def update_todo(user:user_dependency, dataBase:dataBase_dependency,todo_id
     time_difference = reminder_time - now
 
     # Schedule the email if the reminder time is in the future
-    if time_difference.total_seconds() > 10:
+    # if time_difference.total_seconds() > 10 :
+    if time_difference.total_seconds() > 10 and todo_model.remainder == True :
+    
         schedule_email(user.get('email'), "Task Reminder", f"Reminder: Your task '{todo_model.title}' is due in 24 hour!", reminder_time)
     else:
-        print("The reminder time is in the past; email will not be scheduled.")
+        print("The reminder time is in the past or the user dont want a remainder; email will not be scheduled.")
 
     return todo_model
 

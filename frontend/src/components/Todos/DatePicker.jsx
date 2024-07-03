@@ -14,34 +14,6 @@ import {
 
 
 
-// Function to normalize date to start of the day in local timezone
-const normalizeDate = (date) => {
-    const newDate = new Date(date);
-    const now = new Date();
-
-    newDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
-    return newDate;
-  };
-
-  // Convert local date to UTC ISO string, fix the problem with the different time
-  const convertToUTCISO = (date) => {
-    // Assuming date is a Date object
-    const localDate = new Date(date);
-    // Get year, month, date, hours, minutes, seconds, and milliseconds
-    const year = localDate.getFullYear();
-    const month = localDate.getMonth();
-    const day = localDate.getDate();
-    const hours = localDate.getHours();
-    const minutes = localDate.getMinutes();
-    const seconds = localDate.getSeconds();
-    const milliseconds = localDate.getMilliseconds();
-    
-    // Create a new UTC date object
-    const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds));
-    return utcDate.toISOString();
-};
-
-  
 export const DatePicker = (props) => {
   const [date, setDate] = useState(null);
   const [open, setOpen] = useState(false);
@@ -56,9 +28,10 @@ export const DatePicker = (props) => {
 
   const handleDeadline=(date) =>{
     if(date){
-        const normalizedDate = normalizeDate(date);
+      // console.log("$$$$%$%%#%$#%$#%#$")
+        const normalizedDate = props.normalizeDate(date);
         setDate(normalizedDate);
-        props.updateDeadline(props.id, convertToUTCISO(normalizedDate));
+        props.updateDeadline(props.todo.id, props.convertToUTCISO(normalizedDate));
         setOpen(false)
     }
   }
@@ -81,10 +54,10 @@ export const DatePicker = (props) => {
         <Calendar
           mode="single"
           selected={date}
-        //   onSelect={setDate}
           onSelect={(selected) => handleDeadline(selected)}
           initialFocus
         />
+
       </PopoverContent>
     </Popover>
   );

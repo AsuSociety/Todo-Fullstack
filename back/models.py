@@ -31,6 +31,7 @@ class Todos(Base):
     color = Column(String)
     status= Column(String)
     deadline = Column(DateTime, nullable=True)  
+    remainder = Column(Boolean, default=True)
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
 
 
@@ -41,7 +42,7 @@ class AddTasksPayload(BaseModel):
     color: str = None
     status: str
     deadline: Optional[datetime] = None  
-
+    remainder : bool = True
 
 
 class AddUsersPayload(BaseModel):
@@ -64,9 +65,3 @@ class UserVerification(BaseModel):
     password: str
     new_password: str
 
-# class EmailSchema(BaseModel):
-#     email: List[EmailStr]
-
-# class EmailContent(BaseModel):
-#     message : str
-#     subject : str

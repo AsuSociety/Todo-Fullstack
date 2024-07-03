@@ -4,6 +4,8 @@ import { faPen, faTrash, faPalette } from "@fortawesome/free-solid-svg-icons";
 import { ChangeStatus } from "./ChangeStatus";
 import { DatePicker } from "./DatePicker";
 
+import { Checkbox } from "@/components/ui/checkbox"
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
@@ -39,6 +41,7 @@ export const TaskTable = (props) => {
     const [editedColor, setEditedColor] = useState("");
     const [editedStatus, setEditedStatus] = useState("");
     const [editedDate, setEditedDate] = useState("");
+    const [isChecked, setIsChecked] = useState(); 
 
     
     // Function to handle opening the edit dialog
@@ -60,16 +63,26 @@ export const TaskTable = (props) => {
     };
     
        
+  const handleCheckboxChange = (taskId, currentValue) => {
+    const newValue = !currentValue;
+    props.updateRemainder(taskId, newValue);
+    setIsChecked(newValue);
+    if (newValue) {
+      alert("You will receive a reminder 24 hours before the deadline!");
+    }
+  }
+
     return(
         <div>
         <Table className="table-auto border-collapse border border-gray-300" style={{ tableLayout: 'fixed' }}>
         <TableHeader>
           <TableRow>
-          <TableHead className="w-[200px] border border-gray-300">Task</TableHead>
+          <TableHead className="w-[180px] border border-gray-300">Task</TableHead>
       <TableHead className="text-center  w-[80px] border border-gray-300">Status</TableHead>
-      <TableHead className="text-center w-[60px] border border-gray-300" >Date</TableHead>
-      <TableHead className="text-center border border-gray-300" style={{ width: '15px', padding: '0px' }}>Edit</TableHead>
-      <TableHead className="text-center border border-gray-300" style={{ width: '15px', padding: '0px' }}>Delete</TableHead>
+      <TableHead className="text-center w-[70px] border border-gray-300" >Date</TableHead>
+      <TableHead className="text-center w-[20px]  border border-gray-300" >Remainder</TableHead>
+      <TableHead className="text-center border border-gray-300" style={{ width: '20px', padding: '0px' }}>Edit</TableHead>
+      <TableHead className="text-center border border-gray-300" style={{ width: '20px', padding: '0px' }}>Delete</TableHead>
     </TableRow>
         </TableHeader>
         <TableBody>
@@ -88,9 +101,24 @@ export const TaskTable = (props) => {
             </TableCell>
             <TableCell className="text-center border border-gray-300">
               <DatePicker updateDeadline = {props.updateDeadline}
-                                            id= {todo.id}
-                                            currentDeadline ={todo.deadline}
-                                           />
+                           todo= {todo}
+                           currentDeadline ={todo.deadline}
+                           updateRemainder = {props.updateRemainder}
+                           normalizeDate = {props.normalizeDate}
+                           convertToUTCISO = {props.convertToUTCISO}
+                            />
+            </TableCell>
+            <TableCell className="text-center border border-gray-300">
+               <div className="flex items-center space-x-2">
+                 <Checkbox id="terms" checked={todo.remainder} onCheckedChange={() => handleCheckboxChange(todo.id,todo.remainder)}  />
+                   <label
+                       htmlFor="terms"
+                     className="text-sm font-thin leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                    Remaind Me!
+                 </label>
+               </div>
+    
             </TableCell>
             <TableCell className="text-center border border-gray-300 " >
               <FontAwesomeIcon

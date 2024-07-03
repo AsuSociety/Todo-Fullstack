@@ -173,22 +173,31 @@ export const Profile = ({updateIcon,user}) => {
         </Label>
         <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-[120px] justify-center border border-black"
+  <Button
+    variant="outline"
+    size="sm"
+    className="w-[120px] justify-center border border-black"
+  >
+    {selectedIconTemp ? (
+      <>
+        <img src={selectedIconTemp.icon_src} className="mr-2 h-4 w-4 shrink-0" alt="Profile Icon" />
+        {selectedIconTemp.label}
+      </>
+    ) : (
+      <>
+        {selectedIcon ? (
+          <>
+            <img src={selectedIcon.icon_src} className="mr-2 h-4 w-4 shrink-0" alt="Profile Icon" />
+            {selectedIcon.label}
+          </>
+        ) : (
+          <>+ Set profile</>
+        )}
+      </>
+    )}
+  </Button>
+</PopoverTrigger>
 
-          >
-            {selectedIconTemp ? (
-              <>
-                <img src={selectedIconTemp.icon_src} className="mr-2 h-4 w-4 shrink-0" alt="Profile Icon" />
-                {selectedIconTemp.label}
-              </>
-            ) : (
-              <>+ Set profile</>
-            )}
-          </Button>
-        </PopoverTrigger>
         <PopoverContent className="p-0 w-[200px]" side="right" align="start">
           <Command>
             <CommandInput placeholder="Change profile..." />

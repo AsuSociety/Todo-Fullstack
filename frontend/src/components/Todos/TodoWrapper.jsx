@@ -30,7 +30,7 @@ const colors = ["#ef4444", "#f59e0b", "#84cc16", "#71717a"];
 const fetchAllTodos = async (token) => {
   try {
     const url = `${API_URL}/todo`; // Construct API URL
-    console.log("Fetching todos from:", url); // Log fetching todos URL
+    // console.log("Fetching todos from:", url); // Log fetching todos URL
     const response = await fetch(`${API_URL}/todo/`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -103,8 +103,8 @@ const deleteTodo = async (id, token) => {
 };
 
 // Function to edit a todo
-
-const editTask = async (task, id, token, color=null, status = null, date) => {
+const editTask = async (task, id, token, color=null, status = null, date, remainder) => {
+// const editTask = async (task, id, token, color=null, status = null, date) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "PUT",
@@ -118,6 +118,7 @@ const editTask = async (task, id, token, color=null, status = null, date) => {
         color: color,
         status: status,
         deadline : date,
+        remainder: remainder,
 
       }), // Include both body and title properties
     });
@@ -164,34 +165,70 @@ const updateIcon = async (userId, icon, token) => {
   }
 };
 
-const sendEmail = async (email, token) => {
-  try {
-    // Append the email to the URL as a query parameter
-    const response = await fetch(`${API_URL}/todo/send-test-email?email=${encodeURIComponent(email)}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      // No body needed since email is in the query string
-    });
+// const sendEmail = async (email, token) => {
+//   try {
+//     // Append the email to the URL as a query parameter
+//     const response = await fetch(`${API_URL}/todo/send-test-email?email=${encodeURIComponent(email)}`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//       // No body needed since email is in the query string
+//     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Failed to send email: ${response.status} - ${response.statusText}. Error details: ${JSON.stringify(errorData)}`);
-    }
+//     if (!response.ok) {
+//       const errorData = await response.json();
+//       throw new Error(`Failed to send email: ${response.status} - ${response.statusText}. Error details: ${JSON.stringify(errorData)}`);
+//     }
 
-    const result = await response.json();
-    console.log("Email sent successfully:", result);
-    return result;
-  } catch (error) {
-    console.error("Error sending email:", error.message);
-    return null;
-  }
+//     const result = await response.json();
+//     console.log("Email sent successfully:", result);
+//     return result;
+//   } catch (error) {
+//     console.error("Error sending email:", error.message);
+//     return null;
+//   }
+// };
+
+
+
+// Function to normalize date to start of the day in local timezone
+
+const normalizeDate = (date) => {
+  const newDate = new Date(date);
+  const now = new Date();
+
+  newDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+  return newDate;
 };
 
+// Convert local date to UTC ISO string, fix the problem with the different time
+const convertToUTCISO = (date) => {
+  // Assuming date is a Date object
+  const localDate = new Date(date);
+  // Get year, month, date, hours, minutes, seconds, and milliseconds
+  const year = localDate.getFullYear();
+  const month = localDate.getMonth();
+  const day = localDate.getDate();
+  const hours = localDate.getHours();
+  const minutes = localDate.getMinutes();
+  const seconds = localDate.getSeconds();
+  const milliseconds = localDate.getMilliseconds();
+  
+  // Create a new UTC date object
+  const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds));
+  return utcDate.toISOString();
+};
 
+// Function to get the default deadline (3 days from now)
+const getDefaultDeadline = () => {
+  const today = new Date();
+  today.setDate(today.getDate() + 3); // Add 3 days
 
+  const normalizedDate = normalizeDate(today);
+  return convertToUTCISO(normalizedDate);
+};
 
 
 // TodoWrapper functional component
@@ -226,7 +263,7 @@ export const TodoWrapper = () => {
   const handleAddTodo = async (todo) => {
     // Assign a color from the colors array
     const newColor = colors[3];
-    const newTodo = await addTodo({ ...todo, color: newColor,status : '' }, user.token);
+    const newTodo = await addTodo({ ...todo, color: newColor,status : '', deadline: getDefaultDeadline() ,remainder: true }, user.token);
     if (newTodo) {
       setTodos((prevTodos) => [...prevTodos, newTodo]);
       // Update the color index to the next color
@@ -246,7 +283,9 @@ export const TodoWrapper = () => {
   };
 
   const handleSave = async (task,id) => {
-  const updatedTask = await editTask(task, id, user.token,task.color, task.status, task.deadline);
+  const updatedTask = await editTask(task, id, user.token,task.color, task.status, task.deadline,
+    task.remainder
+  );
   if (updatedTask) {
     setTodos((prevTodos) =>
       prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
@@ -266,7 +305,8 @@ export const TodoWrapper = () => {
         user.token,
         color,
         status,
-        taskToUpdate.deadline
+        taskToUpdate.deadline,
+        taskToUpdate.remainder
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
@@ -286,7 +326,8 @@ export const TodoWrapper = () => {
         user.token,
         taskToUpdate.color,
         taskToUpdate.status,
-        date 
+        date,
+        taskToUpdate.remainder
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
@@ -296,7 +337,27 @@ export const TodoWrapper = () => {
     }
   };
   
-  
+
+  const updateRemainder = async (taskId, remainder) => {
+    const taskToUpdate = todos.find((todo) => todo.id === taskId);
+    if (taskToUpdate) {
+      const updatedTask = await editTask(
+        taskToUpdate,
+        taskId,
+        user.token,
+        taskToUpdate.color,
+        taskToUpdate.status,
+        taskToUpdate.deadline,
+        remainder
+      );
+      if (updatedTask) {
+        setTodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
+        );
+      }
+    }
+  };
+
   const updatUserIcon = async (userId,icon) => {
     const updatedUser = await updateIcon(userId, icon, user.token);
     if (updatedUser) {
@@ -358,6 +419,9 @@ export const TodoWrapper = () => {
         handleSave={handleSave} // Pass markForEdit function as prop
         updateTaskStatus = {updateTaskStatus}
         updateDeadline = {updateDeadline}
+        updateRemainder = {updateRemainder}
+        normalizeDate = {normalizeDate}
+        convertToUTCISO = {convertToUTCISO}
         />
   </div>
   );

@@ -1,5 +1,4 @@
 // AuthService.js
-// import jwt_decode from "jwt-decode";
 export const API_URL = "http://localhost:8000";
 
 class AuthService {
@@ -69,35 +68,6 @@ class AuthService {
     localStorage.setItem("token", data.access_token);
     return { token: data.access_token };
   }
-
-  // static async getUser(token) {
-  //   try {
-  //     const tokenParts = token.split('.');
-  //     if (tokenParts.length !== 3) {
-  //       throw new Error('Invalid token format');
-  //     }
-
-  //     const payload = JSON.parse(atob(tokenParts[1]));
-  //     const username = payload.sub; // Extract the username from the payload
-
-  //     const response = await fetch(`${API_URL}/auth/${username}`, {
-  //       method: "GET",
-  //       headers: {
-  //         Authorization: `Bearer ${token}`,
-  //       },
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error("Failed to fetch user details");
-  //     }
-
-  //     const userData = await response.json();
-  //     return userData;
-  //   } catch (error) {
-  //     console.error("Error fetching user details:", error);
-  //     throw error;
-  //   }
-  // }
   
 }
 
