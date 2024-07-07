@@ -1,11 +1,16 @@
 # models.py
 from datetime import datetime
 from typing import List, Optional
-from database import Base
+# from database import Base
 from fastapi import FastAPI
 from pydantic import BaseModel, UUID4, EmailStr, Field
 import uuid
 from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID
+# from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
+
+
+Base = declarative_base()
 
 class Users(Base):
     __tablename__= 'users'
