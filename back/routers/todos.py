@@ -12,7 +12,6 @@ import asyncio
 from .auth import get_current_user
 from database import  SessionLocal
 from sqlalchemy.orm import Session
-# from main import conf  # Import the email configuration from main.py
 from fastapi import BackgroundTasks
 from datetime import timedelta, datetime
 from config import conf

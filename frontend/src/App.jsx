@@ -3,7 +3,7 @@
 // Import necessary modules and components
 import React from "react"; // Import React and useState hook for state management
 import { TodoWrapper } from "./components/Todos/TodoWrapper"; // Import TodoWrapper component
-import Modal from "./components/Modal"; // Import Modal component for displaying modals
+// import Modal from "./components/Modal"; // Import Modal component for displaying modals
 import { Login } from "./components/Login/Login"; // Import Login component for user login
 import { Register } from "./components/Register/Register"; // Import Register component for user registration
 import {
@@ -26,9 +26,7 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: (
-      <Modal>
         <Register />
-      </Modal>
     ),
   },
   {

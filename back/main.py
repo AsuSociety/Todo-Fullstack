@@ -6,7 +6,6 @@ from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse  # Import JSONResponse here
 from typing import Annotated, List
-import sqlite3
 
 from typing import List
 
@@ -17,10 +16,6 @@ from config import conf
 import models
 from database import engine, SessionLocal
 from routers import auth, todos, admin, user
-
-
-# Connect to the SQLite database named 'users.db'
-conn = sqlite3.connect('users.db')
 
 
 # Create a FastAPI application
