@@ -5,66 +5,134 @@ This component manages the input of new tasks with two controlled input fields f
 Upon submission of the form, it triggers a function to add the new task to the todo list if both fields are filled. 
 This component ensures a user-friendly interface for seamlessly adding tasks to the list.
 */
-
-// Import React and useState hook
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import {
   Form,
   FormItem,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 
-// AddTodo component: allows adding new tasks
-// export const AddTodo = ({ handleAddTodo }) => {
+const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const mic = new speechRecognition();
+mic.continuous = true;
+mic.interimResults = true;
+mic.lang = 'en-US';
+
 export const AddTodo = (props) => {
-  // State to manage the input value for new tasks
-  const [title, setTitle] = useState(""); // State for task title
-  const [body, setBody] = useState(""); // State for task body
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [note, setNote] = useState("");
+  const [activeField, setActiveField] = useState(null);
 
-  // Function to handle form submission
+  useEffect(() => {
+    if (isListening) {
+      mic.start();
+      mic.onend = () => {
+        console.log('Continue..');
+        mic.start();
+      };
+    } else {
+      mic.stop();
+      mic.onend = () => {
+        console.log('Stop..');
+      };
+    }
+
+    mic.onstart = () => {
+      console.log('Mics On');
+    };
+
+    mic.onresult = event => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0])
+        .map(result => result.transcript)
+        .join('');
+      setNote(transcript);
+
+      if (activeField === "title") {
+        setTitle(transcript);
+      } else if (activeField === "body") {
+        setBody(transcript);
+      }
+    };
+
+    mic.onerror = (event) => {
+      console.error(event.error);
+      setIsListening(false);
+    };
+
+    return () => {
+      mic.stop();
+      mic.onend = null;
+      mic.onresult = null;
+      mic.onerror = null;
+    };
+  }, [isListening]);
+
   const handleSubmit = (e) => {
-    // Prevent the default form submission behavior
     e.preventDefault();
-
-    // Check if both title and body are not empty
     if (title && body) {
-      // Call the addTodo function passed as prop to add a new task
-      props.handleAddTodo({ title, body }); // Pass title and body as an object to handleAddTodo function
-      // Clear input fields after adding the task
-      setTitle(""); // Clear title input field
-      setBody(""); // Clear body input field
+      props.handleAddTodo({ title, body });
+      setTitle("");
+      setBody("");
     }
   };
 
-  // Return a form with input fields for title and body, and a submit button
-  return (
-    <Form >
-    <form onSubmit={handleSubmit} className="AddTodo">
-      {/* Input field for entering the title of the task */}
-      <FormItem>
-      <Input
-        type="text"
-        value={title} // Value of the input field is set to the current value of 'title' state
-        onChange={(e) => setTitle(e.target.value)} // Update 'title' state as user types
-        className="todo-input"
-        placeholder="Title"
-      />
+  const handleMicClick = (field) => {
+    if (isListening) {
+      mic.stop();
+      setIsListening(false);
+    } else {
+      setActiveField(field);
+      setIsListening(true);
+    }
+  };
 
-      {/* Input field for entering the body of the task */}
-      <Input
-        type="text"
-        value={body} // Value of the input field is set to the current value of 'body' state
-        onChange={(e) => setBody(e.target.value)} // Update 'body' state as user types
-        className="todo-input"
-        placeholder="Body"
-      />
-</FormItem>
-      {/* Submit button to add the new task */}
-      <Button variant="ghost" type="submit" >
-        Add Task
-      </Button>
-    </form>
+  return (
+    <Form>
+      <form onSubmit={handleSubmit} className="AddTodo p-4 bg-white shadow-md rounded-lg">
+        <FormItem className="mb-4">
+          <div className="flex items-center">
+            <Input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="todo-input w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Title"
+            />
+            <FontAwesomeIcon 
+              icon={faMicrophone}
+              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${isListening && activeField === "title" ? 'text-blue-500' : ''}`}
+              onClick={() => handleMicClick("title")}
+            />
+          </div>
+        </FormItem>
+
+        <FormItem className="mb-4">
+          <div className="flex items-center">
+            <Input
+              type="text"
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              className="todo-input w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Body"
+            />
+            <FontAwesomeIcon 
+              icon={faMicrophone}
+              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${isListening && activeField === "body" ? 'text-blue-500' : ''}`}
+              onClick={() => handleMicClick("body")}
+            />
+          </div>
+        </FormItem>
+
+        <Button variant="ghost" type="submit" className=" py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+          Add Task
+        </Button>
+      </form>
     </Form>
   );
 };

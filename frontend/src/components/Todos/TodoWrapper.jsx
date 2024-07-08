@@ -236,10 +236,6 @@ export const TodoWrapper = () => {
   const { user } = useUser();
   const [todos, setTodos] = useState([]); // State hook to store todos
   const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
-  // State to keep track of the current color index
-  // const [colorIndex, setColorIndex] = useState(3);
-
-// Function to handle opening the edit dialog
 
   // useEffect hook to fetch todos when component mounts
   useEffect(() => {
@@ -266,8 +262,6 @@ export const TodoWrapper = () => {
     const newTodo = await addTodo({ ...todo, color: newColor,status : '', deadline: getDefaultDeadline() ,remainder: true }, user.token);
     if (newTodo) {
       setTodos((prevTodos) => [...prevTodos, newTodo]);
-      // Update the color index to the next color
-      // setColorIndex((prevIndex) => (prevIndex + 1) % colors.length);
       setIsAddTodoVisible(false); // Hide the add todo form after successful addition
     }
   };

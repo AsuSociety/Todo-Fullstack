@@ -1,6 +1,6 @@
 import React, { useState } from "react"; // Import React and necessary hooks
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faTrash, faPalette } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faTrash, faPalette, faMicrophone } from "@fortawesome/free-solid-svg-icons";
 import { ChangeStatus } from "./ChangeStatus";
 import { DatePicker } from "./DatePicker";
 
