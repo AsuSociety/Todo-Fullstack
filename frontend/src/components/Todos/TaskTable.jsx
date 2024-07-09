@@ -1,10 +1,15 @@
-import React, { useState } from "react"; // Import React and necessary hooks
+import React, { useState, useRef } from "react"; // Import React and necessary hooks
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faTrash, faPalette, faMicrophone } from "@fortawesome/free-solid-svg-icons";
+import { faPen, faTrash,faImage } from "@fortawesome/free-solid-svg-icons";
 import { ChangeStatus } from "./ChangeStatus";
 import { DatePicker } from "./DatePicker";
+// import { useNavigate } from "react-router-dom";
+import { Task } from "./Task";
+
 
 import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
+import { ChevronRight } from "lucide-react"
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -42,6 +47,12 @@ export const TaskTable = (props) => {
     const [editedStatus, setEditedStatus] = useState("");
     const [editedDate, setEditedDate] = useState("");
     const [isChecked, setIsChecked] = useState(); 
+    const [selectedFile,setSelectedFile] =useState(null)
+    const fileInputRef = useRef(null);
+    // const navigate = useNavigate();
+
+    const [open, setOpen] = useState(false);
+    const [selectedTodo, setSelectedTodo] = useState(null);
 
     
     // Function to handle opening the edit dialog
@@ -71,6 +82,28 @@ export const TaskTable = (props) => {
       alert("You will receive a reminder 24 hours before the deadline!");
     }
   }
+  const handleIconClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  const handleFileChange =(e)=>{
+    setSelectedFile(e.target.files[0])
+    console.log(e.target.files[0])
+  }
+
+  // function handleTask(id,todo) {
+  //   navigate(`/todo/${id}`, { state: { todo } });
+  // }
+  const handleOpenDialog = (todo) => {
+    setSelectedTodo(todo);
+    setOpen(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpen(false);
+    setSelectedTodo(null);
+  };
 
     return(
         <div>
@@ -78,17 +111,19 @@ export const TaskTable = (props) => {
         <TableHeader>
           <TableRow>
           <TableHead className="w-[180px] border border-gray-300">Task</TableHead>
-      <TableHead className="text-center  w-[80px] border border-gray-300">Status</TableHead>
-      <TableHead className="text-center w-[70px] border border-gray-300" >Date</TableHead>
-      <TableHead className="text-center w-[20px]  border border-gray-300" >Remainder</TableHead>
-      <TableHead className="text-center border border-gray-300" style={{ width: '20px', padding: '0px' }}>Edit</TableHead>
-      <TableHead className="text-center border border-gray-300" style={{ width: '20px', padding: '0px' }}>Delete</TableHead>
+          <TableHead className="text-center  w-[80px] border border-gray-300">Status</TableHead>
+          <TableHead className="text-center w-[70px] border border-gray-300" >Date</TableHead>
+          <TableHead className="text-center w-[20px]  border border-gray-300" >Remainder</TableHead>
+          <TableHead className="text-center border border-gray-300" style={{ width: '20px', padding: '0px' }}>Photo</TableHead>
+          <TableHead className="text-center border border-gray-300" style={{ width: '20px', padding: '0px' }}>Edit</TableHead>
+          <TableHead className="text-center border border-gray-300" style={{ width: '20px', padding: '0px' }}>Delete</TableHead>
     </TableRow>
         </TableHeader>
         <TableBody>
           {props.tasks.map((todo) => (
               <TableRow key={todo.id} className="border border-gray-300">
-            <TableCell className="font-medium font-bold border border-gray-300 ">
+            <TableCell className="font-medium font-bold border border-gray-300 " 
+                        onClick={()=> handleOpenDialog(todo)}>
               {todo.title}
               <p className="text-sm font-thin ">{todo.body}</p>
             </TableCell>
@@ -118,8 +153,31 @@ export const TaskTable = (props) => {
                     Remaind Me!
                  </label>
                </div>
-    
             </TableCell>
+
+            <TableCell className="text-center border border-gray-300">
+              <FontAwesomeIcon
+                icon={faImage}
+                className="text-gray-600 cursor-pointer hover:text-yellow-500"
+                onClick={handleIconClick}
+              />
+              <input
+                id="picture"
+                name='image'
+                type="file"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                style={{ display: "none" }}
+              />
+              <Button 
+                variant="outline" 
+                className="p-1 w-6 h-6 justify-center text-gray-600 cursor-pointer hover:text-yellow-500"
+                onClick={() => props.handleUploadClick(todo.id, selectedFile)}
+              >
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </TableCell>
+
             <TableCell className="text-center border border-gray-300 " >
               <FontAwesomeIcon
                 icon={faPen}
@@ -127,6 +185,7 @@ export const TaskTable = (props) => {
                 onClick={() => openEditDialog(todo)}
               />
             </TableCell>
+
             <TableCell className="text-center border border-gray-300 ">
               <FontAwesomeIcon
                 icon={faTrash}
@@ -185,6 +244,12 @@ export const TaskTable = (props) => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Task
+        open={open}
+        onClose={handleCloseDialog}
+        task={selectedTodo}
+      />
       </div>
+
     )
 }

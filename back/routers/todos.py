@@ -1,6 +1,6 @@
 #todos.py
 # Import necessary modules and classes from FastAPI and Python
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi import HTTPException, status
 from typing import Annotated, List
 from models import  AddTasksPayload, Todos
@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 from fastapi import BackgroundTasks
 from datetime import timedelta, datetime
 from config import conf
+import os
 
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -199,3 +200,27 @@ async def send_test_email(email: str, background_tasks: BackgroundTasks):
     body = "This is a test email to verify email sending functionality."
     background_tasks.add_task(send_email, email, subject, body)
     return {"message": "Test email sent"}
+
+# Define a directory for file uploads
+UPLOAD_DIRECTORY = "uploads/"
+Path(UPLOAD_DIRECTORY).mkdir(parents=True, exist_ok=True)
+
+# Define a POST endpoint for file upload
+@router.post("/upload/{todo_id}")
+async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataBase_dependency, file: UploadFile = File(...)):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't Validate the user")
+
+    todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).filter(Todos.owner_id == uuid.UUID(user.get('id'))).first()
+    if not todo_model:
+        raise HTTPException(status_code=404, detail="Todo not found")
+
+    file_location = os.path.join(UPLOAD_DIRECTORY, f"{uuid.uuid4()}_{file.filename}")
+    with open(file_location, "wb") as f:
+        f.write(await file.read())
+
+    todo_model.photo_path = file_location
+    dataBase.commit()
+    dataBase.refresh(todo_model)
+
+    return {"filename": file.filename, "file_path": file_location}

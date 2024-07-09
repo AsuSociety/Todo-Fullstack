@@ -37,6 +37,7 @@ class Todos(Base):
     status= Column(String)
     deadline = Column(DateTime, nullable=True)  
     remainder = Column(Boolean, default=True)
+    photo_path = Column(String, nullable=True)
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
 
 

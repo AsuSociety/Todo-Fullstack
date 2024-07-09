@@ -104,7 +104,6 @@ const deleteTodo = async (id, token) => {
 
 // Function to edit a todo
 const editTask = async (task, id, token, color=null, status = null, date, remainder) => {
-// const editTask = async (task, id, token, color=null, status = null, date) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "PUT",
@@ -135,6 +134,30 @@ const editTask = async (task, id, token, color=null, status = null, date, remain
   } catch (error) {
     console.error("Error updating task:", error); // Log error if updating task fails
     return null; // Return null if updating task fails
+  }
+};
+
+const handleUpload = async (selectedFile, todoId, token) => {
+  try {
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    const response = await axios.post(`${API_URL}/todo/upload/${todoId}`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to upload file: ${response.status} - ${response.statusText}`);
+    }
+
+    console.log("File uploaded successfully", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    return null;
   }
 };
 
@@ -361,6 +384,13 @@ export const TodoWrapper = () => {
     }
   };
   
+
+  const handleUploadClick = async (taskId, selectedFile) => {
+    if (selectedFile) {
+      await handleUpload(selectedFile, taskId, user.token);
+    }
+  };
+
   // test for the mail service
   // const handleClick = async () => {
   //   if (user && user.token) {
@@ -382,7 +412,7 @@ export const TodoWrapper = () => {
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
     <div className="flex items-center justify-between space-y-2">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
+            <h2 className="text-2xl font-bold tracking-tight">Welcome back {user.username}!</h2>
             <p className="text-muted-foreground">
               Here&apos;s a list of your tasks for this month!
             </p>
@@ -416,6 +446,7 @@ export const TodoWrapper = () => {
         updateRemainder = {updateRemainder}
         normalizeDate = {normalizeDate}
         convertToUTCISO = {convertToUTCISO}
+        handleUploadClick = {handleUploadClick}
         />
   </div>
   );
