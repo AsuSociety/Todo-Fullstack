@@ -94,9 +94,8 @@ export const Profile = ({updateIcon,user}) => {
     
     const handleProfile=(icon, src) =>{
       updateIcon(user.id,icon)
-
       setSelectedIconTemp(
-        profiles.find((profile) => profile.value === icon) ||
+        profiles.find((priority) => priority.value === icon) ||
           null
       )
       setOpen(false)  

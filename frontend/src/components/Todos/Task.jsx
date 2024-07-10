@@ -47,12 +47,9 @@ export const Task = ({ open, onClose, task, user }) => {
   const [selectedIconSrc, setSelectedIconSrc] = useState("");
 
   useEffect(() => {
-    // console.log("User icon:", user.icon);
     const initialIcon = profiles.find(profile => profile.value === user.icon);
     setSelectedIconSrc(initialIcon ? initialIcon.icon_src : "");
   }, [user.icon]);
-
-  // console.log("Selected Icon Src in Task component:", selectedIconSrc);
 
   if (!task) return null; // Handle cases where task might be null or undefined
 
@@ -72,12 +69,6 @@ export const Task = ({ open, onClose, task, user }) => {
             <div className="mb-4">
               <p className="font-medium">Description:</p>
               <p className="text-gray-700">{task.body}</p>
-            </div>
-            <div className="mb-4">
-              <p className="font-medium">Status:</p>
-              <p className="text-sm" style={{ color: task.color }}>
-                {task.status}
-              </p>
             </div>
             <div className="mb-4">
               <p className="font-medium">Deadline:</p>
@@ -108,9 +99,11 @@ export const Task = ({ open, onClose, task, user }) => {
             </div>
           </div>
           <div className="mb-4">
-            <p className="font-medium">Reporter:</p>
-            {/* <p className="text-gray-700">{task.reporter}</p> */}
-          </div>
+              <p className="font-medium">Status:</p>
+              <p className="text-sm" style={{ color: task.color }}>
+                {task.status}
+              </p>
+            </div>
           <div className="mb-4">
             <p className="font-medium">Priority:</p>
             {/* <p className="text-gray-700">{task.priority}</p> */}
