@@ -1,18 +1,16 @@
 import React, { useState } from "react";
 import AuthService from "../AuthService";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-
-
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Register = () => {
   const [username, setUsername] = useState("");
@@ -38,7 +36,7 @@ export const Register = () => {
         firstName,
         lastName,
         role,
-        icon
+        icon,
       );
 
       // Reset input fields after successful registration
@@ -48,8 +46,8 @@ export const Register = () => {
       setFirstName("");
       setLastName("");
       setRole("");
-      setIcon("")
-      
+      setIcon("");
+
       // Navigate back to login screen
       navigate("/login");
     } catch (error) {
@@ -64,37 +62,57 @@ export const Register = () => {
       <CardHeader>
         <CardTitle className="text-xl">Sign Up</CardTitle>
         <CardDescription>
-            We just need a little bit of data from you to get you started{" "}
-            <span role="img" aria-label="rocket">
+          We just need a little bit of data from you to get you started{" "}
+          <span role="img" aria-label="rocket">
             🚀
-            </span>
-          </CardDescription>
+          </span>
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
-
             <div className="grid gap-2">
               <Label htmlFor="username">Username</Label>
-              <Input id="username" placeholder="Username" value={username}
-            onChange={(e) => setUsername(e.target.value)} required />
+              <Input
+                id="username"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="role">Role</Label>
-              <Input id="role" placeholder="User" value={role} onChange={(e) => setRole(e.target.value)} required />
+              <Input
+                id="role"
+                placeholder="User"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="first-name">First name</Label>
-              <Input id="first-name" placeholder="First Name" value={firstName}
-            onChange={(e) => setFirstName(e.target.value)} required />
+              <Input
+                id="first-name"
+                placeholder="First Name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="last-name">Last name</Label>
-              <Input id="last-name" placeholder="Last Name" value={lastName}
-            onChange={(e) => setLastName(e.target.value)} required />
+              <Input
+                id="last-name"
+                placeholder="Last Name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
             </div>
           </div>
-          
+
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -108,8 +126,12 @@ export const Register = () => {
           </div>
           <div className="grid gap-2">
             <Label htmlFor="password">Password</Label>
-            <Input id="password" type="password" value={password}
-            onChange={(e) => setPassword(e.target.value)} />
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
           <Button type="submit" onClick={handleRegister} className="w-full">
             Create an account

@@ -5,17 +5,16 @@ import AuthService from "../AuthService";
 import { useNavigate } from "react-router-dom";
 // import "./Login.css";
 
-
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const Login = () => {
   const { login } = useUser();
@@ -38,7 +37,6 @@ export const Login = () => {
   function handleRegister() {
     navigate("/register");
   }
-
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -64,12 +62,11 @@ export const Login = () => {
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
             </div>
-            <Input 
-            type="password" 
-            placeholder="Password"
-
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            <Input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
           <Button type="submit" onClick={handleLogin} className="w-full">
@@ -83,10 +80,8 @@ export const Login = () => {
           </Button>
         </div>
         {error && <p style={{ color: "red" }}>{error}</p>}
-
       </CardContent>
     </Card>
-
   );
 };
 

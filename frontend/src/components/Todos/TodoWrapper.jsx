@@ -13,13 +13,11 @@ import React, { useState, useEffect } from "react"; // Import React and necessar
 import { useUser } from "../UserContext";
 import { AddTodo } from "./AddTodo"; // Import AddTodo component for adding todos
 import { TaskTable } from "./TaskTable";
-import axios from 'axios';
+import axios from "axios";
 
 import { Profile } from "./Profile";
 
-import { Button } from "@/components/ui/button"
-
-
+import { Button } from "@/components/ui/button";
 
 // Define API_URL constant for API endpoint
 export const API_URL = "http://localhost:8000";
@@ -39,7 +37,7 @@ const fetchAllTodos = async (token) => {
 
     if (!response.ok) {
       throw new Error(
-        `Failed to fetch todos: ${response.status} - ${response.statusText}`
+        `Failed to fetch todos: ${response.status} - ${response.statusText}`,
       );
     }
 
@@ -67,7 +65,7 @@ const addTodo = async (todo, token) => {
 
     if (!response.ok) {
       throw new Error(
-        `Failed to add todo: ${response.status} - ${response.statusText}`
+        `Failed to add todo: ${response.status} - ${response.statusText}`,
       );
     }
 
@@ -103,7 +101,15 @@ const deleteTodo = async (id, token) => {
 };
 
 // Function to edit a todo
-const editTask = async (task, id, token, color=null, status = null, date, remainder) => {
+const editTask = async (
+  task,
+  id,
+  token,
+  color = null,
+  status = null,
+  date,
+  remainder,
+) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "PUT",
@@ -116,15 +122,14 @@ const editTask = async (task, id, token, color=null, status = null, date, remain
         body: task.body,
         color: color,
         status: status,
-        deadline : date,
+        deadline: date,
         remainder: remainder,
-
       }), // Include both body and title properties
     });
 
     if (!response.ok) {
       throw new Error(
-        `Failed to update task: ${response.status} - ${response.statusText}`
+        `Failed to update task: ${response.status} - ${response.statusText}`,
       );
     }
 
@@ -142,15 +147,21 @@ const handleUpload = async (selectedFile, todoId, token) => {
     const formData = new FormData();
     formData.append("file", selectedFile);
 
-    const response = await axios.post(`${API_URL}/todo/upload/${todoId}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "Authorization": `Bearer ${token}`,
+    const response = await axios.post(
+      `${API_URL}/todo/upload/${todoId}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
 
     if (response.status !== 200) {
-      throw new Error(`Failed to upload file: ${response.status} - ${response.statusText}`);
+      throw new Error(
+        `Failed to upload file: ${response.status} - ${response.statusText}`,
+      );
     }
 
     console.log("File uploaded successfully", response.data);
@@ -174,14 +185,13 @@ const updateIcon = async (userId, icon, token) => {
 
     if (!response.ok) {
       throw new Error(
-        `Failed to update icon: ${response.status} - ${response.statusText}`
+        `Failed to update icon: ${response.status} - ${response.statusText}`,
       );
     }
 
     const result = await response.json();
     // console.log("Icon updated successfully:", result);
     return result;
-
   } catch (error) {
     console.error("Error updating icon:", error);
     return null;
@@ -214,15 +224,18 @@ const updateIcon = async (userId, icon, token) => {
 //   }
 // };
 
-
-
 // Function to normalize date to start of the day in local timezone
 
 const normalizeDate = (date) => {
   const newDate = new Date(date);
   const now = new Date();
 
-  newDate.setHours(now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds());
+  newDate.setHours(
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+    now.getMilliseconds(),
+  );
   return newDate;
 };
 
@@ -238,9 +251,11 @@ const convertToUTCISO = (date) => {
   const minutes = localDate.getMinutes();
   const seconds = localDate.getSeconds();
   const milliseconds = localDate.getMilliseconds();
-  
+
   // Create a new UTC date object
-  const utcDate = new Date(Date.UTC(year, month, day, hours, minutes, seconds, milliseconds));
+  const utcDate = new Date(
+    Date.UTC(year, month, day, hours, minutes, seconds, milliseconds),
+  );
   return utcDate.toISOString();
 };
 
@@ -252,7 +267,6 @@ const getDefaultDeadline = () => {
   const normalizedDate = normalizeDate(today);
   return convertToUTCISO(normalizedDate);
 };
-
 
 // TodoWrapper functional component
 export const TodoWrapper = () => {
@@ -282,7 +296,16 @@ export const TodoWrapper = () => {
   const handleAddTodo = async (todo) => {
     // Assign a color from the colors array
     const newColor = colors[3];
-    const newTodo = await addTodo({ ...todo, color: newColor,status : '', deadline: getDefaultDeadline() ,remainder: true }, user.token);
+    const newTodo = await addTodo(
+      {
+        ...todo,
+        color: newColor,
+        status: "",
+        deadline: getDefaultDeadline(),
+        remainder: true,
+      },
+      user.token,
+    );
     if (newTodo) {
       setTodos((prevTodos) => [...prevTodos, newTodo]);
       setIsAddTodoVisible(false); // Hide the add todo form after successful addition
@@ -294,26 +317,32 @@ export const TodoWrapper = () => {
     const deletedId = await deleteTodo(id, user.token); // Delete todo by ID
     if (deletedId) {
       setTodos((prevTodos) =>
-        prevTodos.filter((todo) => todo.id !== deletedId)
+        prevTodos.filter((todo) => todo.id !== deletedId),
       ); // Update todos state by removing deleted todo
     }
   };
 
-  const handleSave = async (task,id) => {
-  const updatedTask = await editTask(task, id, user.token,task.color, task.status, task.deadline,
-    task.remainder
-  );
-  if (updatedTask) {
-    setTodos((prevTodos) =>
-      prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
+  const handleSave = async (task, id) => {
+    const updatedTask = await editTask(
+      task,
+      id,
+      user.token,
+      task.color,
+      task.status,
+      task.deadline,
+      task.remainder,
     );
-  } else {
-    console.error("Task update failed.");
-  }
+    if (updatedTask) {
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) => (todo.id === id ? updatedTask : todo)),
+      );
+    } else {
+      console.error("Task update failed.");
+    }
   };
 
-    // Function to update the task status
-  const updateTaskStatus = async (taskId,color, status) => {
+  // Function to update the task status
+  const updateTaskStatus = async (taskId, color, status) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
     if (taskToUpdate) {
       const updatedTask = await editTask(
@@ -323,11 +352,11 @@ export const TodoWrapper = () => {
         color,
         status,
         taskToUpdate.deadline,
-        taskToUpdate.remainder
+        taskToUpdate.remainder,
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
+          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo)),
         );
       }
     }
@@ -344,16 +373,15 @@ export const TodoWrapper = () => {
         taskToUpdate.color,
         taskToUpdate.status,
         date,
-        taskToUpdate.remainder
+        taskToUpdate.remainder,
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
+          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo)),
         );
       }
     }
   };
-  
 
   const updateRemainder = async (taskId, remainder) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
@@ -365,17 +393,17 @@ export const TodoWrapper = () => {
         taskToUpdate.color,
         taskToUpdate.status,
         taskToUpdate.deadline,
-        remainder
+        remainder,
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo))
+          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo)),
         );
       }
     }
   };
 
-  const updatUserIcon = async (userId,icon) => {
+  const updatUserIcon = async (userId, icon) => {
     const updatedUser = await updateIcon(userId, icon, user.token);
     if (updatedUser) {
       // console.log("Icon updated successfully");
@@ -383,7 +411,6 @@ export const TodoWrapper = () => {
       console.error("Task update failed.");
     }
   };
-  
 
   const handleUploadClick = async (taskId, selectedFile) => {
     if (selectedFile) {
@@ -395,7 +422,7 @@ export const TodoWrapper = () => {
   // const handleClick = async () => {
   //   if (user && user.token) {
   //     const result = await sendEmail('omerasus3@gmail.com', user.token);
-      
+
   //     if (result) {
   //       alert('Test email sent!');
   //     } else {
@@ -405,51 +432,51 @@ export const TodoWrapper = () => {
   //     alert('User is not authenticated.');
   //   }
   // };
-  
-  
+
   // JSX structure returned by the TodoWrapper component
   return (
     <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
-    <div className="flex items-center justify-between space-y-2">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Welcome back {user.username}!</h2>
-            <p className="text-muted-foreground">
-              Here&apos;s a list of your tasks for this month!
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Profile updateIcon={updatUserIcon} 
-                     user={user}/>
-          </div>
+      <div className="flex items-center justify-between space-y-2">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Welcome back {user.username}!
+          </h2>
+          <p className="text-muted-foreground">
+            Here&apos;s a list of your tasks for this month!
+          </p>
         </div>
-    <div className="flex flex-col items-center space-y-4">
-    <Button
-            onClick={() => setIsAddTodoVisible(!isAddTodoVisible)}
-            className="text-white py-1 px-3 rounded transition duration-300 bg-blue-500 hover:bg-blue-600"
-          >
-        {isAddTodoVisible ? "Hide Add Task" : "Add Task"}
-      </Button>
-      {isAddTodoVisible && (
-        <div className="w-full transition-opacity duration-300 ease-in-out">
-          <AddTodo handleAddTodo={handleAddTodo} />
+        <div className="flex items-center space-x-2">
+          <Profile updateIcon={updatUserIcon} user={user} />
         </div>
-      )}
-    </div>
-    
-    {/* <Button onClick={handleClick}>Send Test Email</Button> */}
+      </div>
+      <div className="flex flex-col items-center space-y-4">
+        <Button
+          onClick={() => setIsAddTodoVisible(!isAddTodoVisible)}
+          className="text-white py-1 px-3 rounded transition duration-300 bg-blue-500 hover:bg-blue-600"
+        >
+          {isAddTodoVisible ? "Hide Add Task" : "Add Task"}
+        </Button>
+        {isAddTodoVisible && (
+          <div className="w-full transition-opacity duration-300 ease-in-out">
+            <AddTodo handleAddTodo={handleAddTodo} />
+          </div>
+        )}
+      </div>
 
-      <TaskTable 
+      {/* <Button onClick={handleClick}>Send Test Email</Button> */}
+
+      <TaskTable
         tasks={todos} // Pass todo as prop
         deleteTodo={handleDeleteTodo} // Pass deleteTodo function as prop
         handleSave={handleSave} // Pass markForEdit function as prop
-        updateTaskStatus = {updateTaskStatus}
-        updateDeadline = {updateDeadline}
-        updateRemainder = {updateRemainder}
-        normalizeDate = {normalizeDate}
-        convertToUTCISO = {convertToUTCISO}
-        handleUploadClick = {handleUploadClick}
-        user= {user}
-        />
-  </div>
+        updateTaskStatus={updateTaskStatus}
+        updateDeadline={updateDeadline}
+        updateRemainder={updateRemainder}
+        normalizeDate={normalizeDate}
+        convertToUTCISO={convertToUTCISO}
+        handleUploadClick={handleUploadClick}
+        user={user}
+      />
+    </div>
   );
 };

@@ -10,16 +10,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
-import {
-  Form,
-  FormItem,
-} from "@/components/ui/form";
+import { Form, FormItem } from "@/components/ui/form";
 
-const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const speechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
 const mic = new speechRecognition();
 mic.continuous = true;
 mic.interimResults = true;
-mic.lang = 'en-US';
+mic.lang = "en-US";
 
 export const AddTodo = (props) => {
   const [title, setTitle] = useState("");
@@ -32,25 +30,25 @@ export const AddTodo = (props) => {
     if (isListening) {
       mic.start();
       mic.onend = () => {
-        console.log('Continue..');
+        console.log("Continue..");
         mic.start();
       };
     } else {
       mic.stop();
       mic.onend = () => {
-        console.log('Stop..');
+        console.log("Stop..");
       };
     }
 
     mic.onstart = () => {
-      console.log('Mics On');
+      console.log("Mics On");
     };
 
-    mic.onresult = event => {
+    mic.onresult = (event) => {
       const transcript = Array.from(event.results)
-        .map(result => result[0])
-        .map(result => result.transcript)
-        .join('');
+        .map((result) => result[0])
+        .map((result) => result.transcript)
+        .join("");
       setNote(transcript);
 
       if (activeField === "title") {
@@ -94,7 +92,10 @@ export const AddTodo = (props) => {
 
   return (
     <Form>
-      <form onSubmit={handleSubmit} className="AddTodo p-4 bg-white shadow-md rounded-lg">
+      <form
+        onSubmit={handleSubmit}
+        className="AddTodo p-4 bg-white shadow-md rounded-lg"
+      >
         <FormItem className="mb-4">
           <div className="flex items-center">
             <Input
@@ -104,9 +105,9 @@ export const AddTodo = (props) => {
               className="todo-input w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Title"
             />
-            <FontAwesomeIcon 
+            <FontAwesomeIcon
               icon={faMicrophone}
-              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${isListening && activeField === "title" ? 'text-blue-500' : ''}`}
+              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${isListening && activeField === "title" ? "text-blue-500" : ""}`}
               onClick={() => handleMicClick("title")}
             />
           </div>
@@ -121,15 +122,19 @@ export const AddTodo = (props) => {
               className="todo-input w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Body"
             />
-            <FontAwesomeIcon 
+            <FontAwesomeIcon
               icon={faMicrophone}
-              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${isListening && activeField === "body" ? 'text-blue-500' : ''}`}
+              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${isListening && activeField === "body" ? "text-blue-500" : ""}`}
               onClick={() => handleMicClick("body")}
             />
           </div>
         </FormItem>
 
-        <Button variant="ghost" type="submit" className=" py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+        <Button
+          variant="ghost"
+          type="submit"
+          className=" py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
           Add Task
         </Button>
       </form>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 
-
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -9,64 +8,60 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
+} from "@/components/ui/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-
+} from "@/components/ui/popover";
 
 const statuses = [
-    // {
-    //   value: "backlog",
-    //   label: "Backlog",
-    // },
-    {
-      value: "todo",
-      label: "Todo",
-      color: "#71717a"
-    },
-    {
-      value: "in progress",
-      label: "In Progress",
-      color: "#f59e0b"
-    },
-    {
-      value: "done",
-      label: "Done",
-      color: "#84cc16"
-
-    },
-    {
-      value: "canceled",
-      label: "Canceled",
-      color: "#ef4444"
-
-    },
-  ];
-  
-
+  // {
+  //   value: "backlog",
+  //   label: "Backlog",
+  // },
+  {
+    value: "todo",
+    label: "Todo",
+    color: "#71717a",
+  },
+  {
+    value: "in progress",
+    label: "In Progress",
+    color: "#f59e0b",
+  },
+  {
+    value: "done",
+    label: "Done",
+    color: "#84cc16",
+  },
+  {
+    value: "canceled",
+    label: "Canceled",
+    color: "#ef4444",
+  },
+];
 
 export const ChangeStatus = (props) => {
-    const [open, setOpen] = useState(false)
-    const [selectedStatus, setSelectedStatus] = useState( null)
-    
-      // Set the initial state based on the current task status
-    useEffect(() => {
-      const initialStatus = statuses.find((status) => status.value === props.currentStatus);
-      setSelectedStatus(initialStatus || null);
-    }, [props.currentStatus]);
+  const [open, setOpen] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState(null);
 
-    const handleStatus=( id, status, color) =>{
-      props.updateTaskStatus(id, color, status)
+  // Set the initial state based on the current task status
+  useEffect(() => {
+    const initialStatus = statuses.find(
+      (status) => status.value === props.currentStatus,
+    );
+    setSelectedStatus(initialStatus || null);
+  }, [props.currentStatus]);
 
-      setSelectedStatus(
-        statuses.find((priority) => priority.value === status) ||
-          null
-      )
-      setOpen(false)  
-  }
+  const handleStatus = (id, status, color) => {
+    props.updateTaskStatus(id, color, status);
+
+    setSelectedStatus(
+      statuses.find((priority) => priority.value === status) || null,
+    );
+    setOpen(false);
+  };
 
   return (
     <div className="text-center flex items-center space-x-4 justify-center">
@@ -77,15 +72,8 @@ export const ChangeStatus = (props) => {
             size="sm"
             className="w-[95px] justify-center border border-black"
             style={{ backgroundColor: selectedStatus?.color }}
-
           >
-            {selectedStatus ? (
-              <>
-                {selectedStatus.label}
-              </>
-            ) : (
-              <>+ Set status</>
-            )}
+            {selectedStatus ? <>{selectedStatus.label}</> : <>+ Set status</>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="p-0 w-[200px]" side="right" align="start">
@@ -98,9 +86,11 @@ export const ChangeStatus = (props) => {
                   <CommandItem
                     key={status.value}
                     value={status.value}
-                    color = {status.color}
+                    color={status.color}
                     style={{ backgroundColor: status.color }}
-                    onSelect={(value) => handleStatus(props.id, status.value, status.color)}
+                    onSelect={(value) =>
+                      handleStatus(props.id, status.value, status.color)
+                    }
                   >
                     <span>{status.label}</span>
                   </CommandItem>
@@ -111,6 +101,5 @@ export const ChangeStatus = (props) => {
         </PopoverContent>
       </Popover>
     </div>
-  )
-
-}
+  );
+};

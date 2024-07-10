@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from "react"; 
+import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
@@ -12,8 +11,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-
-
 export const DatePicker = (props) => {
   const [date, setDate] = useState(null);
   const [open, setOpen] = useState(false);
@@ -23,18 +20,20 @@ export const DatePicker = (props) => {
     if (props.currentDeadline) {
       setDate(new Date(props.currentDeadline));
     }
-  }, [props.currentDeadline]); 
+  }, [props.currentDeadline]);
 
-
-  const handleDeadline=(date) =>{
-    if(date){
+  const handleDeadline = (date) => {
+    if (date) {
       // console.log("$$$$%$%%#%$#%$#%#$")
-        const normalizedDate = props.normalizeDate(date);
-        setDate(normalizedDate);
-        props.updateDeadline(props.todo.id, props.convertToUTCISO(normalizedDate));
-        setOpen(false)
+      const normalizedDate = props.normalizeDate(date);
+      setDate(normalizedDate);
+      props.updateDeadline(
+        props.todo.id,
+        props.convertToUTCISO(normalizedDate),
+      );
+      setOpen(false);
     }
-  }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -43,7 +42,7 @@ export const DatePicker = (props) => {
           variant={"outline"}
           className={cn(
             "w-[180px] justify-start text-left font-normal",
-            !date && "text-muted-foreground"
+            !date && "text-muted-foreground",
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
@@ -57,9 +56,7 @@ export const DatePicker = (props) => {
           onSelect={(selected) => handleDeadline(selected)}
           initialFocus
         />
-
       </PopoverContent>
     </Popover>
   );
 };
-

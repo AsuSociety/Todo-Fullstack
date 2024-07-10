@@ -24,7 +24,7 @@ class AuthService {
     localStorage.setItem("first_name", data.first_name);
     localStorage.setItem("last_name", data.last_name);
     localStorage.setItem("role", data.role);
-    localStorage.setItem("id",data.id);
+    localStorage.setItem("id", data.id);
     localStorage.setItem("icon", data.icon);
 
     return {
@@ -35,8 +35,8 @@ class AuthService {
       last_name: data.last_name,
       role: data.role,
       id: data.id,
-      icon: data.icon
-    }; 
+      icon: data.icon,
+    };
   }
 
   static logout() {
@@ -47,7 +47,15 @@ class AuthService {
     return localStorage.getItem("token");
   }
 
-  static async register(email, username, password, firstName, lastName, role,icon="") {
+  static async register(
+    email,
+    username,
+    password,
+    firstName,
+    lastName,
+    role,
+    icon = "",
+  ) {
     const response = await fetch(`${API_URL}/auth/`, {
       method: "POST",
       headers: {
@@ -68,7 +76,6 @@ class AuthService {
     localStorage.setItem("token", data.access_token);
     return { token: data.access_token };
   }
-  
 }
 
 export default AuthService;
