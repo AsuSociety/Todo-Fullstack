@@ -1,4 +1,3 @@
-// UserContext.js
 import React, { createContext, useState, useContext, useEffect } from "react";
 import AuthService from "./AuthService";
 
@@ -7,21 +6,19 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
-
-
   useEffect(() => {
     const token = AuthService.getToken();
     if (token) {
+      // Fetch initial user data here if needed
       setUser({ token });
     }
   }, []);
 
-
   const login = (userData) => {
-    setUser(prevUser =>({ 
+    setUser((prevUser) => ({
       ...prevUser,
-      ...userData}));
-        // console.log('Fetched%%%%%%%%%%% user:', userData); // Log userData
+      ...userData
+    }));
   };
 
   const logout = () => {
@@ -29,8 +26,15 @@ export const UserProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateUserProfile = (profileData) => {
+    setUser((prevUser) => ({
+      ...prevUser,
+      ...profileData
+    }));
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, logout, updateUserProfile }}>
       {children}
     </UserContext.Provider>
   );

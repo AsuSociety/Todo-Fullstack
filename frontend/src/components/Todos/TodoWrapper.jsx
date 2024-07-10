@@ -447,6 +447,7 @@ export const TodoWrapper = () => {
         normalizeDate = {normalizeDate}
         convertToUTCISO = {convertToUTCISO}
         handleUploadClick = {handleUploadClick}
+        user= {user}
         />
   </div>
   );

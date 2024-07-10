@@ -96,7 +96,7 @@ export const Profile = ({updateIcon,user}) => {
       updateIcon(user.id,icon)
 
       setSelectedIconTemp(
-        profiles.find((priority) => priority.value === icon) ||
+        profiles.find((profile) => profile.value === icon) ||
           null
       )
       setOpen(false)  

@@ -248,6 +248,7 @@ export const TaskTable = (props) => {
         open={open}
         onClose={handleCloseDialog}
         task={selectedTodo}
+        user = {props.user}
       />
       </div>
 
