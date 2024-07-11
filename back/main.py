@@ -4,15 +4,11 @@
 from fastapi import FastAPI, Depends
 from fastapi import HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse  # Import JSONResponse here
+from fastapi.responses import JSONResponse  
 from typing import Annotated, List
-
 from typing import List
-
 from config import conf
-
-
-
+from fastapi.staticfiles import StaticFiles
 import models
 from database import engine, SessionLocal
 from routers import auth, todos, admin, user
@@ -20,6 +16,8 @@ from routers import auth, todos, admin, user
 
 # Create a FastAPI application
 app = FastAPI()
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # models.Base.metadata.drop_all(bind=engine)
 # models.Base.metadata.create_all(bind=engine)

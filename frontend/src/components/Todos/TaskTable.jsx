@@ -50,7 +50,10 @@ export const TaskTable = (props) => {
   const [editedStatus, setEditedStatus] = useState("");
   const [editedDate, setEditedDate] = useState("");
   const [isChecked, setIsChecked] = useState();
-  const [selectedFile, setSelectedFile] = useState(null);
+
+  // const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
   const fileInputRef = useRef(null);
   // const navigate = useNavigate();
 
@@ -96,9 +99,14 @@ export const TaskTable = (props) => {
       fileInputRef.current.click();
     }
   };
+  // const handleFileChange = (e) => {
+  //   setSelectedFile(e.target.files[0]);
+  //   console.log(e.target.files[0]);
+  // };
   const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-    console.log(e.target.files[0]);
+    setSelectedFiles(Array.from(e.target.files));
+    // console.log("fooooooo")
+    // console.log(e.target.files[0]);
   };
 
   // function handleTask(id,todo) {
@@ -213,13 +221,14 @@ export const TaskTable = (props) => {
                   name="image"
                   type="file"
                   onChange={handleFileChange}
+                  multiple
                   ref={fileInputRef}
                   style={{ display: "none" }}
                 />
                 <Button
                   variant="outline"
                   className="p-1 w-6 h-6 justify-center text-gray-600 cursor-pointer hover:text-yellow-500"
-                  onClick={() => props.handleUploadClick(todo.id, selectedFile)}
+                  onClick={() => props.handleUploadClick(todo.id, selectedFiles)}
                 >
                   <ChevronRight className="h-3 w-3" />
                 </Button>
@@ -296,6 +305,7 @@ export const TaskTable = (props) => {
         onClose={handleCloseDialog}
         task={selectedTodo}
         user={props.user}
+        handleSave={props.handleSave}
       />
     </div>
   );

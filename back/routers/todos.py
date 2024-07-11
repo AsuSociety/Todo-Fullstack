@@ -1,7 +1,7 @@
 #todos.py
 # Import necessary modules and classes from FastAPI and Python
 from fastapi import APIRouter, Depends, File, UploadFile
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, Request
 from typing import Annotated, List
 from models import  AddTasksPayload, Todos
 import uuid
@@ -207,7 +207,7 @@ Path(UPLOAD_DIRECTORY).mkdir(parents=True, exist_ok=True)
 
 # Define a POST endpoint for file upload
 @router.post("/upload/{todo_id}")
-async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataBase_dependency, file: UploadFile = File(...)):
+async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataBase_dependency, files: list[UploadFile] = File(...)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't Validate the user")
 
@@ -215,12 +215,44 @@ async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataB
     if not todo_model:
         raise HTTPException(status_code=404, detail="Todo not found")
 
-    file_location = os.path.join(UPLOAD_DIRECTORY, f"{uuid.uuid4()}_{file.filename}")
-    with open(file_location, "wb") as f:
-        f.write(await file.read())
+    file_paths = []
+    for file in files:
+        file_location = os.path.join(UPLOAD_DIRECTORY, f"{uuid.uuid4()}_{file.filename}")
+        with open(file_location, "wb") as f:
+            f.write(await file.read())
+        file_paths.append(file_location)
 
-    todo_model.photo_path = file_location
+    # todo_model.photo_path = file_location
+    todo_model.photo_path = ", ".join(file_paths)
     dataBase.commit()
     dataBase.refresh(todo_model)
 
-    return {"filename": file.filename, "file_path": file_location}
+    # return {"filename": file.filename, "file_path": file_location}
+    return {"filenames": [file.filename for file in files], "file_paths": file_paths}
+
+
+
+def list_uploaded_files(directory: str):
+    try:
+        # List all files in the directory
+        files = os.listdir(directory)
+        # Return full paths
+        return [os.path.join(directory, file) for file in files]
+    except Exception as e:
+        print(f"Failed to list files: {e}")
+        return []
+
+@router.get("/{todo_id}/photos")
+async def get_photos_for_task(todo_id: uuid.UUID, request: Request, user: user_dependency, dataBase: dataBase_dependency):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't Validate the user")
+    
+    todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).filter(Todos.owner_id == uuid.UUID(user.get('id'))).first()
+    if not todo_model:
+        raise HTTPException(status_code=404, detail="Todo not found")
+
+    photo_paths = todo_model.photo_path.split(", ")
+    base_url = request.base_url
+    photo_urls = [f"{base_url}uploads/{os.path.basename(path)}" for path in photo_paths]
+
+    return {"photos": photo_urls}

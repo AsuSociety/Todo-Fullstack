@@ -27,7 +27,7 @@ const colors = ["#ef4444", "#f59e0b", "#84cc16", "#71717a"];
 // Function to fetch all todos from the API
 const fetchAllTodos = async (token) => {
   try {
-    const url = `${API_URL}/todo`; // Construct API URL
+    // const url = `${API_URL}/todo`; // Construct API URL
     // console.log("Fetching todos from:", url); // Log fetching todos URL
     const response = await fetch(`${API_URL}/todo/`, {
       headers: {
@@ -141,11 +141,14 @@ const editTask = async (
     return null; // Return null if updating task fails
   }
 };
-
-const handleUpload = async (selectedFile, todoId, token) => {
+const handleUpload = async (selectedFiles, todoId, token) => {
   try {
     const formData = new FormData();
-    formData.append("file", selectedFile);
+
+    // Loop through the array of files and append each one to the FormData
+    selectedFiles.forEach((file) => {
+      formData.append('files', file); // Use the key 'file' for each file
+    });
 
     const response = await axios.post(
       `${API_URL}/todo/upload/${todoId}`,
@@ -160,17 +163,47 @@ const handleUpload = async (selectedFile, todoId, token) => {
 
     if (response.status !== 200) {
       throw new Error(
-        `Failed to upload file: ${response.status} - ${response.statusText}`,
+        `Failed to upload files: ${response.status} - ${response.statusText}`,
       );
     }
 
-    console.log("File uploaded successfully", response.data);
+    console.log("Files uploaded successfully", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error uploading file:", error);
+    console.error("Error uploading files:", error);
     return null;
   }
 };
+
+// const handleUpload = async (selectedFile, todoId, token) => {
+//   try {
+//     const formData = new FormData();
+//     formData.append("file", selectedFile);
+
+//     const response = await axios.post(
+//       `${API_URL}/todo/upload/${todoId}`,
+//       formData,
+//       {
+//         headers: {
+//           "Content-Type": "multipart/form-data",
+//           Authorization: `Bearer ${token}`,
+//         },
+//       },
+//     );
+
+//     if (response.status !== 200) {
+//       throw new Error(
+//         `Failed to upload file: ${response.status} - ${response.statusText}`,
+//       );
+//     }
+
+//     console.log("File uploaded successfully", response.data);
+//     return response.data;
+//   } catch (error) {
+//     console.error("Error uploading file:", error);
+//     return null;
+//   }
+// };
 
 const updateIcon = async (userId, icon, token) => {
   try {
