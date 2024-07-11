@@ -26,3 +26,6 @@ yarn-error.log*
 /__pycache__
 
 *.db
+
+# Ignore upload folder
+/uploads
