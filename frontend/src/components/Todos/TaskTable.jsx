@@ -1,26 +1,15 @@
-import React, { useState, useRef } from "react"; // Import React and necessary hooks
+import React, { useState, useRef, useEffect } from "react"; // Import React and necessary hooks
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPen, faTrash, faImage } from "@fortawesome/free-solid-svg-icons";
 import { ChangeStatus } from "./ChangeStatus";
 import { DatePicker } from "./DatePicker";
-// import { useNavigate } from "react-router-dom";
 import { Task } from "./Task";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-} from "@/components/ui/dialog";
+
 import {
   Table,
   TableBody,
@@ -40,51 +29,21 @@ const colors = [
 ];
 
 export const TaskTable = (props) => {
-  // const [showColorPicker, setShowColorPicker] = useState(false);
-  // const [selectedRowId, setSelectedRowId] = useState(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editedTask, setEditedTask] = useState(null);
-  const [editedTitle, setEditedTitle] = useState("");
-  const [editedBody, setEditedBody] = useState("");
-  const [editedColor, setEditedColor] = useState("");
-  const [editedStatus, setEditedStatus] = useState("");
-  const [editedDate, setEditedDate] = useState("");
   const [isChecked, setIsChecked] = useState();
-
-  // const [selectedFile, setSelectedFile] = useState(null);
   const [selectedFiles, setSelectedFiles] = useState([]);
-
   const fileInputRef = useRef(null);
-  // const navigate = useNavigate();
-
   const [open, setOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(null);
 
-  // Function to handle opening the edit dialog
-  const openEditDialog = (task) => {
-    setEditedTask(task.id);
-    setEditedTitle(task.title);
-    setEditedBody(task.body);
-    setEditedColor(task.color);
-    setEditedStatus(task.status);
-    setEditedDate(task.deadline);
-    setIsDialogOpen(true);
-  };
 
-  // Function to handle saving the changes
-  const handleSaves = () => {
-    props.handleSave(
-      {
-        title: editedTitle,
-        body: editedBody,
-        color: editedColor,
-        status: editedStatus,
-        deadline: editedDate,
-      },
-      editedTask,
-    );
-    setIsDialogOpen(false);
-  };
+  useEffect(() => {
+    if (props.selectedTask) {
+      setSelectedTodo(props.selectedTask);
+      setOpen(true);
+      props.setSelectedTask(null); // Clear selected task after opening
+    }
+  }, [props.selectedTask]);
+
 
   const handleCheckboxChange = (taskId, currentValue) => {
     const newValue = !currentValue;
@@ -99,19 +58,12 @@ export const TaskTable = (props) => {
       fileInputRef.current.click();
     }
   };
-  // const handleFileChange = (e) => {
-  //   setSelectedFile(e.target.files[0]);
-  //   console.log(e.target.files[0]);
-  // };
+
   const handleFileChange = (e) => {
     setSelectedFiles(Array.from(e.target.files));
-    // console.log("fooooooo")
-    // console.log(e.target.files[0]);
+
   };
 
-  // function handleTask(id,todo) {
-  //   navigate(`/todo/${id}`, { state: { todo } });
-  // }
   const handleOpenDialog = (todo) => {
     setSelectedTodo(todo);
     setOpen(true);
@@ -147,12 +99,6 @@ export const TaskTable = (props) => {
               style={{ width: "20px", padding: "0px" }}
             >
               Photo
-            </TableHead>
-            <TableHead
-              className="text-center border border-gray-300"
-              style={{ width: "20px", padding: "0px" }}
-            >
-              Edit
             </TableHead>
             <TableHead
               className="text-center border border-gray-300"
@@ -233,15 +179,6 @@ export const TaskTable = (props) => {
                   <ChevronRight className="h-3 w-3" />
                 </Button>
               </TableCell>
-
-              <TableCell className="text-center border border-gray-300 ">
-                <FontAwesomeIcon
-                  icon={faPen}
-                  className="text-gray-600 cursor-pointer hover:text-blue-500"
-                  onClick={() => openEditDialog(todo)}
-                />
-              </TableCell>
-
               <TableCell className="text-center border border-gray-300 ">
                 <FontAwesomeIcon
                   icon={faTrash}
@@ -254,57 +191,10 @@ export const TaskTable = (props) => {
         </TableBody>
       </Table>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogTrigger asChild>
-          <div />
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Task</DialogTitle>
-            <DialogDescription>
-              Make changes to your task here. Click save when you're done.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
-                Task Title
-              </Label>
-              <Input
-                id="title"
-                value={editedTitle}
-                onChange={(e) => setEditedTitle(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="body" className="text-right">
-                Task Body
-              </Label>
-              <Input
-                id="body"
-                value={editedBody}
-                onChange={(e) => setEditedBody(e.target.value)}
-                className="col-span-3"
-              />
-            </div>
-          </div>
-          <DialogFooter className="flex justify-end">
-            <button
-              type="button"
-              onClick={handleSaves}
-              className="py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded transition duration-300"
-            >
-              Save changes
-            </button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
       <Task
         open={open}
         onClose={handleCloseDialog}
         task={selectedTodo}
-        user={props.user}
         handleSave={props.handleSave}
       />
     </div>

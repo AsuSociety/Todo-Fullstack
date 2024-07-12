@@ -51,6 +51,17 @@ class AddTasksPayload(BaseModel):
     remainder : bool = True
 
 
+class GetTaskResponse(BaseModel):
+    id: uuid.uuid4
+    title: str
+    body: str
+    color: str = None
+    status: str
+    deadline: Optional[datetime] = None  
+    remainder : bool = True
+    photo_urls : list[str]
+
+
 class AddUsersPayload(BaseModel):
     email: str = Field(min_length=8)
     username: str = Field(min_length=3)

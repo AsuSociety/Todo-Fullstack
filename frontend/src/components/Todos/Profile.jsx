@@ -44,8 +44,8 @@ import {
 
 
 
-export const Profile = ({ updateIcon, user }) => {
-  const { logout } = useUser();
+export const Profile = () => {
+  const { user,logout,updateIcon } = useUser();
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [open, setOpen] = useState(false);
@@ -58,9 +58,9 @@ export const Profile = ({ updateIcon, user }) => {
   }, [user.icon]);
 
   const handleProfile = (icon, src) => {
-    updateIcon(user.id, icon);
+    updateIcon(user.id, icon,user.token);
     setSelectedIconTemp(
-      profiles.find((priority) => priority.value === icon) || null,
+      profiles.find((profile) => profile.value === icon) || null,
     );
     setOpen(false);
   };

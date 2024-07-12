@@ -11,7 +11,7 @@ Overall, it provides a convenient way for you to organize and keep track of your
 // Import necessary modules and components
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 import { useUser } from "../UserContext";
-import { AddTodo } from "./AddTodo"; // Import AddTodo component for adding todos
+// import { AddTodo } from "./AddTodo"; // Import AddTodo component for adding todos
 import { TaskTable } from "./TaskTable";
 import axios from "axios";
 
@@ -27,7 +27,6 @@ const colors = ["#ef4444", "#f59e0b", "#84cc16", "#71717a"];
 // Function to fetch all todos from the API
 const fetchAllTodos = async (token) => {
   try {
-    // const url = `${API_URL}/todo`; // Construct API URL
     // console.log("Fetching todos from:", url); // Log fetching todos URL
     const response = await fetch(`${API_URL}/todo/`, {
       headers: {
@@ -147,7 +146,7 @@ const handleUpload = async (selectedFiles, todoId, token) => {
 
     // Loop through the array of files and append each one to the FormData
     selectedFiles.forEach((file) => {
-      formData.append('files', file); // Use the key 'file' for each file
+      formData.append("files", file); // Use the key 'file' for each file
     });
 
     const response = await axios.post(
@@ -174,88 +173,6 @@ const handleUpload = async (selectedFiles, todoId, token) => {
     return null;
   }
 };
-
-// const handleUpload = async (selectedFile, todoId, token) => {
-//   try {
-//     const formData = new FormData();
-//     formData.append("file", selectedFile);
-
-//     const response = await axios.post(
-//       `${API_URL}/todo/upload/${todoId}`,
-//       formData,
-//       {
-//         headers: {
-//           "Content-Type": "multipart/form-data",
-//           Authorization: `Bearer ${token}`,
-//         },
-//       },
-//     );
-
-//     if (response.status !== 200) {
-//       throw new Error(
-//         `Failed to upload file: ${response.status} - ${response.statusText}`,
-//       );
-//     }
-
-//     console.log("File uploaded successfully", response.data);
-//     return response.data;
-//   } catch (error) {
-//     console.error("Error uploading file:", error);
-//     return null;
-//   }
-// };
-
-const updateIcon = async (userId, icon, token) => {
-  try {
-    const response = await fetch(`${API_URL}/auth/${userId}/icon`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ icon: icon }),
-    });
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to update icon: ${response.status} - ${response.statusText}`,
-      );
-    }
-
-    const result = await response.json();
-    // console.log("Icon updated successfully:", result);
-    return result;
-  } catch (error) {
-    console.error("Error updating icon:", error);
-    return null;
-  }
-};
-
-// const sendEmail = async (email, token) => {
-//   try {
-//     // Append the email to the URL as a query parameter
-//     const response = await fetch(`${API_URL}/todo/send-test-email?email=${encodeURIComponent(email)}`, {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`,
-//       },
-//       // No body needed since email is in the query string
-//     });
-
-//     if (!response.ok) {
-//       const errorData = await response.json();
-//       throw new Error(`Failed to send email: ${response.status} - ${response.statusText}. Error details: ${JSON.stringify(errorData)}`);
-//     }
-
-//     const result = await response.json();
-//     console.log("Email sent successfully:", result);
-//     return result;
-//   } catch (error) {
-//     console.error("Error sending email:", error.message);
-//     return null;
-//   }
-// };
 
 // Function to normalize date to start of the day in local timezone
 
@@ -305,7 +222,9 @@ const getDefaultDeadline = () => {
 export const TodoWrapper = () => {
   const { user } = useUser();
   const [todos, setTodos] = useState([]); // State hook to store todos
-  const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
+  // const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
+  // const [newTask, setNewTask] = useState(null); // State to hold new task data
+  const [selectedTask, setSelectedTask] = useState(null); // State for selected task to open Task component
 
   // useEffect hook to fetch todos when component mounts
   useEffect(() => {
@@ -322,28 +241,45 @@ export const TodoWrapper = () => {
         setTodos([]); // Clear todos when user is not authenticated
       }
     };
-    // console.log("fooooooooooo",user)
+    // console.log("fooooooooooo",user.icon)
     fetchData();
   }, [user]);
 
-  const handleAddTodo = async (todo) => {
-    // Assign a color from the colors array
-    const newColor = colors[3];
-    const newTodo = await addTodo(
-      {
-        ...todo,
-        color: newColor,
-        status: "",
-        deadline: getDefaultDeadline(),
-        remainder: true,
-      },
-      user.token,
-    );
-    if (newTodo) {
-      setTodos((prevTodos) => [...prevTodos, newTodo]);
-      setIsAddTodoVisible(false); // Hide the add todo form after successful addition
+  const handleAddTask = async () => {
+    const defaultDeadline = getDefaultDeadline(); // Example default deadline
+    const newTask = {
+      title: "New Task",
+      body: "",
+      color: colors[3], // Default color
+      status: "",
+      deadline: defaultDeadline,
+      remainder: true,
+    };
+
+    const addedTask = await addTodo(newTask, user.token);
+    if (addedTask) {
+      setTodos((prevTodos) => [ addedTask, ...prevTodos]);
+      setSelectedTask(addedTask); 
     }
   };
+
+  // const handleAddTodo = async (todo) => {
+  //   const newTodo = await addTodo(
+  //     {
+  //       ...todo,
+  //       color: newTask.color,
+  //       status: newTask.status,
+  //       deadline: newTask.deadline,
+  //       remainder: newTask.remainder,
+  //     },
+  //     user.token,
+  //   );
+  //   if (newTodo) {
+  //     setTodos((prevTodos) => [...prevTodos, newTodo]);
+  //     setNewTask(null);
+  //     setIsAddTodoVisible(false);
+  //   }
+  // };
 
   // Function to handle deleting a todo
   const handleDeleteTodo = async (id) => {
@@ -372,6 +308,7 @@ export const TodoWrapper = () => {
     } else {
       console.error("Task update failed.");
     }
+    // console.log("$$$$$$$$$",updatedTask)
   };
 
   // Function to update the task status
@@ -436,35 +373,20 @@ export const TodoWrapper = () => {
     }
   };
 
-  const updatUserIcon = async (userId, icon) => {
-    const updatedUser = await updateIcon(userId, icon, user.token);
-    if (updatedUser) {
-      // console.log("Icon updated successfully");
-    } else {
-      console.error("Task update failed.");
-    }
-  };
-
   const handleUploadClick = async (taskId, selectedFile) => {
     if (selectedFile) {
-      await handleUpload(selectedFile, taskId, user.token);
+      const uploadedData = await handleUpload(selectedFile, taskId, user.token);
+      if (uploadedData) {
+        // Update the task in the todos state with the new photo information
+        setTodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === taskId ? uploadedData : todo)),
+        );
+      }
     }
   };
+  
 
-  // test for the mail service
-  // const handleClick = async () => {
-  //   if (user && user.token) {
-  //     const result = await sendEmail('omerasus3@gmail.com', user.token);
 
-  //     if (result) {
-  //       alert('Test email sent!');
-  //     } else {
-  //       alert('Failed to send test email.');
-  //     }
-  //   } else {
-  //     alert('User is not authenticated.');
-  //   }
-  // };
 
   // JSX structure returned by the TodoWrapper component
   return (
@@ -479,24 +401,18 @@ export const TodoWrapper = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2">
-          <Profile updateIcon={updatUserIcon} user={user} />
+          <Profile />
         </div>
       </div>
       <div className="flex flex-col items-center space-y-4">
-        <Button
-          onClick={() => setIsAddTodoVisible(!isAddTodoVisible)}
-          className="text-white py-1 px-3 rounded transition duration-300 bg-blue-500 hover:bg-blue-600"
+      <Button
+        variant="ghost"
+        onClick={handleAddTask}
+        className="text-white py-1 px-3 rounded transition duration-300 bg-blue-500 hover:bg-blue-600"
         >
-          {isAddTodoVisible ? "Hide Add Task" : "Add Task"}
-        </Button>
-        {isAddTodoVisible && (
-          <div className="w-full transition-opacity duration-300 ease-in-out">
-            <AddTodo handleAddTodo={handleAddTodo} />
-          </div>
-        )}
+        Add Task
+      </Button>
       </div>
-
-      {/* <Button onClick={handleClick}>Send Test Email</Button> */}
 
       <TaskTable
         tasks={todos} // Pass todo as prop
@@ -509,6 +425,8 @@ export const TodoWrapper = () => {
         convertToUTCISO={convertToUTCISO}
         handleUploadClick={handleUploadClick}
         user={user}
+        selectedTask={selectedTask} 
+        setSelectedTask={setSelectedTask}
       />
     </div>
   );

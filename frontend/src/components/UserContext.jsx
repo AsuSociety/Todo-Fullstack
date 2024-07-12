@@ -3,6 +3,7 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import AuthService from "./AuthService";
 
 const UserContext = createContext();
+export const API_URL = "http://localhost:8000";
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -27,8 +28,38 @@ export const UserProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateIcon = async (userId, icon, token) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/${userId}/icon`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ icon: icon }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to update icon: ${response.status} - ${response.statusText}`,
+        );
+      }
+
+      const result = await response.json();
+      // console.log( icon);
+      setUser((prevUser) => ({
+        ...prevUser,
+        icon: icon, // Assuming the response contains the new icon
+      }));
+      return result;
+    } catch (error) {
+      console.error("Error updating icon:", error);
+      return null;
+    }
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, logout, updateIcon }}>
       {children}
     </UserContext.Provider>
   );

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { format } from "date-fns";
-
 import {
   Dialog,
   DialogContent,
@@ -10,21 +9,32 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import {profiles} from "./profiles.js"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
+import { profiles } from "./profiles.js";
+import { useUser } from "../UserContext";
 
-export const Task = ({ open, onClose, task, user, handleSave }) => {
+const speechRecognition =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+const mic = new speechRecognition();
+mic.continuous = true;
+mic.interimResults = true;
+mic.lang = "en-US";
+
+export const Task = ({ open, onClose, task, handleSave }) => {
+  const { user } = useUser();
   const [selectedIconSrc, setSelectedIconSrc] = useState("");
   const [photoUrls, setPhotoUrls] = useState([]);
   const [error, setError] = useState(null);
-  const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
-  const [isEditing, setIsEditing] = useState(false); // State hook to control the editing mode
-  const [editedBody, setEditedBody] = useState(""); // State hook for the edited task body
+  const [editedTitle, setEditedTitle] = useState("");
+  const [editedBody, setEditedBody] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [activeField, setActiveField] = useState(null);
 
   useEffect(() => {
     if (user) {
       const initialIcon = profiles.find(
-        (profile) => profile.value === user.icon,
+        (profile) => profile.value === user.icon
       );
       setSelectedIconSrc(initialIcon ? initialIcon.icon_src : "");
     }
@@ -32,53 +42,85 @@ export const Task = ({ open, onClose, task, user, handleSave }) => {
 
   useEffect(() => {
     if (open && task) {
-      setEditedBody(task.body || ""); // Ensure editedBody reflects task body
+      setEditedTitle(task.title || ""); 
+      setEditedBody(task.body || ""); 
+      setPhotoUrls(task.photo_urls || []);
 
-      axios
-        .get(`http://localhost:8000/todo/${task.id}/photos`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        })
-        .then((response) => {
-          setPhotoUrls(response.data.photos || []);
-          setError(null); // Clear any previous errors
-        })
-        .catch((error) => {
-          if (error.response && error.response.status === 404) {
-            setError("No photos found for this task");
-          } else {
-            setError("Error fetching photos");
-          }
-          console.error("Error fetching photos:", error);
-        });
+      setError(null);
     }
-  }, [open, task?.id]); // Depend on `open` and `task.id`
+  }, [open, task]);
 
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
+  useEffect(() => {
+    if (isListening) {
+      mic.start();
+      mic.onend = () => {
+        console.log("Continue..");
+        mic.start();
+      };
+    } else {
+      mic.stop();
+      mic.onend = () => {
+        console.log("Stop..");
+      };
+    }
+
+    mic.onstart = () => {
+      console.log("Mics On");
+    };
+
+    mic.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0])
+        .map((result) => result.transcript)
+        .join("");
+      
+      if (activeField === "title") {
+        setEditedTitle(transcript);
+      } else if (activeField === "body") {
+        setEditedBody(transcript);
+      }
+    };
+
+    mic.onerror = (event) => {
+      console.error(event.error);
+      setIsListening(false);
+    };
+
+    return () => {
+      mic.stop();
+      mic.onend = null;
+      mic.onresult = null;
+      mic.onerror = null;
+    };
+  }, [isListening, activeField]);
+
+  const handleMicClick = (field) => {
+    if (isListening) {
+      mic.stop();
+      setIsListening(false);
+    } else {
+      setActiveField(field);
+      setIsListening(true);
+    }
   };
 
-  const handleBodyChange = (e) => {
-    setEditedBody(e.target.value);
-  };
-  const handleSaves = () => {
+  const handleSaveClick = () => {
     handleSave(
       {
-        title: task.title,
+        title: editedTitle,
         body: editedBody,
         color: task.color,
         status: task.status,
         deadline: task.deadline,
       },
-      task.id,
+      task.id
     );
-    setIsEditing(false);
-  }
+    onClose();
+  };
 
   if (!task) return null;
 
-  const formattedDeadline = format(new Date(task.deadline), "MMMM d, yyyy"); // Format date here
+  const formattedDeadline = format(new Date(task.deadline), "MMMM d, yyyy");
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -86,35 +128,45 @@ export const Task = ({ open, onClose, task, user, handleSave }) => {
         <div className="w-2/3 pr-4 flex flex-col overflow-auto">
           <DialogHeader className="border-b border-gray-200">
             <DialogTitle className="text-xl font-semibold">
-              {task.title}
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  value={editedTitle}
+                  onChange={(e) => setEditedTitle(e.target.value)}
+                  className="text-xl font-semibold border border-gray-300 rounded px-2 py-1 w-full"
+                />
+                <FontAwesomeIcon
+                  icon={faMicrophone}
+                  className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${
+                    isListening && activeField === "title" ? "text-blue-500" : ""
+                  }`}
+                  onClick={() => handleMicClick("title")}
+                />
+              </div>
             </DialogTitle>
             <DialogDescription className="text-gray-500 mt-1">
               Details about your task.
             </DialogDescription>
-            </DialogHeader>
+          </DialogHeader>
           <div className="py-4 flex-grow">
             <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="font-medium">Description:</p>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedBody}
-                    onChange={handleBodyChange}
-                    className="border border-gray-300 rounded px-2 py-1 w-full"
-                  />
-                ) : (
-                  <p className="text-gray-700">{task.body}</p>
-                )}
+              <div className="flex items-center w-full">
+                <p className="font-medium mr-2">Description:</p>
+                <input
+                  type="text"
+                  value={editedBody}
+                  onChange={(e) => setEditedBody(e.target.value)}
+                  className="border border-gray-300 rounded px-2 py-1 w-full"
+                />
+                <FontAwesomeIcon
+                  icon={faMicrophone}
+                  className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${
+                    isListening && activeField === "body" ? "text-blue-500" : ""
+                  }`}
+                  onClick={() => handleMicClick("body")}
+                />
               </div>
-              <button
-                onClick={isEditing ? handleSaves : handleEditToggle}
-                className=" py-1 px-1 rounded transition duration-300 text-xs"
-              >
-                {isEditing ? "Save" : "Edit Task"}
-              </button>
             </div>
-
             {photoUrls.length > 0 && (
               <div className="mb-4">
                 <p className="font-medium">Photos:</p>
@@ -157,9 +209,12 @@ export const Task = ({ open, onClose, task, user, handleSave }) => {
             <p className="font-medium">Deadline:</p>
             <p className="text-gray-700">{formattedDeadline}</p>
           </div>
-          {/* <div className="mb-4">
-            <p className="font-medium">Priority:</p>
-          </div> */}
+          <button
+            onClick={handleSaveClick}
+            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          >
+            Save
+          </button>
         </div>
       </DialogContent>
     </Dialog>

@@ -1,10 +1,3 @@
-// AddTodo.js
-
-/*
-This component manages the input of new tasks with two controlled input fields for the title and body. 
-Upon submission of the form, it triggers a function to add the new task to the todo list if both fields are filled. 
-This component ensures a user-friendly interface for seamlessly adding tasks to the list.
-*/
 import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -19,9 +12,9 @@ mic.continuous = true;
 mic.interimResults = true;
 mic.lang = "en-US";
 
-export const AddTodo = (props) => {
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+export const AddTodo = ({ handleAddTodo, defaultTask }) => {
+  const [title, setTitle] = useState(defaultTask?.title || "");
+  const [body, setBody] = useState(defaultTask?.body || "");
   const [isListening, setIsListening] = useState(false);
   const [note, setNote] = useState("");
   const [activeField, setActiveField] = useState(null);
@@ -74,7 +67,7 @@ export const AddTodo = (props) => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (title && body) {
-      props.handleAddTodo({ title, body });
+      handleAddTodo({ title, body });
       setTitle("");
       setBody("");
     }
@@ -107,7 +100,9 @@ export const AddTodo = (props) => {
             />
             <FontAwesomeIcon
               icon={faMicrophone}
-              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${isListening && activeField === "title" ? "text-blue-500" : ""}`}
+              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${
+                isListening && activeField === "title" ? "text-blue-500" : ""
+              }`}
               onClick={() => handleMicClick("title")}
             />
           </div>
@@ -124,7 +119,9 @@ export const AddTodo = (props) => {
             />
             <FontAwesomeIcon
               icon={faMicrophone}
-              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${isListening && activeField === "body" ? "text-blue-500" : ""}`}
+              className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${
+                isListening && activeField === "body" ? "text-blue-500" : ""
+              }`}
               onClick={() => handleMicClick("body")}
             />
           </div>
@@ -133,7 +130,7 @@ export const AddTodo = (props) => {
         <Button
           variant="ghost"
           type="submit"
-          className=" py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+          className="py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
         >
           Add Task
         </Button>
