@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi import HTTPException, status, Request
 from typing import Annotated, List, Dict
-from models import  AddTasksPayload, Todos, GetTaskResponse
+from models import  AddTasksPayload, Todos, GetTaskResponse,Photo
 import uuid
 from pathlib import Path
 from fastapi_mail import FastMail, MessageSchema, MessageType
@@ -20,6 +20,9 @@ import os
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
+
+from starlette.datastructures import URL
+
 ISRAEL_TZ = pytz.timezone('Asia/Jerusalem')
 
 
@@ -39,21 +42,23 @@ dataBase_dependency = Annotated[Session, Depends(get_dataBase)]
 user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
-
-def transform_todo_to_response(todo, base_url: str):
-    photo_paths = todo.photo_path.split(", ") if todo.photo_path else []
-    photo_urls = [f"{base_url}uploads/{os.path.basename(path)}" for path in photo_paths]
+def transform_todo_to_response(todo, base_url: URL):
+    # Directly use the photo_url from the database since it already includes the full URL
+    photo_urls = [photo.photo_url for photo in todo.photos]
+    photo_ids = [photo.id for photo in todo.photos]
 
     return {
-    'id':todo.id,
-    'body': todo.body,
-    'title': todo.title,
-    'color': todo.color,
-    'status': todo.status,
-    'deadline': todo.deadline,
-    'remainder': todo.remainder,
-    'photo_urls': photo_urls,
-}
+        'id': todo.id,
+        'body': todo.body,
+        'title': todo.title,
+        'color': todo.color,
+        'status': todo.status,
+        'deadline': todo.deadline,
+        'remainder': todo.remainder,
+        'photo_urls': photo_urls,
+        'photo_ids': photo_ids,
+    }
+
 
 # Define a GET endpoint to retrieve all tasks from the same user
 # get with database
@@ -199,19 +204,46 @@ async def update_todo(user:user_dependency, dataBase:dataBase_dependency,todo_id
     base_url = request.base_url
     return transform_todo_to_response(todo_model, base_url)
 
+
 # Define a DELETE endpoint to delete a task by its ID
 # Delete with database
 @router.delete("/{todo_id}")
-async def delete_todo(user:user_dependency, dataBase:dataBase_dependency, todo_id: uuid.UUID):
+async def delete_todo(
+    todo_id: uuid.UUID,
+    user: user_dependency,
+    dataBase: dataBase_dependency,
+):
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user"
+        )
+    
+    # Find the task
+    todo = dataBase.query(Todos).filter(
+        Todos.id == todo_id,
+        Todos.owner_id == uuid.UUID(user.get('id'))
+    ).first()
 
-    todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).filter(Todos.owner_id == uuid.UUID(user.get('id'))).first()
-    if todo_model is None:
-        # Raise an exception if the task is not found
+    if todo is None:
         raise HTTPException(status_code=404, detail="Task not found")
-    dataBase.query(Todos).filter(Todos.id == todo_id).filter(Todos.id == todo_id).filter(Todos.owner_id == uuid.UUID(user.get('id'))).delete()
+    
+    # Delete associated photos
+    for photo in todo.photos:
+        try:
+            photo_path = Path(photo.photo_url)  # Adjust if necessary to get the file path
+            if photo_path.exists():
+                os.remove(photo_path)
+            dataBase.delete(photo)
+        except Exception as e:
+            print(f"Failed to delete photo with ID {photo.id}: {e}")
+
+    # Delete the task
+    dataBase.delete(todo)
     dataBase.commit()
+
+    return {"detail": "Task deleted successfully"}
+
+
 
 
 @router.post("/send-test-email")
@@ -220,6 +252,8 @@ async def send_test_email(email: str, background_tasks: BackgroundTasks):
     body = "This is a test email to verify email sending functionality."
     background_tasks.add_task(send_email, email, subject, body)
     return {"message": "Test email sent"}
+
+
 
 # Define a directory for file uploads
 UPLOAD_DIRECTORY = "uploads/"
@@ -235,23 +269,54 @@ async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataB
     todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).filter(Todos.owner_id == uuid.UUID(user.get('id'))).first()
     if not todo_model:
         raise HTTPException(status_code=404, detail="Todo not found")
-
-    file_paths = []
+    
+    file_urls = []
     for file in files:
         file_location = os.path.join(UPLOAD_DIRECTORY, f"{uuid.uuid4()}_{file.filename}")
         with open(file_location, "wb") as f:
             f.write(await file.read())
-        file_paths.append(file_location)
+        
+        
+        # Create Photo object and add to database
+        photo_url = f"{request.base_url}uploads/{os.path.basename(file_location)}"
+        photo = Photo(todo_id=todo_id, photo_path=file_location, photo_url=photo_url)
+        dataBase.add(photo)
+        file_urls.append(photo_url)
 
-    # todo_model.photo_path = file_location
-    todo_model.photo_path = ", ".join(file_paths)
+    # Commit transaction
     dataBase.commit()
-    dataBase.refresh(todo_model)
-
-    # return {"filename": file.filename, "file_path": file_location}
-    # return {"filenames": [file.filename for file in files], "file_paths": file_paths}
+    print("$$$$$$$$$$$$$$$$$$")
+    print(photo_url)
+    todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).first()
     base_url = request.base_url
     return transform_todo_to_response(todo_model, base_url)
+
+
+# Define a DELETE endpoint to remove a photo by its ID
+@router.delete("/photos/{photo_id}")
+async def delete_photo(photo_id: int, user: user_dependency, dataBase: dataBase_dependency):
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't Validate the user")
+
+    # Find the photo by ID
+    photo = dataBase.query(Photo).filter(Photo.id == photo_id).first()
+    if photo is None:
+        raise HTTPException(status_code=404, detail="Photo not found")
+
+    # Check if the user owns the associated todo
+    todo = dataBase.query(Todos).filter(Todos.id == photo.todo_id).filter(Todos.owner_id == uuid.UUID(user.get('id'))).first()
+    if todo is None:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to delete this photo")
+
+    # Remove the photo from the database
+    dataBase.delete(photo)
+    dataBase.commit()
+
+    # Optionally, remove the photo file from the server
+    if os.path.exists(photo.photo_path):
+        os.remove(photo.photo_path)
+
+    return {"message": "Photo deleted successfully"}
 
 
 

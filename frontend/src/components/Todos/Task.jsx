@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMicrophone } from "@fortawesome/free-solid-svg-icons";
+import { faMicrophone, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
 import { profiles } from "./profiles.js";
 import { useUser } from "../UserContext";
 
@@ -21,10 +21,17 @@ mic.continuous = true;
 mic.interimResults = true;
 mic.lang = "en-US";
 
-export const Task = ({ open, onClose, task, handleSave }) => {
+export const Task = ({
+  open,
+  onClose,
+  task,
+  handleSave,
+  handleDeletePhoto,
+}) => {
   const { user } = useUser();
   const [selectedIconSrc, setSelectedIconSrc] = useState("");
   const [photoUrls, setPhotoUrls] = useState([]);
+  const [photoIds, setPhotoIds] = useState([]);
   const [error, setError] = useState(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedBody, setEditedBody] = useState("");
@@ -34,7 +41,7 @@ export const Task = ({ open, onClose, task, handleSave }) => {
   useEffect(() => {
     if (user) {
       const initialIcon = profiles.find(
-        (profile) => profile.value === user.icon
+        (profile) => profile.value === user.icon,
       );
       setSelectedIconSrc(initialIcon ? initialIcon.icon_src : "");
     }
@@ -42,11 +49,12 @@ export const Task = ({ open, onClose, task, handleSave }) => {
 
   useEffect(() => {
     if (open && task) {
-      setEditedTitle(task.title || ""); 
-      setEditedBody(task.body || ""); 
-      setPhotoUrls(task.photo_urls || []);
-
+      setEditedTitle(task.title || "");
+      setEditedBody(task.body || "");
+      setPhotoUrls(task.photo_urls || []); 
+      setPhotoIds(task.photo_ids || []);
       setError(null);
+      console.log(photoIds)
     }
   }, [open, task]);
 
@@ -73,7 +81,7 @@ export const Task = ({ open, onClose, task, handleSave }) => {
         .map((result) => result[0])
         .map((result) => result.transcript)
         .join("");
-      
+
       if (activeField === "title") {
         setEditedTitle(transcript);
       } else if (activeField === "body") {
@@ -113,11 +121,44 @@ export const Task = ({ open, onClose, task, handleSave }) => {
         status: task.status,
         deadline: task.deadline,
       },
-      task.id
+      task.id,
     );
     onClose();
   };
 
+
+  useEffect(() => {
+    if (task && task.photos) {
+      const ids = task.photos.map(photo => photo.id);
+      const urls = task.photos.map(photo => photo.url);
+      setPhotoIds(ids);
+      setPhotoUrls(urls);
+    }
+  }, [task]);
+  
+
+  const handlePhotoDelete = async (photoId) => {
+    try {
+      await handleDeletePhoto(photoId, task.id);
+      
+      // Find index of the photoId to remove
+      const indexToRemove = photoIds.indexOf(photoId);
+  
+      // Update the photoIds and photoUrls states
+      setPhotoIds((prevIds) => prevIds.filter((id) => id !== photoId));
+      setPhotoUrls((prevUrls) => prevUrls.filter((_, index) => index !== indexToRemove));
+      
+      console.log(`Successfully deleted photo with ID: ${photoId}`);
+    } catch (error) {
+      console.error("Error deleting photo:", error);
+      setError("Failed to delete photo.");
+    }
+  };
+  
+  
+  
+
+  
   if (!task) return null;
 
   const formattedDeadline = format(new Date(task.deadline), "MMMM d, yyyy");
@@ -138,7 +179,9 @@ export const Task = ({ open, onClose, task, handleSave }) => {
                 <FontAwesomeIcon
                   icon={faMicrophone}
                   className={`text-gray-600 cursor-pointer hover:text-blue-500 ml-2 ${
-                    isListening && activeField === "title" ? "text-blue-500" : ""
+                    isListening && activeField === "title"
+                      ? "text-blue-500"
+                      : ""
                   }`}
                   onClick={() => handleMicClick("title")}
                 />
@@ -167,17 +210,24 @@ export const Task = ({ open, onClose, task, handleSave }) => {
                 />
               </div>
             </div>
-            {photoUrls.length > 0 && (
+            {photoIds.length > 0 && (
               <div className="mb-4">
                 <p className="font-medium">Photos:</p>
                 <div className="flex flex-wrap gap-2">
-                  {photoUrls.map((url, index) => (
-                    <div key={index} className="w-32 h-32 overflow-hidden">
+                  {photoIds.map((id, index) => (
+                    <div key={id} className="w-32 h-32 overflow-hidden relative">
                       <img
-                        src={url}
+                        src={photoUrls[index]} // Map photoIds to their corresponding URLs
                         alt={`Task Photo ${index}`}
                         className="w-full h-full object-contain rounded-md shadow-sm"
                       />
+                      <button
+                        onClick={() => handlePhotoDelete(id)}
+                        className="absolute top-0 right-0 mt-1 mr-1 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                        aria-label="Delete Photo"
+                      >
+                        <FontAwesomeIcon icon={faTrashAlt} />
+                      </button>
                     </div>
                   ))}
                 </div>

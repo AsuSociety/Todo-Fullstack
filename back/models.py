@@ -5,9 +5,9 @@ from typing import List, Optional
 from fastapi import FastAPI
 from pydantic import BaseModel, UUID4, EmailStr, Field
 import uuid
-from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID
+from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID ,Integer
 # from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declarative_base, relationship
 
 
 Base = declarative_base()
@@ -26,6 +26,16 @@ class Users(Base):
     icon= Column(String)
 
 
+class Photo(Base):
+    __tablename__ = 'photos'
+    id = Column(Integer, primary_key=True, index=True)
+    todo_id = Column(PG_UUID(as_uuid=True),ForeignKey('todos.id'))
+    photo_path = Column(String, nullable=False)
+    photo_url = Column(String, nullable=False)
+
+    todo = relationship("Todos", back_populates="photos")
+    
+
 # Add Priority 
 class Todos(Base):
     __tablename__= 'todos'
@@ -37,9 +47,9 @@ class Todos(Base):
     status= Column(String)
     deadline = Column(DateTime, nullable=True)  
     remainder = Column(Boolean, default=True)
-    photo_path = Column(String, nullable=True)
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
 
+    photos = relationship("Photo", back_populates="todo")
 
 
 class AddTasksPayload(BaseModel):
@@ -60,6 +70,7 @@ class GetTaskResponse(BaseModel):
     deadline: Optional[datetime] = None  
     remainder : bool = True
     photo_urls : list[str]
+    photo_ids : list[int]
 
 
 class AddUsersPayload(BaseModel):

@@ -11,7 +11,6 @@ Overall, it provides a convenient way for you to organize and keep track of your
 // Import necessary modules and components
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 import { useUser } from "../UserContext";
-// import { AddTodo } from "./AddTodo"; // Import AddTodo component for adding todos
 import { TaskTable } from "./TaskTable";
 import axios from "axios";
 
@@ -174,6 +173,57 @@ const handleUpload = async (selectedFiles, todoId, token) => {
   }
 };
 
+// const handleDeletePhoto = async (photoId, todoId,token) => {
+//   try {
+//     const response = await fetch(`${API_URL}/todo/photos/${photoId}`, {
+//       method: "DELETE",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     if (!response.ok) {
+//       throw new Error(`Failed to delete photo: ${response.status} - ${response.statusText}`);
+//     }
+
+//     // Remove the photo from the specific todo
+//     setTodos((prevTodos) =>
+//       prevTodos.map((todo) =>
+//         todo.id === todoId
+//           ? {
+//               ...todo,
+//               photos: todo.photos.filter((photo) => photo.id !== photoId),
+//             }
+//           : todo
+//       )
+//     );
+//   } catch (error) {
+//     console.error("Error deleting photo:", error);
+//   }
+// };
+
+const deletePhoto = async (photoId, todoId, token) => {
+  try {
+    // Send DELETE request to API
+    const response = await axios.delete(`${API_URL}/todo/photos/${photoId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error(`Failed to delete photo: ${response.status} - ${response.statusText}`);
+    }
+
+    console.log("Photo deleted successfully", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting photo:", error);
+    return null;
+  }
+};
+
 // Function to normalize date to start of the day in local timezone
 
 const normalizeDate = (date) => {
@@ -222,8 +272,6 @@ const getDefaultDeadline = () => {
 export const TodoWrapper = () => {
   const { user } = useUser();
   const [todos, setTodos] = useState([]); // State hook to store todos
-  // const [isAddTodoVisible, setIsAddTodoVisible] = useState(false); // State hook to control the visibility of AddTodo form
-  // const [newTask, setNewTask] = useState(null); // State to hold new task data
   const [selectedTask, setSelectedTask] = useState(null); // State for selected task to open Task component
 
   // useEffect hook to fetch todos when component mounts
@@ -262,24 +310,6 @@ export const TodoWrapper = () => {
       setSelectedTask(addedTask); 
     }
   };
-
-  // const handleAddTodo = async (todo) => {
-  //   const newTodo = await addTodo(
-  //     {
-  //       ...todo,
-  //       color: newTask.color,
-  //       status: newTask.status,
-  //       deadline: newTask.deadline,
-  //       remainder: newTask.remainder,
-  //     },
-  //     user.token,
-  //   );
-  //   if (newTodo) {
-  //     setTodos((prevTodos) => [...prevTodos, newTodo]);
-  //     setNewTask(null);
-  //     setIsAddTodoVisible(false);
-  //   }
-  // };
 
   // Function to handle deleting a todo
   const handleDeleteTodo = async (id) => {
@@ -385,7 +415,25 @@ export const TodoWrapper = () => {
     }
   };
   
-
+  const handleDeletePhoto = async (photoId, todoId) => {
+    const deletedPhoto = await deletePhoto(photoId, todoId, user.token);
+    if (deletedPhoto) {
+      // Update the task in the todos state by removing the deleted photo
+      setTodos((prevTodos) =>
+        prevTodos.map((todo) =>
+          todo.id === todoId
+            ? {
+                ...todo,
+                photos: Array.isArray(todo.photos)
+                  ? todo.photos.filter((photo) => photo.id !== photoId)
+                  : [], // Set to empty array if photos is not defined
+              }
+            : todo
+        )
+      );
+    }
+  };
+  
 
 
   // JSX structure returned by the TodoWrapper component
@@ -427,6 +475,7 @@ export const TodoWrapper = () => {
         user={user}
         selectedTask={selectedTask} 
         setSelectedTask={setSelectedTask}
+        handleDeletePhoto={handleDeletePhoto}
       />
     </div>
   );

@@ -196,6 +196,7 @@ export const TaskTable = (props) => {
         onClose={handleCloseDialog}
         task={selectedTodo}
         handleSave={props.handleSave}
+        handleDeletePhoto={props.handleDeletePhoto}
       />
     </div>
   );
