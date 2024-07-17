@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import {profiles} from "./profiles.js"
 
 import {

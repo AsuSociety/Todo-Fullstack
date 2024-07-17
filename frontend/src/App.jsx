@@ -11,6 +11,7 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
+// import CalendarView from "./components/Todos/CalendarView";
 
 const router = createBrowserRouter([
   {
@@ -29,10 +30,10 @@ const router = createBrowserRouter([
     path: "/todos",
     element: <TodoWrapper />,
   },
-  {
-    path: "/todo/:id",
-    element: <Task />,
-  },
+  // {
+  //   path: "/calendarview",
+  //   element: <CalendarView />,
+  // },
 ]);
 
 // Define App function component

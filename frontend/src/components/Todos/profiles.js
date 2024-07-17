@@ -25,4 +25,39 @@ export const profiles = [
     label: "Meowth",
     icon_src: "https://cdn-icons-png.flaticon.com/128/188/188997.png",
   },
+  {
+    value: "groot",
+    label: "Groot",
+    icon_src: "https://img.icons8.com/?size=96&id=78456&format=png",
+  },
+  {
+    value: "wolverin",
+    label: "Wolverin",
+    icon_src:
+      "https://img.icons8.com/?size=100&id=eauO7DcUYHG1&format=png&color=000000",
+  },
+  {
+    value: "spiderman",
+    label: "Spiderman",
+    icon_src:
+      "https://img.icons8.com/?size=100&id=1pe71OL3ROEg&format=png&color=000000",
+  },
+  {
+    value: "thor",
+    label: "Thor",
+    icon_src:
+      "https://img.icons8.com/?size=100&id=66WQHHz06OkY&format=png&color=000000",
+  },
+  {
+    value: "deadpool",
+    label: "Deadpool",
+    icon_src:
+      "https://img.icons8.com/?size=100&id=xwdjP1lvmn4w&format=png&color=000000",
+  },
+  {
+    value: "ironman",
+    label: "Ironman",
+    icon_src:
+      "https://img.icons8.com/?size=100&id=sufOcwdDIbjO&format=png&color=000000",
+  },
 ];

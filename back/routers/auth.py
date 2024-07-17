@@ -84,6 +84,7 @@ async def create_user(dataBase: dataBase_dependency,
         lastname= user_payload.lastname,
         role= user_payload.role,
         icon = user_payload.icon,
+        company_name= user_payload.company_name,
         hashed_password= bcrypt_context.hash(user_payload.password),
         isactive= True
     )
@@ -111,7 +112,8 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         'last_name': user.lastname,
         'role': user.role,
         'id': user.id,
-        'icon': user.icon
+        'icon': user.icon,
+        'company_name': user.company_name,
         }
         print("Response:", response)  # Log the response
         return response

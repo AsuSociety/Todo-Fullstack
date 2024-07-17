@@ -26,6 +26,8 @@ class AuthService {
     localStorage.setItem("role", data.role);
     localStorage.setItem("id", data.id);
     localStorage.setItem("icon", data.icon);
+    localStorage.setItem("company_name", data.company_name);
+
 
     return {
       token: data.access_token,
@@ -36,6 +38,7 @@ class AuthService {
       role: data.role,
       id: data.id,
       icon: data.icon,
+      company_name: data.company_name
     };
   }
 
@@ -55,6 +58,7 @@ class AuthService {
     lastName,
     role,
     icon = "",
+    company_name,
   ) {
     const response = await fetch(`${API_URL}/auth/`, {
       method: "POST",
@@ -69,6 +73,7 @@ class AuthService {
         lastname: lastName,
         role,
         icon,
+        company_name,
       }),
     });
 

@@ -285,8 +285,8 @@ async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataB
 
     # Commit transaction
     dataBase.commit()
-    print("$$$$$$$$$$$$$$$$$$")
-    print(photo_url)
+    # print("$$$$$$$$$$$$$$$$$$")
+    # print(photo_url)
     todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).first()
     base_url = request.base_url
     return transform_todo_to_response(todo_model, base_url)

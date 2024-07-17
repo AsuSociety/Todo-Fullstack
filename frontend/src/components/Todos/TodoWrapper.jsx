@@ -12,7 +12,11 @@ Overall, it provides a convenient way for you to organize and keep track of your
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 import { useUser } from "../UserContext";
 import { TaskTable } from "./TaskTable";
+import {CalendarView} from "./CalendarView";
 import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendar,faTable, faCalendarDays } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 import { Profile } from "./Profile";
 
@@ -173,35 +177,6 @@ const handleUpload = async (selectedFiles, todoId, token) => {
   }
 };
 
-// const handleDeletePhoto = async (photoId, todoId,token) => {
-//   try {
-//     const response = await fetch(`${API_URL}/todo/photos/${photoId}`, {
-//       method: "DELETE",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     if (!response.ok) {
-//       throw new Error(`Failed to delete photo: ${response.status} - ${response.statusText}`);
-//     }
-
-//     // Remove the photo from the specific todo
-//     setTodos((prevTodos) =>
-//       prevTodos.map((todo) =>
-//         todo.id === todoId
-//           ? {
-//               ...todo,
-//               photos: todo.photos.filter((photo) => photo.id !== photoId),
-//             }
-//           : todo
-//       )
-//     );
-//   } catch (error) {
-//     console.error("Error deleting photo:", error);
-//   }
-// };
 
 const deletePhoto = async (photoId, todoId, token) => {
   try {
@@ -213,7 +188,9 @@ const deletePhoto = async (photoId, todoId, token) => {
     });
 
     if (response.status !== 200) {
-      throw new Error(`Failed to delete photo: ${response.status} - ${response.statusText}`);
+      throw new Error(
+        `Failed to delete photo: ${response.status} - ${response.statusText}`,
+      );
     }
 
     console.log("Photo deleted successfully", response.data);
@@ -273,6 +250,9 @@ export const TodoWrapper = () => {
   const { user } = useUser();
   const [todos, setTodos] = useState([]); // State hook to store todos
   const [selectedTask, setSelectedTask] = useState(null); // State for selected task to open Task component
+  const [view, setView] = useState("table"); // State for toggling view
+
+  const navigate = useNavigate();
 
   // useEffect hook to fetch todos when component mounts
   useEffect(() => {
@@ -289,7 +269,7 @@ export const TodoWrapper = () => {
         setTodos([]); // Clear todos when user is not authenticated
       }
     };
-    // console.log("fooooooooooo",user.icon)
+    // console.log("fooooooooooo",user)
     fetchData();
   }, [user]);
 
@@ -306,10 +286,29 @@ export const TodoWrapper = () => {
 
     const addedTask = await addTodo(newTask, user.token);
     if (addedTask) {
-      setTodos((prevTodos) => [ addedTask, ...prevTodos]);
-      setSelectedTask(addedTask); 
+      setTodos((prevTodos) => [addedTask, ...prevTodos]);
+      setSelectedTask(addedTask);
     }
   };
+
+  const handleAddTaskInCalendar = async (date) => {
+    // const defaultDeadline = getDefaultDeadline(); // Example default deadline
+    const newTask = {
+      title: "New Task",
+      body: "",
+      color: colors[3], // Default color
+      status: "",
+      deadline: date,
+      remainder: true,
+    };
+
+    const addedTask = await addTodo(newTask, user.token);
+    if (addedTask) {
+      setTodos((prevTodos) => [addedTask, ...prevTodos]);
+      setSelectedTask(addedTask);
+    }
+  };
+
 
   // Function to handle deleting a todo
   const handleDeleteTodo = async (id) => {
@@ -414,7 +413,7 @@ export const TodoWrapper = () => {
       }
     }
   };
-  
+
   const handleDeletePhoto = async (photoId, todoId) => {
     const deletedPhoto = await deletePhoto(photoId, todoId, user.token);
     if (deletedPhoto) {
@@ -428,55 +427,95 @@ export const TodoWrapper = () => {
                   ? todo.photos.filter((photo) => photo.id !== photoId)
                   : [], // Set to empty array if photos is not defined
               }
-            : todo
-        )
+            : todo,
+        ),
       );
     }
   };
-  
 
+    // Toggle view between table and calendar
+    const toggleView = () => {
+      setView((prevView) => (prevView === "table" ? "calendar" : "table"));
+    };
+  
 
   // JSX structure returned by the TodoWrapper component
   return (
-    <div className="hidden h-full flex-1 flex-col space-y-8 p-8 md:flex">
-      <div className="flex items-center justify-between space-y-2">
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">
-            Welcome back {user.username}!
-          </h2>
-          <p className="text-muted-foreground">
-            Here&apos;s a list of your tasks for this month!
-          </p>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Profile />
+    <div className="h-full flex flex-col p-8">
+      {/* Sticky Header */}
+      <div className="sticky top-0 bg-white shadow-md z-10">
+        <div className="flex items-center justify-between space-y-2 p-4">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">
+              Welcome back {user.first_name}!
+            </h2>
+            <p className="text-muted-foreground">
+              Here's a list of your tasks for this month!
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <FontAwesomeIcon
+              icon={view === "calendar" ? faTable : faCalendarDays}
+              className="text-gray-600 cursor-pointer hover:text-cyan-600"
+              onClick={toggleView}
+            />
+            <Profile />
+          </div>
         </div>
       </div>
-      <div className="flex flex-col items-center space-y-4">
-      <Button
-        variant="ghost"
-        onClick={handleAddTask}
-        className="text-white py-1 px-3 rounded transition duration-300 bg-blue-500 hover:bg-blue-600"
-        >
-        Add Task
-      </Button>
+  
+      {/* Content area that scrolls */}
+      <div className="flex-1 overflow-y-auto mt-4">
+        {/* Add Task button */}
+        <div className="flex justify-center pb-4">
+          <Button
+            variant="ghost"
+            onClick={handleAddTask}
+            className="text-white py-1 px-3 rounded transition duration-300 bg-blue-500 hover:bg-blue-600"
+          >
+            Add Task
+          </Button>
+        </div>
+  
+        {/* TaskTable or CalendarView */}
+        {view === "table" ? (
+          <TaskTable
+            tasks={todos}
+            deleteTodo={handleDeleteTodo}
+            handleSave={handleSave}
+            updateTaskStatus={updateTaskStatus}
+            updateDeadline={updateDeadline}
+            updateRemainder={updateRemainder}
+            normalizeDate={normalizeDate}
+            convertToUTCISO={convertToUTCISO}
+            handleUploadClick={handleUploadClick}
+            user={user}
+            selectedTask={selectedTask}
+            setSelectedTask={setSelectedTask}
+            handleDeletePhoto={handleDeletePhoto}
+          />
+        ) : (
+          <CalendarView
+            tasks={todos}
+            setTodos ={setTodos}
+            handleAddTask={handleAddTaskInCalendar}
+            handleSave={handleSave}
+            handleDeleteTodo={handleDeleteTodo}
+            updateTaskStatus={updateTaskStatus}
+            updateDeadline={updateDeadline}
+            updateRemainder={updateRemainder}
+            normalizeDate={normalizeDate}
+            convertToUTCISO={convertToUTCISO}
+            handleUploadClick={handleUploadClick}
+            user={user}
+            selectedTask={selectedTask}
+            setSelectedTask={setSelectedTask}
+            handleDeletePhoto={handleDeletePhoto}
+          />
+        )}
       </div>
-
-      <TaskTable
-        tasks={todos} // Pass todo as prop
-        deleteTodo={handleDeleteTodo} // Pass deleteTodo function as prop
-        handleSave={handleSave} // Pass markForEdit function as prop
-        updateTaskStatus={updateTaskStatus}
-        updateDeadline={updateDeadline}
-        updateRemainder={updateRemainder}
-        normalizeDate={normalizeDate}
-        convertToUTCISO={convertToUTCISO}
-        handleUploadClick={handleUploadClick}
-        user={user}
-        selectedTask={selectedTask} 
-        setSelectedTask={setSelectedTask}
-        handleDeletePhoto={handleDeletePhoto}
-      />
     </div>
   );
+  
+  
 };

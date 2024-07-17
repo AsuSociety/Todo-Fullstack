@@ -20,6 +20,7 @@ export const Register = () => {
   const [lastName, setLastName] = useState("");
   const [role, setRole] = useState("");
   const [icon, setIcon] = useState("");
+  const [company, setCompany] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -37,6 +38,7 @@ export const Register = () => {
         lastName,
         role,
         icon,
+        company,
       );
 
       // Reset input fields after successful registration
@@ -47,6 +49,7 @@ export const Register = () => {
       setLastName("");
       setRole("");
       setIcon("");
+      setCompany("")
 
       // Navigate back to login screen
       navigate("/login");
@@ -72,12 +75,12 @@ export const Register = () => {
         <div className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="role">Company</Label>
               <Input
-                id="username"
-                placeholder="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                id="company"
+                placeholder="company name"
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
                 required
               />
             </div>
@@ -112,7 +115,16 @@ export const Register = () => {
               />
             </div>
           </div>
-
+          <div className="grid gap-2">
+              <Label htmlFor="username">Username</Label>
+              <Input
+                id="username"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+            </div>
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input

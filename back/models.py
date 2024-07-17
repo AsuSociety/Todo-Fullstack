@@ -12,6 +12,15 @@ from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
+class Company(Base):
+    __tablename__ = 'companies'
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, unique=True, index=True)
+
+    users = relationship("Users", back_populates="company")
+
+
 class Users(Base):
     __tablename__= 'users'
 
@@ -24,6 +33,9 @@ class Users(Base):
     isactive = Column(Boolean, default=True)
     role= Column(String)
     icon= Column(String)
+    company_name = Column(String, ForeignKey('companies.name'))
+
+    company = relationship("Company", back_populates="users")
 
 
 class Photo(Base):
@@ -81,6 +93,7 @@ class AddUsersPayload(BaseModel):
     lastname: str = Field(min_length=2)
     role: str = Field(min_length=3)
     icon : str
+    company_name: str
 
 class UpdateIconPayload(BaseModel):
     icon: str
@@ -92,4 +105,3 @@ class Token(BaseModel):
 class UserVerification(BaseModel):
     password: str
     new_password: str
-
