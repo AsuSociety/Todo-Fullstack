@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Annotated, Union
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import SessionLocal
-from models import Token, Users,AddUsersPayload, UserVerification, UpdateIconPayload
+from models import Token, Users,AddUsersPayload, UpdateIconPayload, UpdateCompanyName
 from passlib.context import CryptContext
 from database import  SessionLocal
 from sqlalchemy.orm import Session
@@ -156,19 +156,60 @@ async def update_user_icon(
     except ValueError:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user_id format")
     
-# @router.put("/password")
-# async def update_password(dataBase:dataBase_dependency, user_verifi: UserVerification):
-#     user = dataBase.query(Users).filter(Users.id == user_id).first()
-#     if user is None:
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
-#     user_model = dataBase.query(Users).filter(Users.id==uuid.UUID(user.get('id'))).first()
 
-#     if not bcrypt_context.verify(user_verifi.password,user_model.hashed_password):
-#         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Error on password change!")
-#     user_model.hashed_password= bcrypt_context.hash(user_verifi.new_password)
 
-#     dataBase.add(user_model)
-#     dataBase.commit()
-#     dataBase.refresh(user_model)
-#     return user_model
+@router.put("/mail/{user_mail}/company")
+async def update_user_company_by_mail(
+    user_mail: str, 
+    user_payload: UpdateCompanyName, 
+    dataBase: dataBase_dependency, 
+    token: str = Depends(oauth2_bearer)
+):
+    try:
+        # payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # username: str = payload.get('sub')
+        # user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+        
+        user = dataBase.query(Users).filter(Users.email == user_mail).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
+        user.company_name = user_payload.company_name
+        dataBase.commit()
+        
+        return {'message': 'company updated successfully'}
+
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't validate the user")
+
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email format")
+    
+
+@router.put("/id/{user_id}/company")
+async def update_user_company(
+    user_id: Union[str, uuid.UUID], 
+    user_payload: UpdateCompanyName, 
+    dataBase: dataBase_dependency, 
+    token: str = Depends(oauth2_bearer)
+):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
+        user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+        
+        user = dataBase.query(Users).filter(Users.id == user_uuid).first()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+        user.company_name = user_payload.company_name
+        dataBase.commit()
+        
+        return {'message': 'company updated successfully'}
+
+    except JWTError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't validate the user")
+
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user_id format")
+    

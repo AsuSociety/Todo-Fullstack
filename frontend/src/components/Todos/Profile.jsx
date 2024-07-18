@@ -1,4 +1,3 @@
-//Profile.jsx
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 import { useUser } from "../UserContext";
 import { useNavigate } from "react-router-dom";
@@ -7,7 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 // import { Input } from "@/components/ui/input";
-import {profiles} from "./profiles.js"
+import { profiles } from "./profiles.js";
 
 import {
   DropdownMenu,
@@ -42,10 +41,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-
-
 export const Profile = () => {
-  const { user,logout,updateIcon } = useUser();
+  const { user, logout, updateIcon } = useUser();
   const navigate = useNavigate();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [open, setOpen] = useState(false);
@@ -58,21 +55,30 @@ export const Profile = () => {
   }, [user.icon]);
 
   const handleProfile = (icon, src) => {
-    updateIcon(user.id, icon,user.token);
+    updateIcon(user.id, icon, user.token);
     setSelectedIconTemp(
       profiles.find((profile) => profile.value === icon) || null,
     );
     setOpen(false);
   };
+
   const handleSaves = () => {
     setSelectedIcon(selectedIconTemp);
     setIsDialogOpen(false);
   };
 
-  function handleLogout() {
+  const handleLogout = () => {
     logout();
     navigate("/login");
-  }
+  };
+
+  const handleCompanyRegister = () => {
+    navigate("/companyregister");
+  };
+
+  const handleCompanyPage = () => {
+    navigate("/company");
+  };
 
   return (
     <div>
@@ -97,6 +103,9 @@ export const Profile = () => {
               <p className="text-xs leading-none text-muted-foreground">
                 {user.email}
               </p>
+              <p className="text-xs leading-none text-muted-foreground">
+                Company: {user.company_name}
+              </p>
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
@@ -105,6 +114,17 @@ export const Profile = () => {
               Profile
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
+            {user.company_name ? (
+              <DropdownMenuItem onClick={handleCompanyPage}>
+                Sign Up workers
+                <DropdownMenuShortcut>⇧⌘W</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            ) : (
+              <DropdownMenuItem onClick={handleCompanyRegister}>
+                Create a company
+                <DropdownMenuShortcut>⇧⌘W</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={handleLogout}>
@@ -197,17 +217,6 @@ export const Profile = () => {
                 </PopoverContent>
               </Popover>
             </div>
-            {/* <div className="grid grid-cols-4 items-center gap-4">
-        <Label htmlFor="body" className="text-center">
-          Change Password
-        </Label>
-        <Input
-          // id="body"
-          // value={editedBody}
-          // onChange={(e) => setEditedBody(e.target.value)}
-          // className="col-span-3"
-        />
-      </div> */}
           </div>
           <DialogFooter className="flex justify-end">
             <button

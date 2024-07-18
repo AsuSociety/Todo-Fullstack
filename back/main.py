@@ -11,7 +11,7 @@ from config import conf
 from fastapi.staticfiles import StaticFiles
 import models
 from database import engine, SessionLocal
-from routers import auth, todos, admin, user
+from routers import auth, todos, admin, user, company
 
 
 # Create a FastAPI application
@@ -25,6 +25,7 @@ app.include_router(auth.router)
 app.include_router(todos.router)
 app.include_router(admin.router)
 app.include_router(user.router)
+app.include_router(company.router)
 
 
 

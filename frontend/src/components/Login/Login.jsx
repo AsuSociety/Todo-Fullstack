@@ -37,6 +37,9 @@ export const Login = () => {
   function handleRegister() {
     navigate("/register");
   }
+  function handleCompanyRegister() {
+    navigate("/companyregister");
+  }
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -76,9 +79,14 @@ export const Login = () => {
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Button type="submit" onClick={handleRegister} className="w-full">
-            Sign up
+            Sign up as User
           </Button>
         </div>
+        {/* <div className="mt-4 text-center text-sm">
+          <Button type="submit" onClick={handleCompanyRegister} className="w-full">
+            Sign up as Company
+          </Button>
+        </div> */}
         {error && <p style={{ color: "red" }}>{error}</p>}
       </CardContent>
     </Card>

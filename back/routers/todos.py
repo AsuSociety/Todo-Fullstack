@@ -57,6 +57,7 @@ def transform_todo_to_response(todo, base_url: URL):
         'remainder': todo.remainder,
         'photo_urls': photo_urls,
         'photo_ids': photo_ids,
+        'visibility':todo.visibility
     }
 
 
@@ -173,6 +174,7 @@ async def update_todo(user:user_dependency, dataBase:dataBase_dependency,todo_id
     todo_model.status = task_payload.status
     todo_model.deadline = task_payload.deadline
     todo_model.remainder = task_payload.remainder
+    todo_model.visibility = task_payload.visibility
     
     dataBase.add(todo_model)
     dataBase.commit()

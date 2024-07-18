@@ -28,7 +28,6 @@ class AuthService {
     localStorage.setItem("icon", data.icon);
     localStorage.setItem("company_name", data.company_name);
 
-
     return {
       token: data.access_token,
       username: data.username,
@@ -38,7 +37,7 @@ class AuthService {
       role: data.role,
       id: data.id,
       icon: data.icon,
-      company_name: data.company_name
+      company_name: data.company_name,
     };
   }
 
@@ -81,6 +80,27 @@ class AuthService {
     localStorage.setItem("token", data.access_token);
     return { token: data.access_token };
   }
+
+
+  static async companyRegister(name) {
+    const response = await fetch(`${API_URL}/companies/register/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name,
+      }),
+    });
+  
+    if (!response.ok) {
+      throw new Error("Failed to register company");
+    }
+  
+    const data = await response.json();
+    return data;
+  }
+  
 }
 
 export default AuthService;

@@ -1,14 +1,26 @@
 import React, { useState, useRef, useEffect } from "react"; // Import React and necessary hooks
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faTrash, faImage } from "@fortawesome/free-solid-svg-icons";
+import {  faTrash, faImage } from "@fortawesome/free-solid-svg-icons";
 import { ChangeStatus } from "./ChangeStatus";
+import { ChangeVisibility } from "./ChangeVisibility";
+
 import { DatePicker } from "./DatePicker";
 import { Task } from "./Task";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 import {
   Table,
@@ -85,6 +97,9 @@ export const TaskTable = (props) => {
             <TableHead className="w-[180px] border border-gray-300">
               Task
             </TableHead>
+            <TableHead className="text-center  w-[40px] border border-gray-300">
+            Visibility
+            </TableHead>
             <TableHead className="text-center  w-[80px] border border-gray-300">
               Status
             </TableHead>
@@ -98,7 +113,7 @@ export const TaskTable = (props) => {
               className="text-center border border-gray-300"
               style={{ width: "20px", padding: "0px" }}
             >
-              Photo
+              Photos
             </TableHead>
             <TableHead
               className="text-center border border-gray-300"
@@ -117,6 +132,16 @@ export const TaskTable = (props) => {
               >
                 {todo.title}
                 <p className="text-sm font-thin ">{todo.body}</p>
+              </TableCell>
+              <TableCell
+                className="text-center border border-gray-300  "
+                // style={{ backgroundColor: todo.color }}
+              >
+                <ChangeVisibility
+                  updateVisibility={props.updateVisibility}
+                  id={todo.id}
+                  currentVisibility={todo.visibility}
+                />
               </TableCell>
               <TableCell
                 className="text-center border border-gray-300  "

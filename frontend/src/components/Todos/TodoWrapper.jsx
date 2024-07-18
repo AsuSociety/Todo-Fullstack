@@ -111,6 +111,7 @@ const editTask = async (
   status = null,
   date,
   remainder,
+  visibility
 ) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
@@ -126,6 +127,7 @@ const editTask = async (
         status: status,
         deadline: date,
         remainder: remainder,
+        visibility: visibility,
       }), // Include both body and title properties
     });
 
@@ -329,6 +331,7 @@ export const TodoWrapper = () => {
       task.status,
       task.deadline,
       task.remainder,
+      task.visibility,
     );
     if (updatedTask) {
       setTodos((prevTodos) =>
@@ -352,6 +355,7 @@ export const TodoWrapper = () => {
         status,
         taskToUpdate.deadline,
         taskToUpdate.remainder,
+        taskToUpdate.visibility,
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
@@ -373,6 +377,7 @@ export const TodoWrapper = () => {
         taskToUpdate.status,
         date,
         taskToUpdate.remainder,
+        taskToUpdate.visibility,
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
@@ -393,6 +398,28 @@ export const TodoWrapper = () => {
         taskToUpdate.status,
         taskToUpdate.deadline,
         remainder,
+        taskToUpdate.visibility,
+      );
+      if (updatedTask) {
+        setTodos((prevTodos) =>
+          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo)),
+        );
+      }
+    }
+  };
+
+  const updateVisibility = async (taskId, visibility) => {
+    const taskToUpdate = todos.find((todo) => todo.id === taskId);
+    if (taskToUpdate) {
+      const updatedTask = await editTask(
+        taskToUpdate,
+        taskId,
+        user.token,
+        taskToUpdate.color,
+        taskToUpdate.status,
+        taskToUpdate.deadline,
+        taskToUpdate.remainder,
+        visibility,
       );
       if (updatedTask) {
         setTodos((prevTodos) =>
@@ -493,6 +520,7 @@ export const TodoWrapper = () => {
             selectedTask={selectedTask}
             setSelectedTask={setSelectedTask}
             handleDeletePhoto={handleDeletePhoto}
+            updateVisibility={updateVisibility}
           />
         ) : (
           <CalendarView
@@ -511,6 +539,7 @@ export const TodoWrapper = () => {
             selectedTask={selectedTask}
             setSelectedTask={setSelectedTask}
             handleDeletePhoto={handleDeletePhoto}
+            updateVisibility={updateVisibility}
           />
         )}
       </div>

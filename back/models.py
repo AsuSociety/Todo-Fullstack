@@ -5,9 +5,13 @@ from typing import List, Optional
 from fastapi import FastAPI
 from pydantic import BaseModel, UUID4, EmailStr, Field
 import uuid
-from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID ,Integer
-# from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID ,Integer, Enum as SQLAEnum
 from sqlalchemy.orm import declarative_base, relationship
+from enum import Enum
+
+class TaskVisibility(Enum):
+    PRIVATE = "private"
+    COMPANY = "company"
 
 
 Base = declarative_base()
@@ -60,6 +64,7 @@ class Todos(Base):
     deadline = Column(DateTime, nullable=True)  
     remainder = Column(Boolean, default=True)
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
+    visibility = Column(SQLAEnum(TaskVisibility), default=TaskVisibility.PRIVATE)
 
     photos = relationship("Photo", back_populates="todo")
 
@@ -71,6 +76,7 @@ class AddTasksPayload(BaseModel):
     status: str
     deadline: Optional[datetime] = None  
     remainder : bool = True
+    visibility: TaskVisibility = TaskVisibility.PRIVATE  
 
 
 class GetTaskResponse(BaseModel):
@@ -83,6 +89,8 @@ class GetTaskResponse(BaseModel):
     remainder : bool = True
     photo_urls : list[str]
     photo_ids : list[int]
+    visibility: TaskVisibility = TaskVisibility.PRIVATE  
+
 
 
 class AddUsersPayload(BaseModel):
@@ -91,12 +99,15 @@ class AddUsersPayload(BaseModel):
     password: str = Field(min_length=5)
     firstname: str= Field(min_length=2)
     lastname: str = Field(min_length=2)
-    role: str = Field(min_length=3)
-    icon : str
-    company_name: str
+    icon : str = ""
+    role: str = "user"
+    company_name: str =""
 
 class UpdateIconPayload(BaseModel):
     icon: str
+
+class UpdateCompanyName(BaseModel):
+    company_name: str
 
 class Token(BaseModel):
     access_token: str

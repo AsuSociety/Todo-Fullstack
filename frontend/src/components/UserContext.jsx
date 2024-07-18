@@ -58,8 +58,70 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  // Function to update the user's company name
+  const updateCompanyById = async (userId, company_name, token) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/id/${userId}/company`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ company_name: company_name }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to update company name: ${response.status} - ${response.statusText}`,
+        );
+      }
+
+      const result = await response.json();
+      // console.log( icon);
+      setUser((prevUser) => ({
+        ...prevUser,
+        company_name: company_name, 
+      }));
+      return result;
+    } catch (error) {
+      console.error("Error updating company name:", error);
+      return null;
+    }
+  };
+
+  const updateCompanyByMail = async (userMail, company_name, token) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/mail/${userMail}/company`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ company_name: company_name }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to update company name: ${response.status} - ${response.statusText}`,
+        );
+      }
+
+      const result = await response.json();
+      // console.log( icon);
+      setUser((prevUser) => ({
+        ...prevUser,
+        company_name: company_name, 
+      }));
+      return result;
+    } catch (error) {
+      console.error("Error updating company name:", error);
+      return null;
+    }
+  };
+
+
   return (
-    <UserContext.Provider value={{ user, login, logout, updateIcon }}>
+    <UserContext.Provider value={{ user, login, logout, updateIcon, updateCompanyById, updateCompanyByMail }}>
       {children}
     </UserContext.Provider>
   );
