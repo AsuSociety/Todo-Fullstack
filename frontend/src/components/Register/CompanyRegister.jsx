@@ -18,7 +18,7 @@ export const CompanyRegister = () => {
   const [company, setCompany] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { user,updateCompanyById} = useUser();
+  const { user,updateCompanyById, updateRole} = useUser();
 
 
   const handleRegister = async () => {
@@ -30,13 +30,14 @@ export const CompanyRegister = () => {
       // Perform registration
       await AuthService.companyRegister(company);
       setCompany("");
-
+      updateRole(user.id,'admin',user.token)
       // Navigate back to login screen
       navigate("/Company");
     } catch (error) {
       setError("Registration failed: " + error.message);
     }
   };
+
   function backToTasks() {
     console.log(user)
     navigate("/todos");

@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react"; // Import React and necessary hooks
+import React, { useState, useEffect } from "react";
 import { useUser } from "../UserContext";
 import { useNavigate } from "react-router-dom";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-// import { Input } from "@/components/ui/input";
 import { profiles } from "./profiles.js";
 
 import {
@@ -80,6 +79,9 @@ export const Profile = () => {
     navigate("/company");
   };
 
+  const isAdmin = user.role === "admin";
+  const hasCompany = user.company_name;
+
   return (
     <div>
       <DropdownMenu>
@@ -114,11 +116,13 @@ export const Profile = () => {
               Profile
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
-            {user.company_name ? (
-              <DropdownMenuItem onClick={handleCompanyPage}>
-                Sign Up workers
-                <DropdownMenuShortcut>⇧⌘W</DropdownMenuShortcut>
-              </DropdownMenuItem>
+            {hasCompany ? (
+              isAdmin ? (
+                <DropdownMenuItem onClick={handleCompanyPage}>
+                  Company 
+                  <DropdownMenuShortcut>⇧⌘W</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              ) : null
             ) : (
               <DropdownMenuItem onClick={handleCompanyRegister}>
                 Create a company

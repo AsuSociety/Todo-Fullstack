@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from typing import Annotated, Union
 from fastapi import APIRouter, Depends, HTTPException, status
 from database import SessionLocal
-from models import Token, Users,AddUsersPayload, UpdateIconPayload, UpdateCompanyName
+from models import Token, Users,AddUsersPayload, UpdateIconPayload, UpdateCompanyName, UpdateUserRolePayload
 from passlib.context import CryptContext
 from database import  SessionLocal
 from sqlalchemy.orm import Session
@@ -158,31 +158,43 @@ async def update_user_icon(
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user_id format")
     
 
-
-@router.put("/mail/{user_mail}/company")
-async def update_user_company_by_mail(
-    user_mail: str, 
-    user_payload: UpdateCompanyName, 
-    dataBase: dataBase_dependency, 
+@router.put("/{user_id}/role")
+async def update_user_role(
+    user_id: Union[str, uuid.UUID],
+    role_payload: UpdateUserRolePayload,
+    dataBase: dataBase_dependency,
     token: str = Depends(oauth2_bearer)
 ):
     try:
-        
-        user = dataBase.query(Users).filter(Users.email == user_mail).first()
+        # Decode the token to get the current user details
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get('sub')
+        current_role: str = payload.get('role')
+        user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+
+        # Ensure the user has the admin role to perform this action
+        # if current_role != 'admin':
+        #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to change roles")
+
+        # Find the user in the database
+        user = dataBase.query(Users).filter(Users.id == user_uuid).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-        user.company_name = user_payload.company_name
+        # Update the role
+        user.role = role_payload.role
         dataBase.commit()
-        
-        return {'message': 'company updated successfully'}
+
+        return {'message': 'Role updated successfully'}
 
     except JWTError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't validate the user")
 
     except ValueError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid email format")
-    
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user_id format")
+
+
+
 
 @router.put("/id/{user_id}/company")
 async def update_user_company(

@@ -55,7 +55,7 @@ class AuthService {
     password,
     firstName,
     lastName,
-    role,
+    role ="user",
     icon = "",
     company_name,
   ) {
@@ -95,6 +95,23 @@ class AuthService {
   
     if (!response.ok) {
       throw new Error("Failed to register company");
+    }
+  
+    const data = await response.json();
+    return data;
+  }
+
+  static async getCompanyUsers(token) {
+    const response = await fetch(`${API_URL}/admin/company/users/`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+  
+    if (!response.ok) {
+      throw new Error("Failed to fetch company users");
     }
   
     const data = await response.json();

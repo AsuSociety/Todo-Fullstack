@@ -18,7 +18,7 @@ export const Register = () => {
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("user");
   const [icon, setIcon] = useState("");
   const [company, setCompany] = useState("");
   const [error, setError] = useState("");

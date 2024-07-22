@@ -58,6 +58,35 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  const updateRole = async (userId, role, token) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/${userId}/role`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ role: role }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Failed to update role: ${response.status} - ${response.statusText}`,
+        );
+      }
+
+      const result = await response.json();
+      setUser((prevUser) => ({
+        ...prevUser,
+        role: role,
+      }));
+      return result;
+    } catch (error) {
+      console.error("Error updating role:", error);
+      return null;
+    }
+  };
+
   // Function to update the user's company name
   const updateCompanyById = async (userId, company_name, token) => {
     try {
@@ -80,7 +109,7 @@ export const UserProvider = ({ children }) => {
       // console.log( icon);
       setUser((prevUser) => ({
         ...prevUser,
-        company_name: company_name, 
+        company_name: company_name,
       }));
       return result;
     } catch (error) {
@@ -91,7 +120,7 @@ export const UserProvider = ({ children }) => {
 
   const updateCompanyByMail = async (userMail, company_name, token) => {
     try {
-      const response = await fetch(`${API_URL}/auth/mail/${userMail}/company`, {
+      const response = await fetch(`${API_URL}/admin/mail/${userMail}/company`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -99,29 +128,99 @@ export const UserProvider = ({ children }) => {
         },
         body: JSON.stringify({ company_name: company_name }),
       });
-
+  
       if (!response.ok) {
         throw new Error(
           `Failed to update company name: ${response.status} - ${response.statusText}`,
         );
       }
-
+  
       const result = await response.json();
-      // console.log( icon);
+      // console.log("Result from API:", result); // Check what you are receiving from the API
+  
+      // Assuming result contains user details
       setUser((prevUser) => ({
         ...prevUser,
-        company_name: company_name, 
+        company_name: company_name,
       }));
-      return result;
+      return result; // Ensure this contains the full user details
     } catch (error) {
       console.error("Error updating company name:", error);
       return null;
     }
   };
+  
 
+  const updateRoleById = async (userId, role, token) => {
+    try {
+      const response = await fetch(`${API_URL}/admin/${userId}/role`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ role: role }),
+      });
+  
+      if (!response.ok) {
+        throw new Error(
+          `Failed to update role: ${response.status} - ${response.statusText}`,
+        );
+      }
+  
+      const result = await response.json();
+      // console.log("Result from API:", result); // Check what you are receiving from the API
+  
+      setUser((prevUser) => ({
+        ...prevUser,
+        role: role,
+      }));
+      return result; // Ensure this contains the full user details
+    } catch (error) {
+      console.error("Error updating role:", error);
+      return null;
+    }
+  };
+  
 
+  const deleteCompanyByMail = async (userId, token) => {
+    try {
+      const response = await fetch(`${API_URL}/admin/company/${userId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(
+          `Failed to delete user from company: ${response.status} - ${response.statusText}`,
+        );
+      }
+  
+      const result = await response.json();
+      return result;
+    } catch (error) {
+      console.error("Error deleting user from company:", error);
+      return null;
+    }
+  };
+  
   return (
-    <UserContext.Provider value={{ user, login, logout, updateIcon, updateCompanyById, updateCompanyByMail }}>
+    <UserContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        updateIcon,
+        updateRole,
+        updateCompanyById,
+        updateCompanyByMail,
+        deleteCompanyByMail,
+        updateRoleById,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

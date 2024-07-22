@@ -96,11 +96,23 @@ class AddUsersPayload(BaseModel):
     role: str = "user"
     company_name: str =""
 
+class GetUserResponse(BaseModel):
+    id: uuid.UUID
+    email: str
+    username: str
+    firstname: str
+    lastname: str
+    company_name: str
+    role: str
+
 class UpdateIconPayload(BaseModel):
     icon: str
 
 class UpdateCompanyName(BaseModel):
     company_name: str
+
+class UpdateUserRolePayload(BaseModel):
+    role: str 
 
 class Token(BaseModel):
     access_token: str
