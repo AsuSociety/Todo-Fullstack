@@ -109,10 +109,21 @@ const editTask = async (
   token,
   color = null,
   status = null,
-  date,
-  remainder,
+  deadline = null,
+  remainder = true,
   visibility
 ) => {
+  const payload = {
+    title: task.title,
+    body: task.body,
+    color: color,
+    status: status,
+    deadline: deadline,
+    remainder: remainder,
+    visibility: visibility,
+  };
+
+
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "PUT",
@@ -120,31 +131,25 @@ const editTask = async (
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        title: task.title,
-        body: task.body,
-        color: color,
-        status: status,
-        deadline: date,
-        remainder: remainder,
-        visibility: visibility,
-      }), // Include both body and title properties
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
+      const errorResponse = await response.json();
+      console.error('Error response:', errorResponse);
       throw new Error(
-        `Failed to update task: ${response.status} - ${response.statusText}`,
+        `Failed to update task: ${response.status} - ${response.statusText}`
       );
     }
 
-    const updatedTodo = await response.json(); // Parse response data
-    // console.log("EDIT TASK##########")
-    return updatedTodo; // Return updated todo
+    const updatedTodo = await response.json();
+    return updatedTodo;
   } catch (error) {
-    console.error("Error updating task:", error); // Log error if updating task fails
-    return null; // Return null if updating task fails
+    console.error("Error updating task:", error);
+    return null;
   }
 };
+
 const handleUpload = async (selectedFiles, todoId, token) => {
   try {
     const formData = new FormData();
@@ -284,6 +289,7 @@ export const TodoWrapper = () => {
       status: "",
       deadline: defaultDeadline,
       remainder: true,
+      visibility: 'private'
     };
 
     const addedTask = await addTodo(newTask, user.token);
@@ -302,6 +308,7 @@ export const TodoWrapper = () => {
       status: "",
       deadline: date,
       remainder: true,
+      visibility: 'private'
     };
 
     const addedTask = await addTodo(newTask, user.token);
@@ -329,18 +336,17 @@ export const TodoWrapper = () => {
       user.token,
       task.color,
       task.status,
-      task.deadline,
+      task.deadline ? new Date(task.deadline).toISOString() : null,
       task.remainder,
       task.visibility,
     );
     if (updatedTask) {
       setTodos((prevTodos) =>
-        prevTodos.map((todo) => (todo.id === id ? updatedTask : todo)),
+        prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
       );
     } else {
       console.error("Task update failed.");
     }
-    // console.log("$$$$$$$$$",updatedTask)
   };
 
   // Function to update the task status

@@ -3,12 +3,11 @@
 from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi import HTTPException, status, Request
 from typing import Annotated, List, Dict
-from models import  AddTasksPayload, Todos, GetTaskResponse,Photo
+from models import  AddTasksPayload,GetTaskResponse, Todos, Users,Photo, Company, TaskVisibility
 import uuid
 from pathlib import Path
 from fastapi_mail import FastMail, MessageSchema, MessageType
 import asyncio
-
 from .auth import get_current_user
 from database import  SessionLocal
 from sqlalchemy.orm import Session
@@ -16,7 +15,6 @@ from fastapi import BackgroundTasks
 from datetime import timedelta, datetime
 from config import conf
 import os
-
 import pytz
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.date import DateTrigger
@@ -49,6 +47,7 @@ def transform_todo_to_response(todo, base_url: URL):
 
     return {
         'id': todo.id,
+        'owner_id': todo.owner_id,
         'body': todo.body,
         'title': todo.title,
         'color': todo.color,
@@ -64,15 +63,23 @@ def transform_todo_to_response(todo, base_url: URL):
 # Define a GET endpoint to retrieve all tasks from the same user
 # get with database
 @router.get("/")
-async def get_todos_from_db(user:user_dependency,request: Request, dataBase:dataBase_dependency ):
+async def get_todos_from_db(user: user_dependency, request: Request, dataBase: dataBase_dependency):
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
-    todos = dataBase.query(Todos).filter(Todos.owner_id == uuid.UUID(user.get('id'))).all()
-    
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authenticated")
+
+    user_id = uuid.UUID(user.get('id'))
+    user_company_name = user.get('company_name')
+    todos_query = dataBase.query(Todos).join(Users, Todos.owner_id == Users.id).filter(
+        ((Todos.visibility == TaskVisibility.COMPANY) & (Users.company_name == user_company_name)) |
+        ((Todos.visibility == TaskVisibility.PRIVATE) & (Todos.owner_id == user_id))
+    )
+    todos = todos_query.all()
+
     base_url = request.base_url
     todo_list = [transform_todo_to_response(todo, base_url) for todo in todos]
-    
+
     return todo_list
+
 
 # Define a GET endpoint to retrieve task by ID
 # get with database
@@ -87,7 +94,6 @@ async def get_todos_from_db_by_id(user:user_dependency, dataBase:dataBase_depend
         return transform_todo_to_response(todo_model, base_url)
     # Raise an exception if the task is not found
     raise HTTPException(status_code=404, detail="Task not found")
-
 
 
 # Define a function to send emails
@@ -111,7 +117,6 @@ def send_email_sync(email: str, subject: str, body: str):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
 
-    # Run the asynchronous send_email function in the event loop
     loop.run_until_complete(send_email(email, subject, body))
 
 scheduler = BackgroundScheduler()
@@ -138,7 +143,6 @@ def schedule_email(email: str, subject: str, body: str, send_time: datetime):
 # Post with database
 @router.post("/")
 async def create_todo(user: user_dependency, dataBase:dataBase_dependency,task_payload: AddTasksPayload,request: Request, background_tasks: BackgroundTasks):
-    # Extract title and body from the payload
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
 
@@ -159,15 +163,43 @@ async def create_todo(user: user_dependency, dataBase:dataBase_dependency,task_p
 # Define a PUT endpoint to update a task by its ID
 # Put with database
 @router.put("/{todo_id}")
-async def update_todo(user:user_dependency, dataBase:dataBase_dependency,todo_id: uuid.UUID,request: Request, task_payload: AddTasksPayload):
+async def update_todo(
+    user: user_dependency,
+    dataBase: dataBase_dependency,
+    todo_id: uuid.UUID,
+    request: Request,
+    task_payload: AddTasksPayload
+):
     if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't validate the user")
 
-    todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).filter(Todos.owner_id == uuid.UUID(user.get('id'))).first()
+    user_id = uuid.UUID(user.get('id'))
+    user_company_name = user.get('company_name')
+
+    todo_model = (
+        dataBase.query(Todos)
+        .join(Users, Todos.owner_id == Users.id)
+        .filter(Todos.id == todo_id)
+        .first()
+    )
     if todo_model is None:
-        # Raise an exception if the task is not found
-        raise HTTPException(status_code=404, detail="Task not found")  
-    
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    related_user = (
+        dataBase.query(Users)
+        .filter(Users.id == todo_model.owner_id)
+        .first()
+    )
+
+    if related_user is None:
+        raise HTTPException(status_code=404, detail="Related user not found")
+
+    if not (
+        todo_model.owner_id == user_id or
+        (todo_model.visibility == TaskVisibility.COMPANY and related_user.company_name == user_company_name)
+    ):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to update this task")
+
     todo_model.title = task_payload.title
     todo_model.body = task_payload.body
     todo_model.color = task_payload.color
@@ -179,33 +211,23 @@ async def update_todo(user:user_dependency, dataBase:dataBase_dependency,todo_id
     dataBase.add(todo_model)
     dataBase.commit()
     dataBase.refresh(todo_model)
-
-    # Remove existing email job if needed
     scheduler.remove_all_jobs()
 
     if todo_model.deadline is not None:
         if todo_model.deadline.tzinfo is None:
             todo_model.deadline = ISRAEL_TZ.localize(todo_model.deadline)
 
-    # Get current time in UTC
     now = datetime.now(ISRAEL_TZ)
-
-    # Calculate reminder time to be one day before the deadline
     reminder_time = todo_model.deadline - timedelta(days=1) + timedelta(minutes=1)
-
-    # Calculate the time difference from now to the reminder time
     time_difference = reminder_time - now
 
-    # Schedule the email if the reminder time is in the future
-    # if time_difference.total_seconds() > 10 :
-    if time_difference.total_seconds() > 10 and todo_model.remainder == True :
-        schedule_email(user.get('email'), "Task Reminder", f"Reminder: Your task '{todo_model.title}' is due in 24 hour!", reminder_time)
+    if time_difference.total_seconds() > 10 and todo_model.remainder:
+        schedule_email(user.get('email'), "Task Reminder", f"Reminder: Your task '{todo_model.title}' is due in 24 hours!", reminder_time)
     else:
-        print("The reminder time is in the past or the user dont want a remainder; email will not be scheduled.")
+        print("The reminder time is in the past or the user doesn't want a reminder; email will not be scheduled.")
 
     base_url = request.base_url
     return transform_todo_to_response(todo_model, base_url)
-
 
 # Define a DELETE endpoint to delete a task by its ID
 # Delete with database
@@ -220,7 +242,6 @@ async def delete_todo(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user"
         )
     
-    # Find the task
     todo = dataBase.query(Todos).filter(
         Todos.id == todo_id,
         Todos.owner_id == uuid.UUID(user.get('id'))
@@ -229,7 +250,6 @@ async def delete_todo(
     if todo is None:
         raise HTTPException(status_code=404, detail="Task not found")
     
-    # Delete associated photos
     for photo in todo.photos:
         try:
             photo_path = Path(photo.photo_url)  # Adjust if necessary to get the file path
@@ -239,13 +259,10 @@ async def delete_todo(
         except Exception as e:
             print(f"Failed to delete photo with ID {photo.id}: {e}")
 
-    # Delete the task
     dataBase.delete(todo)
     dataBase.commit()
 
     return {"detail": "Task deleted successfully"}
-
-
 
 
 @router.post("/send-test-email")
@@ -256,8 +273,6 @@ async def send_test_email(email: str, background_tasks: BackgroundTasks):
     return {"message": "Test email sent"}
 
 
-
-# Define a directory for file uploads
 UPLOAD_DIRECTORY = "uploads/"
 Path(UPLOAD_DIRECTORY).mkdir(parents=True, exist_ok=True)
 
@@ -277,9 +292,7 @@ async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataB
         file_location = os.path.join(UPLOAD_DIRECTORY, f"{uuid.uuid4()}_{file.filename}")
         with open(file_location, "wb") as f:
             f.write(await file.read())
-        
-        
-        # Create Photo object and add to database
+                
         photo_url = f"{request.base_url}uploads/{os.path.basename(file_location)}"
         photo = Photo(todo_id=todo_id, photo_path=file_location, photo_url=photo_url)
         dataBase.add(photo)
@@ -287,8 +300,6 @@ async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataB
 
     # Commit transaction
     dataBase.commit()
-    # print("$$$$$$$$$$$$$$$$$$")
-    # print(photo_url)
     todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).first()
     base_url = request.base_url
     return transform_todo_to_response(todo_model, base_url)
@@ -319,7 +330,6 @@ async def delete_photo(photo_id: int, user: user_dependency, dataBase: dataBase_
         os.remove(photo.photo_path)
 
     return {"message": "Photo deleted successfully"}
-
 
 
 def list_uploaded_files(directory: str):

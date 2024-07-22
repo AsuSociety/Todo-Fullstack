@@ -39,8 +39,8 @@ def authenticate_user(username: str, passowrd: str, dataBase):
         return False
     return user
 
-def create_access_token(username: str, user_id: Union[str, uuid.UUID],role: str, email:str ,expires_delta: timedelta):
-     encode = {'sub': username, 'id': str(user_id), 'role': role, 'email':email}
+def create_access_token(username: str, user_id: Union[str, uuid.UUID],role: str, email:str, company_name: str ,expires_delta: timedelta):
+     encode = {'sub': username, 'id': str(user_id), 'role': role, 'email':email,'company_name':company_name}
      expires = datetime.utcnow()+ expires_delta
      encode.update({'exp' : expires})
      return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -53,10 +53,11 @@ async def get_current_user(token: Annotated[str,Depends(oauth2_bearer)]):
           user_id: uuid = payload.get('id')
           role: str= payload.get('role')
           email: str=payload.get('email')
+          company_name: str=payload.get('company_name')
 
           if username is None or user_id is None:
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
-          return {'username':username, 'id':user_id, 'role':role, 'email':email}
+          return {'username':username, 'id':user_id, 'role':role, 'email':email, 'company_name':company_name}
      except JWTError:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
 
@@ -101,7 +102,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         if not user:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
         
-        token = create_access_token(user.username, user.id, user.role,user.email, timedelta(minutes=20))
+        token = create_access_token(user.username, user.id, user.role,user.email,user.company_name, timedelta(minutes=20))
         # return {'access_token': token, 'type_of_token': 'bearer', 'username':user.username, 'email': user.email, 'first_name': user.firstname, 'last_name': user.lastname, 'role': user.role}
         response = {
         'access_token': token,
@@ -166,9 +167,6 @@ async def update_user_company_by_mail(
     token: str = Depends(oauth2_bearer)
 ):
     try:
-        # payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        # username: str = payload.get('sub')
-        # user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
         
         user = dataBase.query(Users).filter(Users.email == user_mail).first()
         if not user:

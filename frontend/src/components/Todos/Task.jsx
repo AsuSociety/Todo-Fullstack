@@ -120,6 +120,7 @@ export const Task = ({
         color: task.color,
         status: task.status,
         deadline: task.deadline,
+        visibility: task.visibility,
       },
       task.id,
     );

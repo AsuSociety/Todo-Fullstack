@@ -1,7 +1,6 @@
 # models.py
 from datetime import datetime
 from typing import List, Optional
-# from database import Base
 from fastapi import FastAPI
 from pydantic import BaseModel, UUID4, EmailStr, Field
 import uuid
@@ -21,7 +20,6 @@ class Company(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
-
     users = relationship("Users", back_populates="company")
 
 
@@ -38,7 +36,6 @@ class Users(Base):
     role= Column(String)
     icon= Column(String)
     company_name = Column(String, ForeignKey('companies.name'))
-
     company = relationship("Company", back_populates="users")
 
 
@@ -48,7 +45,6 @@ class Photo(Base):
     todo_id = Column(PG_UUID(as_uuid=True),ForeignKey('todos.id'))
     photo_path = Column(String, nullable=False)
     photo_url = Column(String, nullable=False)
-
     todo = relationship("Todos", back_populates="photos")
     
 
@@ -65,7 +61,6 @@ class Todos(Base):
     remainder = Column(Boolean, default=True)
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
     visibility = Column(SQLAEnum(TaskVisibility), default=TaskVisibility.PRIVATE)
-
     photos = relationship("Photo", back_populates="todo")
 
 
@@ -76,11 +71,11 @@ class AddTasksPayload(BaseModel):
     status: str
     deadline: Optional[datetime] = None  
     remainder : bool = True
-    visibility: TaskVisibility = TaskVisibility.PRIVATE  
-
+    visibility: TaskVisibility 
 
 class GetTaskResponse(BaseModel):
     id: uuid.uuid4
+    owner_id: uuid.uuid4
     title: str
     body: str
     color: str = None
@@ -90,8 +85,6 @@ class GetTaskResponse(BaseModel):
     photo_urls : list[str]
     photo_ids : list[int]
     visibility: TaskVisibility = TaskVisibility.PRIVATE  
-
-
 
 class AddUsersPayload(BaseModel):
     email: str = Field(min_length=8)

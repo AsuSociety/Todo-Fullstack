@@ -1,26 +1,16 @@
 import React, { useState, useRef, useEffect } from "react"; // Import React and necessary hooks
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {  faTrash, faImage } from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faImage } from "@fortawesome/free-solid-svg-icons";
 import { ChangeStatus } from "./ChangeStatus";
 import { ChangeVisibility } from "./ChangeVisibility";
 
 import { DatePicker } from "./DatePicker";
 import { Task } from "./Task";
+import { Toolbar } from "./Toolbar";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
 
 import {
   Table,
@@ -47,6 +37,10 @@ export const TaskTable = (props) => {
   const [open, setOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(null);
 
+  const [filterTitle, setFilterTitle] = useState("");  
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterVisibility, setFilterVisibility] = useState("");
+  
 
   useEffect(() => {
     if (props.selectedTask) {
@@ -55,7 +49,6 @@ export const TaskTable = (props) => {
       props.setSelectedTask(null); // Clear selected task after opening
     }
   }, [props.selectedTask]);
-
 
   const handleCheckboxChange = (taskId, currentValue) => {
     const newValue = !currentValue;
@@ -73,7 +66,6 @@ export const TaskTable = (props) => {
 
   const handleFileChange = (e) => {
     setSelectedFiles(Array.from(e.target.files));
-
   };
 
   const handleOpenDialog = (todo) => {
@@ -86,143 +78,169 @@ export const TaskTable = (props) => {
     setSelectedTodo(null);
   };
 
+  const filteredTasks = props.tasks.filter(todo => {
+    return (
+      (filterTitle ? todo.title.includes(filterTitle) : true) &&
+      (filterStatus ? todo.status === filterStatus : true) &&
+      (filterVisibility ? todo.visibility === filterVisibility : true)
+    );
+  });
+
   return (
-    <div>
-      <Table
-        className="table-auto border-collapse border border-gray-300"
-        style={{ tableLayout: "fixed" }}
-      >
-        <TableHeader>
-          <TableRow>
-            <TableHead className="w-[180px] border border-gray-300">
-              Task
-            </TableHead>
-            <TableHead className="text-center  w-[40px] border border-gray-300">
-            Visibility
-            </TableHead>
-            <TableHead className="text-center  w-[80px] border border-gray-300">
-              Status
-            </TableHead>
-            <TableHead className="text-center w-[70px] border border-gray-300">
-              Date
-            </TableHead>
-            <TableHead className="text-center w-[20px]  border border-gray-300">
-              Remainder
-            </TableHead>
-            <TableHead
-              className="text-center border border-gray-300"
-              style={{ width: "20px", padding: "0px" }}
-            >
-              Photos
-            </TableHead>
-            <TableHead
-              className="text-center border border-gray-300"
-              style={{ width: "20px", padding: "0px" }}
-            >
-              Delete
-            </TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {props.tasks.map((todo) => (
-            <TableRow key={todo.id} className="border border-gray-300">
-              <TableCell
-                className="font-medium font-bold border border-gray-300 "
-                onClick={() => handleOpenDialog(todo)}
-              >
-                {todo.title}
-                <p className="text-sm font-thin ">{todo.body}</p>
-              </TableCell>
-              <TableCell
-                className="text-center border border-gray-300  "
-                // style={{ backgroundColor: todo.color }}
-              >
-                <ChangeVisibility
-                  updateVisibility={props.updateVisibility}
-                  id={todo.id}
-                  currentVisibility={todo.visibility}
-                />
-              </TableCell>
-              <TableCell
-                className="text-center border border-gray-300  "
-                style={{ backgroundColor: todo.color }}
-              >
-                <ChangeStatus
-                  updateTaskStatus={props.updateTaskStatus}
-                  id={todo.id}
-                  currentStatus={todo.status}
-                />
-              </TableCell>
-              <TableCell className="text-center border border-gray-300">
-                <DatePicker
-                  updateDeadline={props.updateDeadline}
-                  todo={todo}
-                  currentDeadline={todo.deadline}
-                  updateRemainder={props.updateRemainder}
-                  normalizeDate={props.normalizeDate}
-                  convertToUTCISO={props.convertToUTCISO}
-                />
-              </TableCell>
-              <TableCell className="text-center border border-gray-300">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="terms"
-                    checked={todo.remainder}
-                    onCheckedChange={() =>
-                      handleCheckboxChange(todo.id, todo.remainder)
-                    }
-                  />
-                  <label
-                    htmlFor="terms"
-                    className="text-sm font-thin leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Remaind Me!
-                  </label>
-                </div>
-              </TableCell>
-
-              <TableCell className="text-center border border-gray-300">
-                <FontAwesomeIcon
-                  icon={faImage}
-                  className="text-gray-600 cursor-pointer hover:text-yellow-500"
-                  onClick={handleIconClick}
-                />
-                <input
-                  id="picture"
-                  name="image"
-                  type="file"
-                  onChange={handleFileChange}
-                  multiple
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                />
-                <Button
-                  variant="outline"
-                  className="p-1 w-6 h-6 justify-center text-gray-600 cursor-pointer hover:text-yellow-500"
-                  onClick={() => props.handleUploadClick(todo.id, selectedFiles)}
-                >
-                  <ChevronRight className="h-3 w-3" />
-                </Button>
-              </TableCell>
-              <TableCell className="text-center border border-gray-300 ">
-                <FontAwesomeIcon
-                  icon={faTrash}
-                  className="text-gray-600 cursor-pointer hover:text-red-500"
-                  onClick={() => props.deleteTodo(todo.id)}
-                />
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-
-      <Task
-        open={open}
-        onClose={handleCloseDialog}
-        task={selectedTodo}
-        handleSave={props.handleSave}
-        handleDeletePhoto={props.handleDeletePhoto}
+    <div className="space-y-4">
+      <Toolbar
+        filterTitle={filterTitle}
+        setFilterTitle={setFilterTitle}
+        filterStatus={filterStatus}
+        setFilterStatus={setFilterStatus}
+        filterVisibility={filterVisibility}
+        setFilterVisibility={setFilterVisibility}
+        resetFilters={() => {
+          setFilterTitle("");
+          setFilterStatus("");
+          setFilterVisibility("");
+        }}
       />
+      <div className="rounded-md border">
+      <Table
+          className="table-auto border-collapse border border-gray-300"
+          style={{ tableLayout: "fixed" }}
+        >
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[180px] border border-gray-300">
+                Task
+              </TableHead>
+              <TableHead className="text-center  w-[40px] border border-gray-300">
+                Visibility
+              </TableHead>
+              <TableHead className="text-center  w-[80px] border border-gray-300">
+                Status
+              </TableHead>
+              <TableHead className="text-center w-[70px] border border-gray-300">
+                Date
+              </TableHead>
+              <TableHead className="text-center w-[20px]  border border-gray-300">
+                Remainder
+              </TableHead>
+              <TableHead
+                className="text-center border border-gray-300"
+                style={{ width: "20px", padding: "0px" }}
+              >
+                Photos
+              </TableHead>
+              <TableHead
+                className="text-center border border-gray-300"
+                style={{ width: "20px", padding: "0px" }}
+              >
+                Delete
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {/* {props.tasks.map((todo) => ( */}
+            {filteredTasks.map((todo) => (
+              <TableRow key={todo.id} className="border border-gray-300">
+                <TableCell
+                  className="font-medium font-bold border border-gray-300 "
+                  onClick={() => handleOpenDialog(todo)}
+                >
+                  {todo.title}
+                  <p className="text-sm font-thin ">{todo.body}</p>
+                </TableCell>
+                <TableCell
+                  className="text-center border border-gray-300  "
+                  // style={{ backgroundColor: todo.color }}
+                >
+                  <ChangeVisibility
+                    updateVisibility={props.updateVisibility}
+                    id={todo.id}
+                    currentVisibility={todo.visibility}
+                  />
+                </TableCell>
+                <TableCell
+                  className="text-center border border-gray-300  "
+                  style={{ backgroundColor: todo.color }}
+                >
+                  <ChangeStatus
+                    updateTaskStatus={props.updateTaskStatus}
+                    id={todo.id}
+                    currentStatus={todo.status}
+                  />
+                </TableCell>
+                <TableCell className="text-center border border-gray-300">
+                  <DatePicker
+                    updateDeadline={props.updateDeadline}
+                    todo={todo}
+                    currentDeadline={todo.deadline}
+                    updateRemainder={props.updateRemainder}
+                    normalizeDate={props.normalizeDate}
+                    convertToUTCISO={props.convertToUTCISO}
+                  />
+                </TableCell>
+                <TableCell className="text-center border border-gray-300">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="terms"
+                      checked={todo.remainder}
+                      onCheckedChange={() =>
+                        handleCheckboxChange(todo.id, todo.remainder)
+                      }
+                    />
+                    <label
+                      htmlFor="terms"
+                      className="text-sm font-thin leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
+                      Remaind Me!
+                    </label>
+                  </div>
+                </TableCell>
+
+                <TableCell className="text-center border border-gray-300">
+                  <FontAwesomeIcon
+                    icon={faImage}
+                    className="text-gray-600 cursor-pointer hover:text-yellow-500"
+                    onClick={handleIconClick}
+                  />
+                  <input
+                    id="picture"
+                    name="image"
+                    type="file"
+                    onChange={handleFileChange}
+                    multiple
+                    ref={fileInputRef}
+                    style={{ display: "none" }}
+                  />
+                  <Button
+                    variant="outline"
+                    className="p-1 w-6 h-6 justify-center text-gray-600 cursor-pointer hover:text-yellow-500"
+                    onClick={() =>
+                      props.handleUploadClick(todo.id, selectedFiles)
+                    }
+                  >
+                    <ChevronRight className="h-3 w-3" />
+                  </Button>
+                </TableCell>
+                <TableCell className="text-center border border-gray-300 ">
+                  <FontAwesomeIcon
+                    icon={faTrash}
+                    className="text-gray-600 cursor-pointer hover:text-red-500"
+                    onClick={() => props.deleteTodo(todo.id)}
+                  />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+
+        <Task
+          open={open}
+          onClose={handleCloseDialog}
+          task={selectedTodo}
+          handleSave={props.handleSave}
+          handleDeletePhoto={props.handleDeletePhoto}
+        />
+      </div>
     </div>
   );
 };
