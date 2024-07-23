@@ -56,7 +56,7 @@ export const ChangeStatus = (props) => {
 
   const handleStatus = (id, status, color) => {
     props.updateTaskStatus(id, color, status);
-
+    console.log(color)
     setSelectedStatus(
       statuses.find((priority) => priority.value === status) || null,
     );

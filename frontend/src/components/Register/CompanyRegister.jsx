@@ -30,7 +30,7 @@ export const CompanyRegister = () => {
       // Perform registration
       await AuthService.companyRegister(company);
       setCompany("");
-      updateRole(user.id,'admin',user.token)
+      updateRole(user.id,'CEO',user.token)
       // Navigate back to login screen
       navigate("/Company");
     } catch (error) {

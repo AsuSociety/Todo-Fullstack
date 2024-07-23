@@ -33,7 +33,7 @@ async def get_company_users(
     current_user: user_dependency,
     dataBase: dataBase_dependency
 ):
-    if current_user['role'] != 'admin':
+    if current_user['role'] != 'admin' and current_user['role'] != 'CEO':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
     
     company_name = current_user['company_name']
@@ -87,7 +87,7 @@ async def remove_user_from_company(
     current_user: user_dependency, 
     token: str = Depends(oauth2_bearer)
 ):
-    if current_user['role'] != 'admin':
+    if current_user['role'] != 'admin' and current_user['role'] != 'CEO':
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to perform this action")
     
     try:
@@ -128,7 +128,7 @@ async def update_user_role(
         user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
 
         # Ensure the user has the admin role to perform this action
-        if current_role != 'admin':
+        if current_role != 'admin' and current_role != 'CEO':
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to change roles")
 
         # Find the user in the database

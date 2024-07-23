@@ -36,9 +36,9 @@ export const Company = () => {
     const fetchCompanyUsers = async () => {
       try {
         const users = await AuthService.getCompanyUsers(user.token);
-        // Filter out the current user
+        // Filter out the current user and CEO
         const filteredUsers = users.filter(
-          (companyUser) => companyUser.email !== user.email,
+          (companyUser) => companyUser.email !== user.email && companyUser.role !== 'CEO'
         );
         setCompanyUsers(filteredUsers);
       } catch (error) {
@@ -47,6 +47,7 @@ export const Company = () => {
     };
     fetchCompanyUsers();
   }, [user.token, user.email]);
+  
 
   const handleRegister = async () => {
     console.log("Registering user:", userEmail, "Company:", user.company_name);

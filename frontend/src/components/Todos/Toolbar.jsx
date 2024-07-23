@@ -14,14 +14,14 @@ export const Toolbar = (props) => {
           placeholder="Filter tasks..."
           value={props.filterTitle}
           onChange={(event) => props.setFilterTitle(event.target.value)}
-          className="h-8 w-[150px] lg:w-[250px]"
+          className="h-8 w-[150px] lg:w-[200px]"
         />
 
         <Select
           value={props.filterStatus}
           onValueChange={(value) => props.setFilterStatus(value)}
         >
-          <SelectTrigger className="h-8 w-[150px] lg:w-[250px]">
+          <SelectTrigger className="h-8 w-[150px] lg:w-[150px]">
             <span>{props.filterStatus || "Filter by status..."}</span>
           </SelectTrigger>
           <SelectContent>
@@ -37,7 +37,7 @@ export const Toolbar = (props) => {
           value={props.filterVisibility}
           onValueChange={(value) => props.setFilterVisibility(value)}
         >
-          <SelectTrigger className="h-8 w-[150px] lg:w-[250px]">
+          <SelectTrigger className="h-8 w-[150px] lg:w-[170px]">
             <span>{props.filterVisibility || "Filter by visibility..."}</span>
           </SelectTrigger>
           <SelectContent>

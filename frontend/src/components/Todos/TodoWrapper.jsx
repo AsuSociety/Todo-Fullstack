@@ -12,15 +12,24 @@ Overall, it provides a convenient way for you to organize and keep track of your
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 import { useUser } from "../UserContext";
 import { TaskTable } from "./TaskTable";
-import {CalendarView} from "./CalendarView";
+import { CalendarView } from "./CalendarView";
+import { KanbanBoard } from "./KanbanBoard";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCalendar,faTable, faCalendarDays } from "@fortawesome/free-solid-svg-icons";
+import {
+  faClipboard,
+  faTable,
+  faCalendarDays,
+} from "@fortawesome/free-solid-svg-icons";
 import { useNavigate } from "react-router-dom";
-
 import { Profile } from "./Profile";
-
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 // Define API_URL constant for API endpoint
 export const API_URL = "http://localhost:8000";
@@ -111,7 +120,7 @@ const editTask = async (
   status = null,
   deadline = null,
   remainder = true,
-  visibility
+  visibility,
 ) => {
   const payload = {
     title: task.title,
@@ -122,7 +131,6 @@ const editTask = async (
     remainder: remainder,
     visibility: visibility,
   };
-
 
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
@@ -136,9 +144,9 @@ const editTask = async (
 
     if (!response.ok) {
       const errorResponse = await response.json();
-      console.error('Error response:', errorResponse);
+      console.error("Error response:", errorResponse);
       throw new Error(
-        `Failed to update task: ${response.status} - ${response.statusText}`
+        `Failed to update task: ${response.status} - ${response.statusText}`,
       );
     }
 
@@ -183,7 +191,6 @@ const handleUpload = async (selectedFiles, todoId, token) => {
     return null;
   }
 };
-
 
 const deletePhoto = async (photoId, todoId, token) => {
   try {
@@ -289,7 +296,7 @@ export const TodoWrapper = () => {
       status: "",
       deadline: defaultDeadline,
       remainder: true,
-      visibility: 'private'
+      visibility: "private",
     };
 
     const addedTask = await addTodo(newTask, user.token);
@@ -308,7 +315,7 @@ export const TodoWrapper = () => {
       status: "",
       deadline: date,
       remainder: true,
-      visibility: 'private'
+      visibility: "private",
     };
 
     const addedTask = await addTodo(newTask, user.token);
@@ -317,7 +324,6 @@ export const TodoWrapper = () => {
       setSelectedTask(addedTask);
     }
   };
-
 
   // Function to handle deleting a todo
   const handleDeleteTodo = async (id) => {
@@ -342,7 +348,7 @@ export const TodoWrapper = () => {
     );
     if (updatedTask) {
       setTodos((prevTodos) =>
-        prevTodos.map((todo) => (todo.id === id ? updatedTask : todo))
+        prevTodos.map((todo) => (todo.id === id ? updatedTask : todo)),
       );
     } else {
       console.error("Task update failed.");
@@ -466,11 +472,14 @@ export const TodoWrapper = () => {
     }
   };
 
-    // Toggle view between table and calendar
-    const toggleView = () => {
-      setView((prevView) => (prevView === "table" ? "calendar" : "table"));
-    };
-  
+  // Toggle view between table and calendar
+  const toggleView = () => {
+    setView((prevView) => {
+      if (prevView === "table") return "calendar";
+      if (prevView === "calendar") return "kanban";
+      return "table";
+    });
+  };
 
   // JSX structure returned by the TodoWrapper component
   return (
@@ -487,16 +496,36 @@ export const TodoWrapper = () => {
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <FontAwesomeIcon
-              icon={view === "calendar" ? faTable : faCalendarDays}
-              className="text-gray-600 cursor-pointer hover:text-cyan-600"
-              onClick={toggleView}
-            />
+            <Select onValueChange={setView} defaultValue={view}>
+              <SelectTrigger className="flex items-center h-8 w-[30px] lg:w-[40px]">
+                <FontAwesomeIcon
+                  icon={
+                    view === "table"
+                      ? faTable
+                      : view === "calendar"
+                        ? faCalendarDays
+                        : faClipboard
+                  }
+                  className="text-lg"
+                />
+              </SelectTrigger>
+              <SelectContent className="flex items-center ">
+                <SelectItem value="table" className="flex items-center">
+                  <FontAwesomeIcon icon={faTable} className="text-lg" />
+                </SelectItem>
+                <SelectItem value="calendar" className="flex items-center">
+                  <FontAwesomeIcon icon={faCalendarDays} className="text-lg" />
+                </SelectItem>
+                <SelectItem value="kanban" className="flex items-center">
+                  <FontAwesomeIcon icon={faClipboard} className="text-lg" />
+                </SelectItem>
+              </SelectContent>
+            </Select>
             <Profile />
           </div>
         </div>
       </div>
-  
+
       {/* Content area that scrolls */}
       <div className="flex-1 overflow-y-auto mt-4">
         {/* Add Task button */}
@@ -509,9 +538,7 @@ export const TodoWrapper = () => {
             Add Task
           </Button>
         </div>
-  
-        {/* TaskTable or CalendarView */}
-        {view === "table" ? (
+        {view === "table" && (
           <TaskTable
             tasks={todos}
             deleteTodo={handleDeleteTodo}
@@ -528,10 +555,11 @@ export const TodoWrapper = () => {
             handleDeletePhoto={handleDeletePhoto}
             updateVisibility={updateVisibility}
           />
-        ) : (
+        )}
+        {view === "calendar" && (
           <CalendarView
             tasks={todos}
-            setTodos ={setTodos}
+            setTodos={setTodos}
             handleAddTask={handleAddTaskInCalendar}
             handleSave={handleSave}
             handleDeleteTodo={handleDeleteTodo}
@@ -548,9 +576,10 @@ export const TodoWrapper = () => {
             updateVisibility={updateVisibility}
           />
         )}
+        {view === "kanban" && (
+          <KanbanBoard tasks={todos} updateTaskStatus={updateTaskStatus} />
+        )}
       </div>
     </div>
   );
-  
-  
 };

@@ -79,7 +79,9 @@ export const Profile = () => {
     navigate("/company");
   };
 
+  const isCEO = user.role === "CEO";
   const isAdmin = user.role === "admin";
+
   const hasCompany = user.company_name;
 
   return (
@@ -117,7 +119,7 @@ export const Profile = () => {
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
             {hasCompany ? (
-              isAdmin ? (
+              isAdmin||isCEO ? (
                 <DropdownMenuItem onClick={handleCompanyPage}>
                   Company 
                   <DropdownMenuShortcut>⇧⌘W</DropdownMenuShortcut>
