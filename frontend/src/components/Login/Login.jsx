@@ -42,6 +42,7 @@ export const Login = () => {
   }
 
   return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
@@ -82,14 +83,10 @@ export const Login = () => {
             Sign up as User
           </Button>
         </div>
-        {/* <div className="mt-4 text-center text-sm">
-          <Button type="submit" onClick={handleCompanyRegister} className="w-full">
-            Sign up as Company
-          </Button>
-        </div> */}
         {error && <p style={{ color: "red" }}>{error}</p>}
       </CardContent>
     </Card>
+    </div>
   );
 };
 

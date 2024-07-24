@@ -19,12 +19,10 @@ const visibilities = [
   {
     value: "private",
     label: "Private",
-    // color: "#71717a",
   },
   {
     value: "company",
     label: "Company",
-    // color: "#f59e0b",
   },
 ];
 

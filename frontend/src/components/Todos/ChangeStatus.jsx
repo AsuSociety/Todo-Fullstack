@@ -23,22 +23,22 @@ const statuses = [
   {
     value: "todo",
     label: "Todo",
-    color: "#71717a",
+    color: "#bae1ff",
   },
   {
     value: "in progress",
     label: "In Progress",
-    color: "#f59e0b",
+    color: "#ffdfba",
   },
   {
     value: "done",
     label: "Done",
-    color: "#84cc16",
+    color: "#baffc9",
   },
   {
     value: "canceled",
     label: "Canceled",
-    color: "#ef4444",
+    color: "#ffb3ba",
   },
 ];
 

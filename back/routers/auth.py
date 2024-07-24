@@ -75,6 +75,18 @@ async def get_user_by_username(dataBase: dataBase_dependency, username:str):
     return user
 
 
+@router.get("/users/{user_id}")
+async def get_user_by_id(user_id: Union[str, uuid.UUID], dataBase: dataBase_dependency):
+    try:
+        user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+        user = dataBase.query(Users).filter(Users.id == user_uuid).first()
+        if user is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return user
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid user_id format")
+
+
 @router.post("/")
 async def create_user(dataBase: dataBase_dependency, 
                       user_payload: AddUsersPayload):

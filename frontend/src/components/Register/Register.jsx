@@ -61,6 +61,7 @@ export const Register = () => {
     navigate("/login");
   }
   return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
     <Card className="mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-xl">Sign Up</CardTitle>
@@ -74,26 +75,6 @@ export const Register = () => {
       <CardContent>
         <div className="grid gap-4">
           <div className="grid grid-cols-2 gap-4">
-            {/* <div className="grid gap-2">
-              <Label htmlFor="role">Company</Label>
-              <Input
-                id="company"
-                placeholder="company name"
-                value={company}
-                onChange={(e) => setCompany(e.target.value)}
-                required
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="role">Role</Label>
-              <Input
-                id="role"
-                placeholder="User"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                required
-              />
-            </div> */}
             <div className="grid gap-2">
               <Label htmlFor="first-name">First name</Label>
               <Input
@@ -157,6 +138,7 @@ export const Register = () => {
         </div>
       </CardContent>
     </Card>
+    </div>
   );
 };
 

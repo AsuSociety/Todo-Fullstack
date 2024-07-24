@@ -28,8 +28,9 @@ export const Task = ({
   handleSave,
   handleDeletePhoto,
 }) => {
-  const { user } = useUser();
+  const { user, getUserById } = useUser();
   const [selectedIconSrc, setSelectedIconSrc] = useState("");
+  const [selectedUserIconSrc, setSelectedUserIconSrc] = useState("");
   const [photoUrls, setPhotoUrls] = useState([]);
   const [photoIds, setPhotoIds] = useState([]);
   const [error, setError] = useState(null);
@@ -37,15 +38,27 @@ export const Task = ({
   const [editedBody, setEditedBody] = useState("");
   const [isListening, setIsListening] = useState(false);
   const [activeField, setActiveField] = useState(null);
+  const [assignee, setAssignee] = useState(null);
+
+  useEffect(() => {
+    if (user && assignee) {
+      const initialIcon = profiles.find(
+        (profile) => profile.value === assignee.icon,
+      );
+      setSelectedIconSrc(initialIcon ? initialIcon.icon_src : "");
+    }
+  }, [user, assignee]);
+
 
   useEffect(() => {
     if (user) {
       const initialIcon = profiles.find(
         (profile) => profile.value === user.icon,
       );
-      setSelectedIconSrc(initialIcon ? initialIcon.icon_src : "");
+      setSelectedUserIconSrc(initialIcon ? initialIcon.icon_src : "");
     }
   }, [user]);
+
 
   useEffect(() => {
     if (open && task) {
@@ -54,9 +67,22 @@ export const Task = ({
       setPhotoUrls(task.photo_urls || []); 
       setPhotoIds(task.photo_ids || []);
       setError(null);
-      console.log(photoIds)
+
+      // Fetch user details if owner_id is present
+      if (task.owner_id) {
+        const fetchUserDetails = async () => {
+          const token = user?.token; // Assuming user object contains token
+          const fetchedUser = await getUserById(task.owner_id, token);
+          if (fetchedUser) {
+            setAssignee(fetchedUser);
+          } else {
+            setError("Failed to fetch user details.");
+          }
+        };
+        fetchUserDetails();
+      }
     }
-  }, [open, task]);
+  }, [open, task, getUserById, user]);
 
   useEffect(() => {
     if (isListening) {
@@ -127,7 +153,6 @@ export const Task = ({
     onClose();
   };
 
-
   useEffect(() => {
     if (task && task.photos) {
       const ids = task.photos.map(photo => photo.id);
@@ -136,7 +161,6 @@ export const Task = ({
       setPhotoUrls(urls);
     }
   }, [task]);
-  
 
   const handlePhotoDelete = async (photoId) => {
     try {
@@ -155,11 +179,7 @@ export const Task = ({
       setError("Failed to delete photo.");
     }
   };
-  
-  
-  
 
-  
   if (!task) return null;
 
   const formattedDeadline = format(new Date(task.deadline), "MMMM d, yyyy");
@@ -218,7 +238,7 @@ export const Task = ({
                   {photoIds.map((id, index) => (
                     <div key={id} className="w-32 h-32 overflow-hidden relative">
                       <img
-                        src={photoUrls[index]} // Map photoIds to their corresponding URLs
+                        src={photoUrls[index]}
                         alt={`Task Photo ${index}`}
                         className="w-full h-full object-contain rounded-md shadow-sm"
                       />
@@ -239,33 +259,45 @@ export const Task = ({
         </div>
         <div className="w-1/3 pl-4 border-l border-gray-200 flex-shrink-0">
           <div className="mb-4">
-            <p className="font-medium">Assignee:</p>
+            <p className="font-medium">Creator:</p>
             <div className="flex items-center">
               <Avatar className="h-9 w-9">
                 <AvatarImage src={selectedIconSrc} alt="@avatar-icon" />
                 <AvatarFallback>User</AvatarFallback>
               </Avatar>
               <p className="text-gray-700 ml-2">
-                {user.first_name} {user.last_name}
+                {assignee ? `${assignee.firstname} ${assignee.lastname} (${assignee.role})` : "Loading..."}
+              </p>
+            </div>
+          </div>
+          <div className="mb-4">
+            <p className="font-medium">Assignee:</p>
+            <div className="flex items-center">
+              <Avatar className="h-9 w-9">
+                <AvatarImage src={selectedUserIconSrc} alt="@avatar-icon" />
+                <AvatarFallback>User</AvatarFallback>
+              </Avatar>
+              <p className="text-gray-700 ml-2">
+                {assignee ? `${user.first_name} ${user.last_name} (${user.role})` : "Loading..."}
               </p>
             </div>
           </div>
           <div className="mb-4">
             <p className="font-medium">Status:</p>
-            <p className="text-sm" style={{ color: task.color }}>
-              {task.status}
-            </p>
+            <p className="text-gray-700">{task.status}</p>
           </div>
           <div className="mb-4">
             <p className="font-medium">Deadline:</p>
             <p className="text-gray-700">{formattedDeadline}</p>
           </div>
-          <button
-            onClick={handleSaveClick}
-            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-          >
-            Save
-          </button>
+          <div className="mt-auto">
+            <button
+              onClick={handleSaveClick}
+              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
+            >
+              Save
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

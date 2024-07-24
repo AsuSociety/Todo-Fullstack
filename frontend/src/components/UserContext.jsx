@@ -207,6 +207,30 @@ export const UserProvider = ({ children }) => {
     }
   };
   
+  const getUserById = async (userId, token) => {
+    try {
+      const response = await fetch(`${API_URL}/auth/users/${userId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(
+          `Failed to fetch user: ${response.status} - ${response.statusText}`
+        );
+      }
+  
+      const user = await response.json();
+      return user;
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return null;
+    }
+  };
+  
   return (
     <UserContext.Provider
       value={{
@@ -219,6 +243,7 @@ export const UserProvider = ({ children }) => {
         updateCompanyByMail,
         deleteCompanyByMail,
         updateRoleById,
+        getUserById,
       }}
     >
       {children}

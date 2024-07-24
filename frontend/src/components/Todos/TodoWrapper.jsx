@@ -34,7 +34,7 @@ import {
 // Define API_URL constant for API endpoint
 export const API_URL = "http://localhost:8000";
 // Define an array of colors
-const colors = ["#ef4444", "#f59e0b", "#84cc16", "#71717a"];
+const colors = ["#ffb3ba", "#ffdfba", "#baffc9", "#bae1ff"];
 
 // Function to fetch all todos from the API
 const fetchAllTodos = async (token) => {
@@ -293,7 +293,7 @@ export const TodoWrapper = () => {
       title: "New Task",
       body: "",
       color: colors[3], // Default color
-      status: "",
+      status: "todo",
       deadline: defaultDeadline,
       remainder: true,
       visibility: "private",
@@ -312,7 +312,7 @@ export const TodoWrapper = () => {
       title: "New Task",
       body: "",
       color: colors[3], // Default color
-      status: "",
+      status: "todo",
       deadline: date,
       remainder: true,
       visibility: "private",
@@ -533,7 +533,10 @@ export const TodoWrapper = () => {
           <Button
             variant="ghost"
             onClick={handleAddTask}
-            className="text-white py-1 px-3 rounded transition duration-300 bg-blue-500 hover:bg-blue-600"
+            className="text-white py-1 px-3 rounded transition duration-300 hover:bg-blue-600"
+            style={{ backgroundColor: "#1b85b8" }}
+
+            
           >
             Add Task
           </Button>

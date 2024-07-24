@@ -21,14 +21,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const colors = [
-  "#ef4444",
-  "#f59e0b",
-  "#84cc16",
-  "#99f6e4",
-  "#bfdbfe",
-  "#FFFFFF",
-];
+const colors = ["#ffb3ba", "#ffdfba", "#baffc9", "#bae1ff"];
+
 
 export const TaskTable = (props) => {
   const [isChecked, setIsChecked] = useState();
@@ -160,7 +154,7 @@ export const TaskTable = (props) => {
                 </TableCell>
                 <TableCell
                   className="text-center border border-gray-300  "
-                  style={{ backgroundColor: todo.color }}
+                  // style={{ backgroundColor: todo.color }}
                 >
                   <ChangeStatus
                     updateTaskStatus={props.updateTaskStatus}

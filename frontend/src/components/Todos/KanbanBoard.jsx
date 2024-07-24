@@ -3,10 +3,10 @@ import { DragDropContext } from "react-beautiful-dnd";
 import { KanbanColumn } from "./KanbanColumn";
 
 const statuses = [
-  { value: "todo", label: "Todo", color: "#71717a" },
-  { value: "in progress", label: "In Progress", color: "#f59e0b" },
-  { value: "done", label: "Done", color: "#84cc16" },
-  { value: "canceled", label: "Canceled", color: "#ef4444" },
+  { value: "todo", label: "Todo", color: "#bae1ff" },
+  { value: "in progress", label: "In Progress", color: "#ffdfba" },
+  { value: "done", label: "Done", color: "#baffc9" },
+  { value: "canceled", label: "Canceled", color: "#ffb3ba" },
 ];
 
 const getStatusColor = (status) => {
