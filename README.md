@@ -1,5 +1,4 @@
 
-```markdown
 # Todo-Fullstack
 
 ## Description
@@ -27,25 +26,23 @@ Todo-Fullstack is a comprehensive task management application designed to stream
    git clone https://github.com/AsuSociety/Todo-Fullstack.git
    cd Todo-Fullstack/backend
    ```
-
 2. Create a virtual environment and activate it:
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
    ```
-   
 3. Install the dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-
 4. Configure environment variables:
    Create a `.env` file in the `backend` directory with the following content:
    ```
+   DATABASE_URL=sqlite:///./test.db
+   SECRET_KEY=your_secret_key
    EMAIL_USER=your_email_user
    EMAIL_PASSWORD=your_email_password
    ```
-   
 5. Run the backend server:
    ```bash
    uvicorn main:app --reload
@@ -56,12 +53,10 @@ Todo-Fullstack is a comprehensive task management application designed to stream
    ```bash
    cd ../frontend
    ```
-   
 2. Install the frontend dependencies:
    ```bash
    npm install
    ```
-
 3. Run the frontend application:
    ```bash
    npm start
@@ -113,5 +108,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - **Shadcn and Tailwind CSS:** For the beautiful and responsive UI components.
 - **SQLAlchemy:** For the robust and efficient ORM.
 - **FastMail:** For handling email notifications.
-```
 
