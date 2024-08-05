@@ -80,7 +80,7 @@ export const Login = () => {
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Button type="submit" onClick={handleRegister} className="w-full">
-            Sign up as User
+            Sign up
           </Button>
         </div>
         {error && <p style={{ color: "red" }}>{error}</p>}

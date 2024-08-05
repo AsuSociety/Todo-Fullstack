@@ -25,10 +25,10 @@ export const CompanyRegister = () => {
     try {
       // Clear any existing session data or tokens
       AuthService.logout();
-      console.log(company)
+      console.log(user.id)
+      await AuthService.companyRegister(company);
       updateCompanyById(user.id,company,user.token)
       // Perform registration
-      await AuthService.companyRegister(company);
       setCompany("");
       updateRole(user.id,'CEO',user.token)
       // Navigate back to login screen
@@ -39,7 +39,7 @@ export const CompanyRegister = () => {
   };
 
   function backToTasks() {
-    console.log(user)
+    // console.log(user)
     navigate("/todos");
   }
   return (

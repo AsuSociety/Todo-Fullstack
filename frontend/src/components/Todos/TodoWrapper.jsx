@@ -158,6 +158,37 @@ const editTask = async (
   }
 };
 
+const sendEmail = async (email, token) => {
+  try {
+    // Append the email to the URL as a query parameter
+    const response = await fetch(
+      `${API_URL}/todo/send-test-email?email=${encodeURIComponent(email)}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        // No body needed since email is in the query string
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        `Failed to send email: ${response.status} - ${response.statusText}. Error details: ${JSON.stringify(errorData)}`,
+      );
+    }
+
+    const result = await response.json();
+    console.log("Email sent successfully:", result);
+    return result;
+  } catch (error) {
+    console.error("Error sending email:", error.message);
+    return null;
+  }
+};
+
 const handleUpload = async (selectedFiles, todoId, token) => {
   try {
     const formData = new FormData();
@@ -481,6 +512,21 @@ export const TodoWrapper = () => {
     });
   };
 
+  // test for the mail service
+  const handleClick = async () => {
+    if (user && user.token) {
+      const result = await sendEmail("omerasus3@gmail.com", user.token);
+
+      if (result) {
+        alert("Test email sent!");
+      } else {
+        alert("Failed to send test email.");
+      }
+    } else {
+      alert("User is not authenticated.");
+    }
+  };
+
   // JSX structure returned by the TodoWrapper component
   return (
     <div className="h-full flex flex-col p-8">
@@ -535,11 +581,10 @@ export const TodoWrapper = () => {
             onClick={handleAddTask}
             className="text-white py-1 px-3 rounded transition duration-300 hover:bg-blue-600"
             style={{ backgroundColor: "#1b85b8" }}
-
-            
           >
             Add Task
           </Button>
+          <Button onClick={handleClick}>Send Test Email</Button>
         </div>
         {view === "table" && (
           <TaskTable

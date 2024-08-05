@@ -35,7 +35,8 @@ class Users(Base):
     isactive = Column(Boolean, default=True)
     role= Column(String)
     icon= Column(String)
-    company_name = Column(String, ForeignKey('companies.name'))
+    company_name = Column(String, ForeignKey('companies.name'), nullable=True)
+
     company = relationship("Company", back_populates="users")
 
 

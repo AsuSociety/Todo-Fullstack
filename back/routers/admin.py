@@ -42,7 +42,7 @@ async def get_company_users(
     if not users:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No users found for the company")
 
-    return users
+    return users or []
 
 @router.put("/mail/{user_mail}/company")
 async def update_user_company_by_mail(

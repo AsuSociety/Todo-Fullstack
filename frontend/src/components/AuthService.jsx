@@ -57,7 +57,7 @@ class AuthService {
     lastName,
     role ="user",
     icon = "",
-    company_name,
+    company_name= null,
   ) {
     const response = await fetch(`${API_URL}/auth/`, {
       method: "POST",

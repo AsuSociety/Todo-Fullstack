@@ -100,11 +100,12 @@ export const UserProvider = ({ children }) => {
       });
 
       if (!response.ok) {
+        const errorDetails = await response.text(); // Get response text for more details
         throw new Error(
-          `Failed to update company name: ${response.status} - ${response.statusText}`,
+          `Failed to update company name: ${response.status} - ${response.statusText}. Details: ${errorDetails}`
         );
       }
-
+      console.log("fooooooooooooooooo")
       const result = await response.json();
       // console.log( icon);
       setUser((prevUser) => ({

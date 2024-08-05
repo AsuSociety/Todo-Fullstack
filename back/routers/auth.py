@@ -97,7 +97,7 @@ async def create_user(dataBase: dataBase_dependency,
         lastname= user_payload.lastname,
         role= user_payload.role,
         icon = user_payload.icon,
-        company_name= user_payload.company_name,
+        company_name= user_payload.company_name or None,
         hashed_password= bcrypt_context.hash(user_payload.password),
         isactive= True
     )
