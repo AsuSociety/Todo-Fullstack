@@ -53,6 +53,7 @@ def transform_todo_to_response(todo, base_url: URL):
     return {
         'id': todo.id,
         'owner_id': todo.owner_id,
+        'assignee_id': todo.assignee_id,
         'body': todo.body,
         'title': todo.title,
         'color': todo.color,
@@ -215,27 +216,57 @@ async def update_todo(
     todo_model.deadline = task_payload.deadline
     todo_model.remainder = task_payload.remainder
     todo_model.visibility = task_payload.visibility
-    
+    print("Incoming Assignee IDs:", task_payload.assignee_id)
+    todo_model.assignee_id = task_payload.assignee_id  
+    print("Assignee IDs set on model:", todo_model.assignee_id)
+
+
     dataBase.add(todo_model)
     dataBase.commit()
     dataBase.refresh(todo_model)
     scheduler.remove_all_jobs()
+    print("After Save - Assignee IDs:", todo_model.assignee_id)  # Verify saved state
+
+    assignee = None  
+    assignee_email= None
+
+    if task_payload.assignee_id is not None:
+        assignee = (
+            dataBase.query(Users)
+            .filter(Users.id == task_payload.assignee_id)
+            .first()
+        )
+    else:
+        print("No assignee ID provided.")
+
+    if assignee:
+        assignee_email = assignee.email  # Adjust according to your User model
+        print("The Assignee mail is:", assignee_email)
+    else:
+        print("No assignee provided.")
+
 
     if todo_model.deadline is not None:
         if todo_model.deadline.tzinfo is None:
             todo_model.deadline = ISRAEL_TZ.localize(todo_model.deadline)
 
-    now = datetime.now(ISRAEL_TZ)
-    real_deadline= todo_model.deadline -timedelta(hours=3)
-    reminder_time = real_deadline - timedelta(days=1) + timedelta(minutes=1)
-    time_difference = reminder_time - now
+        now = datetime.now(ISRAEL_TZ)
+        real_deadline= todo_model.deadline -timedelta(hours=3)
+        reminder_time = real_deadline - timedelta(days=1) + timedelta(minutes=1)
+        time_difference = reminder_time - now
 
 
-    if time_difference.total_seconds() > 10 and todo_model.remainder == True:
-        schedule_email(user.get('email'), "Task Reminder", f"Reminder: Your task '{todo_model.title}' is due in 24 hours!", reminder_time)
+        if time_difference.total_seconds() > 10 and todo_model.remainder == True:
+            schedule_email(user.get('email'), "Task Reminder", f"Reminder: Your task '{todo_model.title}' is due in 24 hours!", reminder_time)
+            if assignee_email:
+                schedule_email(assignee_email,  "Task Reminder", f"Reminder: Your task '{todo_model.title}' is due in 24 hours!", reminder_time)
+
+        else:
+            print("The reminder time is in the past or the user doesn't want a reminder; email will not be scheduled.")
+
     else:
-        print("The reminder time is in the past or the user doesn't want a reminder; email will not be scheduled.")
-
+        print("Deadline is not set; skipping reminder scheduling.")
+        
     base_url = request.base_url
     return transform_todo_to_response(todo_model, base_url)
 

@@ -1,19 +1,12 @@
 // TodoWrapper.js
-
-/*
-This code sets up a web application where you can manage your to-do list.
-It allows you to add new tasks, delete completed tasks, and edit existing tasks.
-The application communicates with a server to fetch, add, delete, and update tasks.
-It presents your to-do list in a user-friendly format on the screen.
-Overall, it provides a convenient way for you to organize and keep track of your tasks online.
-*/
-
 // Import necessary modules and components
 import React, { useState, useEffect } from "react"; // Import React and necessary hooks
 import { useUser } from "../UserContext";
 import { TaskTable } from "./TaskTable";
 import { CalendarView } from "./CalendarView";
 import { KanbanBoard } from "./KanbanBoard";
+import { Toolbar } from "./Toolbar";
+
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -21,15 +14,8 @@ import {
   faTable,
   faCalendarDays,
 } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
 import { Profile } from "./Profile";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectTrigger,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
 
 // Define API_URL constant for API endpoint
 export const API_URL = "http://localhost:8000";
@@ -121,6 +107,7 @@ const editTask = async (
   deadline = null,
   remainder = true,
   visibility,
+  assignee_id,
 ) => {
   const payload = {
     title: task.title,
@@ -130,7 +117,10 @@ const editTask = async (
     deadline: deadline,
     remainder: remainder,
     visibility: visibility,
+    assignee_id: assignee_id,
   };
+
+  // console.log("Payload to be sent:", payload);
 
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
@@ -144,13 +134,15 @@ const editTask = async (
 
     if (!response.ok) {
       const errorResponse = await response.json();
-      console.error("Error response:", errorResponse);
+      console.error("Error response:", errorResponse); // Check here for more details
       throw new Error(
         `Failed to update task: ${response.status} - ${response.statusText}`,
       );
     }
 
     const updatedTodo = await response.json();
+    // console.log("Updated Task:", updatedTodo);
+
     return updatedTodo;
   } catch (error) {
     console.error("Error updating task:", error);
@@ -158,65 +150,36 @@ const editTask = async (
   }
 };
 
-const sendEmail = async (email, token) => {
-  try {
-    // Append the email to the URL as a query parameter
-    const response = await fetch(
-      `${API_URL}/todo/send-test-email?email=${encodeURIComponent(email)}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        // No body needed since email is in the query string
-      },
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `Failed to send email: ${response.status} - ${response.statusText}. Error details: ${JSON.stringify(errorData)}`,
-      );
-    }
-
-    const result = await response.json();
-    console.log("Email sent successfully:", result);
-    return result;
-  } catch (error) {
-    console.error("Error sending email:", error.message);
-    return null;
-  }
-};
-
 const handleUpload = async (selectedFiles, todoId, token) => {
-  try {
-    const formData = new FormData();
+  const formData = new FormData();
 
-    // Loop through the array of files and append each one to the FormData
-    selectedFiles.forEach((file) => {
-      formData.append("files", file); // Use the key 'file' for each file
+  selectedFiles.forEach((file) => {
+    formData.append("files", file); // Append files to FormData
+  });
+
+  try {
+    const response = await fetch(`${API_URL}/todo/upload/${todoId}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        // Note: Content-Type is not set here, fetch will automatically set it when using FormData
+      },
+      body: formData,
     });
 
-    const response = await axios.post(
-      `${API_URL}/todo/upload/${todoId}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
-
-    if (response.status !== 200) {
+    if (!response.ok) {
+      const errorResponse = await response.json();
+      console.error("Error response:", errorResponse);
       throw new Error(
         `Failed to upload files: ${response.status} - ${response.statusText}`,
       );
     }
 
-    console.log("Files uploaded successfully", response.data);
-    return response.data;
+    // Assuming the response includes the updated task object
+    const updatedTask = await response.json(); // Adjust according to actual response structure
+    console.log("Files uploaded and task updated successfully", updatedTask);
+
+    return updatedTask;
   } catch (error) {
     console.error("Error uploading files:", error);
     return null;
@@ -282,13 +245,13 @@ const convertToUTCISO = (date) => {
 };
 
 // Function to get the default deadline (3 days from now)
-const getDefaultDeadline = () => {
-  const today = new Date();
-  today.setDate(today.getDate() + 3); // Add 3 days
+// const getDefaultDeadline = () => {
+//   const today = new Date();
+//   today.setDate(today.getDate() + 3); // Add 3 days
 
-  const normalizedDate = normalizeDate(today);
-  return convertToUTCISO(normalizedDate);
-};
+//   const normalizedDate = normalizeDate(today);
+//   return convertToUTCISO(normalizedDate);
+// };
 
 // TodoWrapper functional component
 export const TodoWrapper = () => {
@@ -296,13 +259,14 @@ export const TodoWrapper = () => {
   const [todos, setTodos] = useState([]); // State hook to store todos
   const [selectedTask, setSelectedTask] = useState(null); // State for selected task to open Task component
   const [view, setView] = useState("table"); // State for toggling view
-
-  const navigate = useNavigate();
+  const [filterTitle, setFilterTitle] = useState("");
+  const [filterStatus, setFilterStatus] = useState([]);
+  const [filterVisibility, setFilterVisibility] = useState("");
 
   // useEffect hook to fetch todos when component mounts
   useEffect(() => {
     const fetchData = async () => {
-      if (user && user.token) {
+      if (user && user.token) { 
         try {
           const fetchedTodos = await fetchAllTodos(user.token);
           setTodos(fetchedTodos);
@@ -319,15 +283,16 @@ export const TodoWrapper = () => {
   }, [user]);
 
   const handleAddTask = async () => {
-    const defaultDeadline = getDefaultDeadline(); // Example default deadline
+    // const defaultDeadline = getDefaultDeadline();
     const newTask = {
       title: "New Task",
       body: "",
       color: colors[3], // Default color
       status: "todo",
-      deadline: defaultDeadline,
+      deadline: null,
       remainder: true,
       visibility: "private",
+      assignee_id: null,
     };
 
     const addedTask = await addTodo(newTask, user.token);
@@ -338,7 +303,6 @@ export const TodoWrapper = () => {
   };
 
   const handleAddTaskInCalendar = async (date) => {
-    // const defaultDeadline = getDefaultDeadline(); // Example default deadline
     const newTask = {
       title: "New Task",
       body: "",
@@ -347,6 +311,7 @@ export const TodoWrapper = () => {
       deadline: date,
       remainder: true,
       visibility: "private",
+      assignee_id: null,
     };
 
     const addedTask = await addTodo(newTask, user.token);
@@ -376,7 +341,10 @@ export const TodoWrapper = () => {
       task.deadline ? new Date(task.deadline).toISOString() : null,
       task.remainder,
       task.visibility,
+      task.assignee_id,
     );
+
+    // console.log("@#$@@#@#%@#%",updatedTask)
     if (updatedTask) {
       setTodos((prevTodos) =>
         prevTodos.map((todo) => (todo.id === id ? updatedTask : todo)),
@@ -386,100 +354,62 @@ export const TodoWrapper = () => {
     }
   };
 
+  const updateTaskTitle = async (taskId, title) => {
+    const taskToUpdate = todos.find((todo) => todo.id === taskId);
+    if (taskToUpdate) {
+      await handleSave({ ...taskToUpdate, title }, taskId);
+    }
+  };
+
+  const updateTaskDescription = async (taskId, body) => {
+    const taskToUpdate = todos.find((todo) => todo.id === taskId);
+    if (taskToUpdate) {
+      await handleSave({ ...taskToUpdate, body }, taskId);
+    }
+  };
+
   // Function to update the task status
   const updateTaskStatus = async (taskId, color, status) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
     if (taskToUpdate) {
-      const updatedTask = await editTask(
-        taskToUpdate,
-        taskId,
-        user.token,
-        color,
-        status,
-        taskToUpdate.deadline,
-        taskToUpdate.remainder,
-        taskToUpdate.visibility,
-      );
-      if (updatedTask) {
-        setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo)),
-        );
-      }
+      handleSave({ ...taskToUpdate, status, color }, taskId);
     }
   };
 
   // Function to update the deadline status
-  const updateDeadline = async (taskId, date) => {
+  const updateDeadline = async (taskId, deadline) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
     if (taskToUpdate) {
-      const updatedTask = await editTask(
-        taskToUpdate,
-        taskId,
-        user.token,
-        taskToUpdate.color,
-        taskToUpdate.status,
-        date,
-        taskToUpdate.remainder,
-        taskToUpdate.visibility,
-      );
-      if (updatedTask) {
-        setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo)),
-        );
-      }
+      handleSave({ ...taskToUpdate, deadline }, taskId);
     }
   };
 
   const updateRemainder = async (taskId, remainder) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
     if (taskToUpdate) {
-      const updatedTask = await editTask(
-        taskToUpdate,
-        taskId,
-        user.token,
-        taskToUpdate.color,
-        taskToUpdate.status,
-        taskToUpdate.deadline,
-        remainder,
-        taskToUpdate.visibility,
-      );
-      if (updatedTask) {
-        setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo)),
-        );
-      }
+      handleSave({ ...taskToUpdate, remainder }, taskId);
     }
   };
 
   const updateVisibility = async (taskId, visibility) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
     if (taskToUpdate) {
-      const updatedTask = await editTask(
-        taskToUpdate,
-        taskId,
-        user.token,
-        taskToUpdate.color,
-        taskToUpdate.status,
-        taskToUpdate.deadline,
-        taskToUpdate.remainder,
-        visibility,
-      );
-      if (updatedTask) {
-        setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? updatedTask : todo)),
-        );
-      }
+      handleSave({ ...taskToUpdate, visibility }, taskId);
     }
   };
 
-  const handleUploadClick = async (taskId, selectedFile) => {
+  const updateAssignees = async (taskId, assignee_id) => {
+    const taskToUpdate = todos.find((todo) => todo.id === taskId);
+    if (taskToUpdate) {
+      handleSave({ ...taskToUpdate, assignee_id }, taskId);
+    }
+  };
+
+  const handleUploadClick = async (taskId, selectedFile, task) => {
     if (selectedFile) {
-      const uploadedData = await handleUpload(selectedFile, taskId, user.token);
-      if (uploadedData) {
-        // Update the task in the todos state with the new photo information
-        setTodos((prevTodos) =>
-          prevTodos.map((todo) => (todo.id === taskId ? uploadedData : todo)),
-        );
+      const updatedTask = await handleUpload(selectedFile, taskId, user.token);
+      if (updatedTask) {
+        handleSave(updatedTask, taskId);
       }
     }
   };
@@ -487,7 +417,6 @@ export const TodoWrapper = () => {
   const handleDeletePhoto = async (photoId, todoId) => {
     const deletedPhoto = await deletePhoto(photoId, todoId, user.token);
     if (deletedPhoto) {
-      // Update the task in the todos state by removing the deleted photo
       setTodos((prevTodos) =>
         prevTodos.map((todo) =>
           todo.id === todoId
@@ -495,7 +424,7 @@ export const TodoWrapper = () => {
                 ...todo,
                 photos: Array.isArray(todo.photos)
                   ? todo.photos.filter((photo) => photo.id !== photoId)
-                  : [], // Set to empty array if photos is not defined
+                  : [],
               }
             : todo,
         ),
@@ -503,34 +432,24 @@ export const TodoWrapper = () => {
     }
   };
 
-  // Toggle view between table and calendar
-  const toggleView = () => {
-    setView((prevView) => {
-      if (prevView === "table") return "calendar";
-      if (prevView === "calendar") return "kanban";
-      return "table";
-    });
-  };
-
-  // test for the mail service
-  const handleClick = async () => {
-    if (user && user.token) {
-      const result = await sendEmail("omerasus3@gmail.com", user.token);
-
-      if (result) {
-        alert("Test email sent!");
-      } else {
-        alert("Failed to send test email.");
-      }
-    } else {
-      alert("User is not authenticated.");
-    }
-  };
+  const filteredTodos = todos.filter((todo) => {
+    const matchesTitle = todo.title
+      .toLowerCase()
+      .includes(filterTitle.toLowerCase());
+    const matchesStatus = filterStatus.length > 0 
+      ? filterStatus.includes(todo.status)
+      : true;
+    const matchesVisibility = filterVisibility
+      ? todo.visibility === filterVisibility
+      : true;
+  
+    return matchesTitle && matchesStatus && matchesVisibility;
+  });
+  
 
   // JSX structure returned by the TodoWrapper component
   return (
     <div className="h-full flex flex-col p-8">
-      {/* Sticky Header */}
       <div className="sticky top-0 bg-white shadow-md z-10">
         <div className="flex items-center justify-between space-y-2 p-4">
           <div>
@@ -542,53 +461,81 @@ export const TodoWrapper = () => {
             </p>
           </div>
           <div className="flex items-center space-x-4">
-            <Select onValueChange={setView} defaultValue={view}>
-              <SelectTrigger className="flex items-center h-8 w-[30px] lg:w-[40px]">
-                <FontAwesomeIcon
-                  icon={
-                    view === "table"
-                      ? faTable
-                      : view === "calendar"
-                        ? faCalendarDays
-                        : faClipboard
-                  }
-                  className="text-lg"
-                />
-              </SelectTrigger>
-              <SelectContent className="flex items-center ">
-                <SelectItem value="table" className="flex items-center">
-                  <FontAwesomeIcon icon={faTable} className="text-lg" />
-                </SelectItem>
-                <SelectItem value="calendar" className="flex items-center">
-                  <FontAwesomeIcon icon={faCalendarDays} className="text-lg" />
-                </SelectItem>
-                <SelectItem value="kanban" className="flex items-center">
-                  <FontAwesomeIcon icon={faClipboard} className="text-lg" />
-                </SelectItem>
-              </SelectContent>
-            </Select>
             <Profile />
           </div>
         </div>
       </div>
 
-      {/* Content area that scrolls */}
-      <div className="flex-1 overflow-y-auto mt-4">
-        {/* Add Task button */}
-        <div className="flex justify-center pb-4">
-          <Button
-            variant="ghost"
-            onClick={handleAddTask}
-            className="text-white py-1 px-3 rounded transition duration-300 hover:bg-blue-600"
-            style={{ backgroundColor: "#1b85b8" }}
-          >
-            Add Task
-          </Button>
-          <Button onClick={handleClick}>Send Test Email</Button>
+      <div className="flex-1 overflow-y-auto mt-6">
+        <div className="flex justify-between mb-6">
+          <div className="flex flex-col">
+            <Toolbar
+              filterTitle={filterTitle}
+              setFilterTitle={setFilterTitle}
+              filterStatus={filterStatus}
+              setFilterStatus={setFilterStatus}
+              filterVisibility={filterVisibility}
+              setFilterVisibility={setFilterVisibility}
+              resetFilters={() => {
+                setFilterTitle("");
+                setFilterStatus([]);
+                setFilterVisibility("");
+              }}
+            />
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center">
+              <Button
+                onClick={() => setView("table")}
+                className={`p-2 flex items-center justify-center border-transparent ${
+                  view === "table" ? "border-b-2 border-[#BBD6B8]" : ""
+                }`}
+                style={{ background: "none", border: "none" }}
+              >
+                <FontAwesomeIcon
+                  icon={faTable}
+                  className={`text-lg ${view === "table" ? "text-[#BBD6B8]" : "text-gray-500"}`}
+                />
+              </Button>
+              <Button
+                onClick={() => setView("calendar")}
+                className={`p-2 flex items-center justify-center border-transparent ${
+                  view === "calendar" ? "border-b-2 border-[#BBD6B8]" : ""
+                }`}
+                style={{ background: "none", border: "none" }}
+              >
+                <FontAwesomeIcon
+                  icon={faCalendarDays}
+                  className={`text-lg ${view === "calendar" ? "text-[#BBD6B8]" : "text-gray-500"}`}
+                />
+              </Button>
+              <Button
+                onClick={() => setView("kanban")}
+                className={`p-2 flex items-center justify-center border-transparent ${
+                  view === "kanban" ? "border-b-2 border-[#BBD6B8]" : ""
+                }`}
+                style={{ background: "none", border: "none" }}
+              >
+                <FontAwesomeIcon
+                  icon={faClipboard}
+                  className={`text-lg ${view === "kanban" ? "text-[#BBD6B8]" : "text-gray-500"}`}
+                />
+              </Button>
+            </div>
+            <Button
+              variant="ghost"
+              onClick={handleAddTask}
+              className="text-black py-1 px-3 rounded transition duration-300"
+              style={{ backgroundColor: "#BBD6B8" }}
+            >
+              Add Task ➕
+            </Button>
+          </div>
         </div>
+
         {view === "table" && (
           <TaskTable
-            tasks={todos}
+            tasks={filteredTodos}
             deleteTodo={handleDeleteTodo}
             handleSave={handleSave}
             updateTaskStatus={updateTaskStatus}
@@ -602,11 +549,15 @@ export const TodoWrapper = () => {
             setSelectedTask={setSelectedTask}
             handleDeletePhoto={handleDeletePhoto}
             updateVisibility={updateVisibility}
+            updateAssignees={updateAssignees}
+            updateTaskDescription={updateTaskDescription}
+            updateTaskTitle={updateTaskTitle}
           />
         )}
+
         {view === "calendar" && (
           <CalendarView
-            tasks={todos}
+            tasks={filteredTodos}
             setTodos={setTodos}
             handleAddTask={handleAddTaskInCalendar}
             handleSave={handleSave}
@@ -622,10 +573,17 @@ export const TodoWrapper = () => {
             setSelectedTask={setSelectedTask}
             handleDeletePhoto={handleDeletePhoto}
             updateVisibility={updateVisibility}
+            updateAssignees={updateAssignees}
+            updateTaskDescription={updateTaskDescription}
+            updateTaskTitle={updateTaskTitle}
           />
         )}
+
         {view === "kanban" && (
-          <KanbanBoard tasks={todos} updateTaskStatus={updateTaskStatus} />
+          <KanbanBoard
+            tasks={filteredTodos}
+            updateTaskStatus={updateTaskStatus}
+          />
         )}
       </div>
     </div>

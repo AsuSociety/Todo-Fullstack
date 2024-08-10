@@ -4,9 +4,10 @@ from typing import List, Optional
 from fastapi import FastAPI
 from pydantic import BaseModel, UUID4, EmailStr, Field
 import uuid
-from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID ,Integer, Enum as SQLAEnum
+from sqlalchemy import Boolean, Column,  String, ForeignKey, DateTime, UUID as PG_UUID ,Integer, Enum as SQLAEnum, ARRAY
 from sqlalchemy.orm import declarative_base, relationship
 from enum import Enum
+from uuid import UUID
 
 class TaskVisibility(Enum):
     PRIVATE = "private"
@@ -49,7 +50,6 @@ class Photo(Base):
     todo = relationship("Todos", back_populates="photos")
     
 
-# Add Priority 
 class Todos(Base):
     __tablename__= 'todos'
 
@@ -61,6 +61,8 @@ class Todos(Base):
     deadline = Column(DateTime, nullable=True)  
     remainder = Column(Boolean, default=True)
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
+    # assignee_ids = Column(ARRAY(PG_UUID(as_uuid=True)))
+    assignee_id = Column(PG_UUID(as_uuid=True),ForeignKey("users.id"), nullable=True)
     visibility = Column(SQLAEnum(TaskVisibility), default=TaskVisibility.PRIVATE)
     photos = relationship("Photo", back_populates="todo")
 
@@ -73,10 +75,12 @@ class AddTasksPayload(BaseModel):
     deadline: Optional[datetime] = None  
     remainder : bool = True
     visibility: TaskVisibility 
+    assignee_id: Optional[UUID] = None
 
 class GetTaskResponse(BaseModel):
     id: uuid.uuid4
     owner_id: uuid.uuid4
+    assignee_id: uuid.uuid4
     title: str
     body: str
     color: str = None

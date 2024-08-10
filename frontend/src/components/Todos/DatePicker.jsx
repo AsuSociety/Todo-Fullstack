@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { format } from "date-fns";
+import { format, differenceInHours } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -24,7 +24,6 @@ export const DatePicker = (props) => {
 
   const handleDeadline = (date) => {
     if (date) {
-      // console.log("$$$$%$%%#%$#%$#%#$")
       const normalizedDate = props.normalizeDate(date);
       setDate(normalizedDate);
       props.updateDeadline(
@@ -35,18 +34,31 @@ export const DatePicker = (props) => {
     }
   };
 
+  const renderDate = () => {
+    if (!date) return <span>Pick a date</span>;
+
+    const now = new Date();
+    const timeDifference = differenceInHours(date, now);
+
+    if (timeDifference < 24) {
+      return `${timeDifference} hours`;
+    } else {
+      return format(date, "PPP");
+    }
+  };
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button
           variant={"outline"}
           className={cn(
-            "w-[180px] justify-start text-left font-normal",
+            "w-[180px] flex justify-center items-center text-left font-normal",
             !date && "text-muted-foreground",
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, "PPP") : <span>Pick a date</span>}
+          {renderDate()}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0 max-h-[250px] overflow-auto">

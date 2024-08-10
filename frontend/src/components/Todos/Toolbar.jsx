@@ -1,11 +1,27 @@
-import React from "react";
+// Toolbar.jsx
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectTrigger, SelectContent, SelectItem } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Toolbar = (props) => {
   const statusOptions = ["todo", "in progress", "done", "canceled"];
   const visibilityOptions = ["private", "company"];
+
+  const handleStatusChange = (status) => {
+    if (props.filterStatus.includes(status)) {
+      props.setFilterStatus(props.filterStatus.filter((s) => s !== status));
+    } else {
+      props.setFilterStatus([...props.filterStatus, status]);
+    }
+  };
 
   return (
     <div className="flex items-center justify-between">
@@ -17,37 +33,49 @@ export const Toolbar = (props) => {
           className="h-8 w-[150px] lg:w-[200px]"
         />
 
-        <Select
-          value={props.filterStatus}
-          onValueChange={(value) => props.setFilterStatus(value)}
-        >
-          <SelectTrigger className="h-8 w-[150px] lg:w-[150px]">
-            <span>{props.filterStatus || "Filter by status..."}</span>
-          </SelectTrigger>
-          <SelectContent>
+        <DropdownMenu >
+          <DropdownMenuTrigger asChild >
+          <Button variant="outline" className="h-8 max-w-[240px] w-auto overflow-auto text-left">
+          {props.filterStatus.length > 0
+                ? props.filterStatus.join(", ")
+                : "Filter by status..."}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-30">
+            <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+            <DropdownMenuSeparator />
             {statusOptions.map((status) => (
-              <SelectItem key={status} value={status}>
+              <DropdownMenuCheckboxItem
+                key={status}
+                checked={props.filterStatus.includes(status)}
+                onCheckedChange={() => handleStatusChange(status)}
+              >
                 {status}
-              </SelectItem>
+              </DropdownMenuCheckboxItem>
             ))}
-          </SelectContent>
-        </Select>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
-        <Select
-          value={props.filterVisibility}
-          onValueChange={(value) => props.setFilterVisibility(value)}
-        >
-          <SelectTrigger className="h-8 w-[150px] lg:w-[170px]">
-            <span>{props.filterVisibility || "Filter by visibility..."}</span>
-          </SelectTrigger>
-          <SelectContent>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" className="h-8 w-[150px] lg:w-[160px]">
+              {props.filterVisibility || "Filter by visibility..."}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>Filter by Visibility</DropdownMenuLabel>
+            <DropdownMenuSeparator />
             {visibilityOptions.map((visibility) => (
-              <SelectItem key={visibility} value={visibility}>
+              <DropdownMenuCheckboxItem
+                key={visibility}
+                checked={props.filterVisibility === visibility}
+                onCheckedChange={() => props.setFilterVisibility(visibility)}
+              >
                 {visibility}
-              </SelectItem>
+              </DropdownMenuCheckboxItem>
             ))}
-          </SelectContent>
-        </Select>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Button
           variant="ghost"

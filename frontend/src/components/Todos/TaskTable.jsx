@@ -1,17 +1,9 @@
-import React, { useState, useRef, useEffect } from "react"; // Import React and necessary hooks
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faImage } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useEffect } from "react";
 import { ChangeStatus } from "./ChangeStatus";
 import { ChangeVisibility } from "./ChangeVisibility";
-
 import { DatePicker } from "./DatePicker";
 import { Task } from "./Task";
-import { Toolbar } from "./Toolbar";
-
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { ChevronRight } from "lucide-react";
-
 import {
   Table,
   TableBody,
@@ -21,45 +13,49 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const colors = ["#ffb3ba", "#ffdfba", "#baffc9", "#bae1ff"];
-
-
 export const TaskTable = (props) => {
-  const [isChecked, setIsChecked] = useState();
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const fileInputRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(null);
-
-  const [filterTitle, setFilterTitle] = useState("");  
-  const [filterStatus, setFilterStatus] = useState("");
-  const [filterVisibility, setFilterVisibility] = useState("");
-  
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     if (props.selectedTask) {
       setSelectedTodo(props.selectedTask);
       setOpen(true);
-      props.setSelectedTask(null); // Clear selected task after opening
+      props.setSelectedTask(null);
     }
   }, [props.selectedTask]);
+
+  useEffect(() => {
+    setSelectAll(selectedTasks.length === props.tasks.length);
+  }, [selectedTasks, props.tasks.length]);
 
   const handleCheckboxChange = (taskId, currentValue) => {
     const newValue = !currentValue;
     props.updateRemainder(taskId, newValue);
-    setIsChecked(newValue);
     if (newValue) {
       alert("You will receive a reminder 24 hours before the deadline!");
     }
   };
-  const handleIconClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+
+  const handleDeleteCheckbox = (taskId) => {
+    setSelectedTasks((prevSelected) => {
+      const newSelectedTasks = prevSelected.includes(taskId)
+        ? prevSelected.filter((id) => id !== taskId)
+        : [...prevSelected, taskId];
+
+      setSelectAll(newSelectedTasks.length === props.tasks.length);
+      return newSelectedTasks;
+    });
   };
 
-  const handleFileChange = (e) => {
-    setSelectedFiles(Array.from(e.target.files));
+  const handleDeleteSelected = () => {
+    selectedTasks.forEach((taskId) => {
+      props.deleteTodo(taskId);
+    });
+    setSelectedTasks([]);
+    setSelectAll(false);
   };
 
   const handleOpenDialog = (todo) => {
@@ -72,154 +68,114 @@ export const TaskTable = (props) => {
     setSelectedTodo(null);
   };
 
-  const filteredTasks = props.tasks.filter(todo => {
-    return (
-      (filterTitle ? todo.title.includes(filterTitle) : true) &&
-      (filterStatus ? todo.status === filterStatus : true) &&
-      (filterVisibility ? todo.visibility === filterVisibility : true)
-    );
-  });
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedTasks([]);
+    } else {
+      setSelectedTasks(props.tasks.map((todo) => todo.id));
+    }
+    setSelectAll(!selectAll);
+  };
 
   return (
     <div className="space-y-4">
-      <Toolbar
-        filterTitle={filterTitle}
-        setFilterTitle={setFilterTitle}
-        filterStatus={filterStatus}
-        setFilterStatus={setFilterStatus}
-        filterVisibility={filterVisibility}
-        setFilterVisibility={setFilterVisibility}
-        resetFilters={() => {
-          setFilterTitle("");
-          setFilterStatus("");
-          setFilterVisibility("");
-        }}
-      />
       <div className="rounded-md border">
-      <Table
+        <Table
           className="table-auto border-collapse border border-gray-300"
           style={{ tableLayout: "fixed" }}
         >
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[180px] border border-gray-300">
+              <TableHead className="text-center w-[15px] border border-gray-300">
+                <Checkbox
+                  className="flex items-center"
+                  checked={selectAll}
+                  onCheckedChange={handleSelectAll}
+                />
+              </TableHead>
+              <TableHead className="w-[280px] border border-gray-300">
                 Task
               </TableHead>
-              <TableHead className="text-center  w-[40px] border border-gray-300">
+              <TableHead className="text-center w-[40px] border border-gray-300">
                 Visibility
               </TableHead>
-              <TableHead className="text-center  w-[80px] border border-gray-300">
+              <TableHead className="text-center w-[50px] border border-gray-300">
                 Status
               </TableHead>
               <TableHead className="text-center w-[70px] border border-gray-300">
                 Date
               </TableHead>
-              <TableHead className="text-center w-[20px]  border border-gray-300">
+              <TableHead className="text-center w-[20px] border border-gray-300">
                 Remainder
-              </TableHead>
-              <TableHead
-                className="text-center border border-gray-300"
-                style={{ width: "20px", padding: "0px" }}
-              >
-                Photos
-              </TableHead>
-              <TableHead
-                className="text-center border border-gray-300"
-                style={{ width: "20px", padding: "0px" }}
-              >
-                Delete
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {/* {props.tasks.map((todo) => ( */}
-            {filteredTasks.map((todo) => (
+            {props.tasks.map((todo) => (
               <TableRow key={todo.id} className="border border-gray-300">
-                <TableCell
-                  className="font-medium font-bold border border-gray-300 "
-                  onClick={() => handleOpenDialog(todo)}
-                >
-                  {todo.title}
-                  <p className="text-sm font-thin ">{todo.body}</p>
-                </TableCell>
-                <TableCell
-                  className="text-center border border-gray-300  "
-                  // style={{ backgroundColor: todo.color }}
-                >
-                  <ChangeVisibility
-                    updateVisibility={props.updateVisibility}
-                    id={todo.id}
-                    currentVisibility={todo.visibility}
+                <TableCell className="text-center border border-gray-300 justify-center">
+                  <Checkbox
+                    className="flex items-center justify-center"
+                    id={`checkbox-${todo.id}`}
+                    checked={selectedTasks.includes(todo.id)}
+                    onCheckedChange={() => handleDeleteCheckbox(todo.id)}
+                    disabled={todo.owner_id !== props.user.id}
                   />
                 </TableCell>
                 <TableCell
-                  className="text-center border border-gray-300  "
-                  // style={{ backgroundColor: todo.color }}
+                  className="border border-gray-300 p-2 cursor-pointer"
+                  onClick={() => handleOpenDialog(todo)}
                 >
+                  {todo.title}
+                  <p className="text-sm font-thin">{todo.body}</p>
+                </TableCell>
+                <TableCell className="text-center border border-gray-300 p-2">
+                  {todo.owner_id === props.user.id ? (
+                    <ChangeVisibility
+                      updateVisibility={props.updateVisibility}
+                      id={todo.id}
+                      currentVisibility={todo.visibility}
+                    />
+                  ) : (
+                    <p>{todo.visibility}</p>
+                  )}
+                </TableCell>
+                <TableCell className="text-center border border-gray-300 p-2">
                   <ChangeStatus
                     updateTaskStatus={props.updateTaskStatus}
                     id={todo.id}
                     currentStatus={todo.status}
                   />
                 </TableCell>
-                <TableCell className="text-center border border-gray-300">
-                  <DatePicker
-                    updateDeadline={props.updateDeadline}
-                    todo={todo}
-                    currentDeadline={todo.deadline}
-                    updateRemainder={props.updateRemainder}
-                    normalizeDate={props.normalizeDate}
-                    convertToUTCISO={props.convertToUTCISO}
-                  />
-                </TableCell>
-                <TableCell className="text-center border border-gray-300">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="terms"
-                      checked={todo.remainder}
-                      onCheckedChange={() =>
-                        handleCheckboxChange(todo.id, todo.remainder)
-                      }
+                <TableCell className="text-center border border-gray-300 p-2">
+                  {todo.owner_id === props.user.id ? (
+                    <DatePicker
+                      updateDeadline={props.updateDeadline}
+                      todo={todo}
+                      currentDeadline={todo.deadline}
+                      updateRemainder={props.updateRemainder}
+                      normalizeDate={props.normalizeDate}
+                      convertToUTCISO={props.convertToUTCISO}
                     />
-                    <label
-                      htmlFor="terms"
-                      className="text-sm font-thin leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Remaind Me!
-                    </label>
-                  </div>
+                  ) : (
+                    <p>
+                      {new Date(todo.deadline).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit",
+                      })}
+                    </p>
+                  )}
                 </TableCell>
-
-                <TableCell className="text-center border border-gray-300">
-                  <FontAwesomeIcon
-                    icon={faImage}
-                    className="text-gray-600 cursor-pointer hover:text-yellow-500"
-                    onClick={handleIconClick}
-                  />
-                  <input
-                    id="picture"
-                    name="image"
-                    type="file"
-                    onChange={handleFileChange}
-                    multiple
-                    ref={fileInputRef}
-                    style={{ display: "none" }}
-                  />
-                  <Button
-                    variant="outline"
-                    className="p-1 w-6 h-6 justify-center text-gray-600 cursor-pointer hover:text-yellow-500"
-                    onClick={() =>
-                      props.handleUploadClick(todo.id, selectedFiles)
+                <TableCell className="text-center  p-2 flex justify-center items-center h-16">
+                  <Checkbox
+                    className="flex items-center justify-center"
+                    id="terms"
+                    checked={todo.remainder}
+                    onCheckedChange={() =>
+                      handleCheckboxChange(todo.id, todo.remainder)
                     }
-                  >
-                    <ChevronRight className="h-3 w-3" />
-                  </Button>
-                </TableCell>
-                <TableCell className="text-center border border-gray-300 ">
-                  <FontAwesomeIcon
-                    icon={faTrash}
-                    className="text-gray-600 cursor-pointer hover:text-red-500"
-                    onClick={() => props.deleteTodo(todo.id)}
+                    disabled={todo.owner_id !== props.user.id}
                   />
                 </TableCell>
               </TableRow>
@@ -233,8 +189,41 @@ export const TaskTable = (props) => {
           task={selectedTodo}
           handleSave={props.handleSave}
           handleDeletePhoto={props.handleDeletePhoto}
+          updateAssignees={props.updateAssignees}
+          updateTaskStatus={props.updateTaskStatus}
+          handleUploadClick={props.handleUploadClick}
+          updateTaskDescription={props.updateTaskDescription}
+          updateTaskTitle={props.updateTaskTitle}
+          updateDeadline={props.updateDeadline}
+          updateRemainder={props.updateRemainder}
+          normalizeDate={props.normalizeDate}
+          convertToUTCISO={props.convertToUTCISO}
+          updateVisibility={props.updateVisibility}
+          deleteTodo={props.deleteTodo}
         />
       </div>
+      {selectedTasks.length > 0 && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 flex items-center bg-black bg-opacity-80 p-2 rounded-md shadow-lg">
+          <span className="text-white text-sm font-semibold mr-2">
+            {selectedTasks.length} tasks selected
+          </span>
+          <span
+            onClick={() => {
+              setSelectedTasks([]);
+              setSelectAll(false);
+            }}
+            className="text-white text-sm cursor-pointer mr-12"
+          >
+            X
+          </span>
+          <button
+            onClick={handleDeleteSelected}
+            className="p-1 bg-white text-black text-sm rounded-md hover:bg-slate-200 transition"
+          >
+            Remove Tasks
+          </button>
+        </div>
+      )}
     </div>
   );
 };

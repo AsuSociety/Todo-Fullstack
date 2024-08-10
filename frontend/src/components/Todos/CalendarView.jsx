@@ -112,6 +112,11 @@ export const CalendarView = (props) => {
         task={selectedTodo}
         handleSave={props.handleSave}
         handleDeletePhoto={props.handleDeletePhoto}
+        updateAssignees={props.updateAssignees}
+        updateTaskStatus={props.updateTaskStatus} 
+        handleUploadClick={props.handleUploadClick}
+        updateTaskDescription={props.updateTaskDescription}
+        updateTaskTitle={props.updateTaskTitle}
       />
     </Card>
   );
