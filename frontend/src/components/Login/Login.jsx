@@ -28,17 +28,27 @@ export const Login = () => {
       const userData = await AuthService.login(username, password);
       login(userData);
 
+      localStorage.setItem('token', userData.token); 
+      localStorage.setItem("username", userData.username);
+      localStorage.setItem("email", userData.email);
+      localStorage.setItem("first_name", userData.first_name);
+      localStorage.setItem("last_name", userData.last_name);
+      localStorage.setItem("role", userData.role);
+      localStorage.setItem("id", userData.id);
+      localStorage.setItem("icon", userData.icon);
+      localStorage.setItem("company_name", userData.company_name);
+
+
+
       navigate("/todos");
     } catch (error) {
       setError("Invalid username or password");
     }
   };
 
+
   function handleRegister() {
     navigate("/register");
-  }
-  function handleCompanyRegister() {
-    navigate("/companyregister");
   }
 
   return (

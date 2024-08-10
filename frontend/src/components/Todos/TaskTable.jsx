@@ -15,13 +15,13 @@ import {
 
 export const TaskTable = (props) => {
   const [open, setOpen] = useState(false);
-  const [selectedTodo, setSelectedTodo] = useState(null);
+  const [selectedTodoId, setSelectedTodoId] = useState(null);
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
 
   useEffect(() => {
     if (props.selectedTask) {
-      setSelectedTodo(props.selectedTask);
+      setSelectedTodoId(props.selectedTask.id);
       setOpen(true);
       props.setSelectedTask(null);
     }
@@ -59,13 +59,13 @@ export const TaskTable = (props) => {
   };
 
   const handleOpenDialog = (todo) => {
-    setSelectedTodo(todo);
+    setSelectedTodoId(todo);
     setOpen(true);
   };
 
   const handleCloseDialog = () => {
     setOpen(false);
-    setSelectedTodo(null);
+    setSelectedTodoId(null);
   };
 
   const handleSelectAll = () => {
@@ -76,7 +76,6 @@ export const TaskTable = (props) => {
     }
     setSelectAll(!selectAll);
   };
-
   return (
     <div className="space-y-4">
       <div className="rounded-md border">
@@ -124,7 +123,7 @@ export const TaskTable = (props) => {
                 </TableCell>
                 <TableCell
                   className="border border-gray-300 p-2 cursor-pointer"
-                  onClick={() => handleOpenDialog(todo)}
+                  onClick={() => handleOpenDialog(todo.id)}
                 >
                   {todo.title}
                   <p className="text-sm font-thin">{todo.body}</p>
@@ -186,7 +185,7 @@ export const TaskTable = (props) => {
         <Task
           open={open}
           onClose={handleCloseDialog}
-          task={selectedTodo}
+          task={props.tasks.find(todo => todo.id === selectedTodoId)} 
           handleSave={props.handleSave}
           handleDeletePhoto={props.handleDeletePhoto}
           updateAssignees={props.updateAssignees}

@@ -7,6 +7,8 @@ import { CompanyRegister } from "./components/Register/CompanyRegister"; // Impo
 import { Company } from "./components/Register/Company"; // Import Task component for displaying Tasks
 import { Login } from "./components/Login/Login"; // Import Login component for user login
 import { Register } from "./components/Register/Register"; // Import Register component for user registration
+import AuthService from "./components/AuthService";
+
 import {
   createBrowserRouter,
   RouterProvider,
@@ -17,7 +19,7 @@ import {
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Navigate to="/login" />,
+    element: <Navigate to={AuthService.getToken() ? "/todos" : "/login"} />, // Redirect based on token presence
   },
   {
     path: "/login",

@@ -33,15 +33,18 @@ export const Toolbar = (props) => {
           className="h-8 w-[150px] lg:w-[200px]"
         />
 
-        <DropdownMenu >
-          <DropdownMenuTrigger asChild >
-          <Button variant="outline" className="h-8 max-w-[240px] w-auto overflow-auto text-left">
-          {props.filterStatus.length > 0
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="h-8 w-auto max-w-[240px] text-left overflow-hidden"
+            >
+              {props.filterStatus.length > 0
                 ? props.filterStatus.join(", ")
                 : "Filter by status..."}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-30">
+          <DropdownMenuContent className="w-56">
             <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {statusOptions.map((status) => (

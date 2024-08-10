@@ -58,14 +58,17 @@ export const Task = ({
   const [photoUrls, setPhotoUrls] = useState([]);
   const [photoIds, setPhotoIds] = useState([]);
   const [error, setError] = useState(null);
-  const [editedTitle, setEditedTitle] = useState("");
-  const [editedBody, setEditedBody] = useState("");
+  
   const [isListening, setIsListening] = useState(false);
   const [activeField, setActiveField] = useState(null);
+
   const [creator, setCreator] = useState(null);
   const [assignee, setAssignee] = useState(null);
+
   const [showAddAssignees, setShowAddAssignees] = useState(false);
   const [selectedAssignees, setSelectedAssignees] = useState(null);
+
+
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
 
@@ -80,8 +83,6 @@ export const Task = ({
 
   useEffect(() => {
     if (open && task) {
-      setEditedTitle(task.title);
-      setEditedBody(task.body);
       setPhotoUrls(task.photo_urls || []);
       setPhotoIds(task.photo_ids || []);
       setError(null);
@@ -161,10 +162,8 @@ export const Task = ({
 
       if (activeField === "title") {
         updateTaskTitle(task.id, transcript);
-        setEditedTitle(transcript);
       } else if (activeField === "body") {
         updateTaskDescription(task.id, transcript);
-        setEditedBody(transcript);
       }
     };
 
@@ -221,10 +220,8 @@ export const Task = ({
     try {
       await handleDeletePhoto(photoId, task.id);
 
-      // Find index of the photoId to remove
       const indexToRemove = photoIds.indexOf(photoId);
 
-      // Update the photoIds and photoUrls states
       setPhotoIds((prevIds) => prevIds.filter((id) => id !== photoId));
       setPhotoUrls((prevUrls) =>
         prevUrls.filter((_, index) => index !== indexToRemove),
@@ -284,12 +281,10 @@ export const Task = ({
   };
 
   const handleTitleChange = (e) => {
-    setEditedTitle(e.target.value);
     updateTaskTitle(task.id, e.target.value);
   };
 
   const handleBodyChange = (e) => {
-    setEditedBody(e.target.value);
     updateTaskDescription(task.id, e.target.value);
   };
 
@@ -314,8 +309,6 @@ export const Task = ({
 
   if (!task) return null;
 
-  // const formattedDeadline = format(new Date(task.deadline), "MMMM d, yyyy");
-
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[1000px] max-h-[90vh] min-h-[80vh] overflow-auto p-6 bg-white rounded-lg shadow-lg flex">
@@ -325,7 +318,7 @@ export const Task = ({
               <div className="flex items-center">
                 <input
                   type="text"
-                  value={editedTitle}
+                  value={task.title}
                   onChange={handleTitleChange}
                   className="text-xl font-semibold border border-gray-300 rounded px-2 py-1 w-full"
                 />
@@ -348,7 +341,7 @@ export const Task = ({
             <div className="mb-4 flex items-start">
               <div className="flex flex-col flex-grow">
                 <textarea
-                  value={editedBody}
+                  value={task.body}
                   onChange={handleBodyChange}
                   className="border border-gray-300 rounded px-2 py-1 w-full h-32 resize-none"
                   placeholder="Enter task description here..."
