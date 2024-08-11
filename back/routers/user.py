@@ -1,4 +1,3 @@
-# Import necessary modules and classes from FastAPI and Python
 from fastapi import APIRouter, Depends
 from fastapi import HTTPException, status
 from typing import Annotated, List
@@ -12,7 +11,6 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
 
-# Create a APIRouter application
 router = APIRouter(
     prefix='/user',
     tags=['user'])

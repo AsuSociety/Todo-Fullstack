@@ -61,7 +61,6 @@ class Todos(Base):
     deadline = Column(DateTime, nullable=True)  
     remainder = Column(Boolean, default=True)
     owner_id= Column(PG_UUID(as_uuid=True),ForeignKey("users.id"))
-    # assignee_ids = Column(ARRAY(PG_UUID(as_uuid=True)))
     assignee_id = Column(PG_UUID(as_uuid=True),ForeignKey("users.id"), nullable=True)
     visibility = Column(SQLAEnum(TaskVisibility), default=TaskVisibility.PRIVATE)
     photos = relationship("Photo", back_populates="todo")

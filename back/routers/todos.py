@@ -1,5 +1,4 @@
 #todos.py
-# Import necessary modules and classes from FastAPI and Python
 from fastapi import APIRouter, Depends, File, UploadFile
 from fastapi import HTTPException, status, Request
 from typing import Annotated, List, Dict
@@ -29,7 +28,6 @@ ISRAEL_TZ = timezone('Asia/Jerusalem')
 logging.basicConfig(level=logging.DEBUG)
 
 
-# Create a APIRouter application
 router = APIRouter(
     prefix='/todo',
     tags=['todo'])
@@ -46,7 +44,6 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 def transform_todo_to_response(todo, base_url: URL):
-    # Directly use the photo_url from the database since it already includes the full URL
     photo_urls = [photo.photo_url for photo in todo.photos]
     photo_ids = [photo.id for photo in todo.photos]
 
@@ -98,7 +95,6 @@ async def get_todos_from_db_by_id(user:user_dependency, dataBase:dataBase_depend
     if todo_model is not None:
         base_url = request.base_url
         return transform_todo_to_response(todo_model, base_url)
-    # Raise an exception if the task is not found
     raise HTTPException(status_code=404, detail="Task not found")
 
 
@@ -116,7 +112,6 @@ async def send_email(email: str, subject: str, body: str):
 
 
 def send_email_sync(email: str, subject: str, body: str):
-    # Check if an event loop already exists, and if not, create one
     try:
         loop = asyncio.get_event_loop()
     except RuntimeError:
@@ -160,7 +155,6 @@ async def create_todo(user: user_dependency, dataBase:dataBase_dependency,task_p
     dataBase.add(todo_model)
     dataBase.commit()
     dataBase.refresh(todo_model)
-    # await send_email(user.get('email'), "Test Email", "This is a test email to verify the email sending functionality.")
 
     if todo_model.deadline:
         reminder_time = todo_model.deadline
@@ -216,16 +210,13 @@ async def update_todo(
     todo_model.deadline = task_payload.deadline
     todo_model.remainder = task_payload.remainder
     todo_model.visibility = task_payload.visibility
-    print("Incoming Assignee IDs:", task_payload.assignee_id)
     todo_model.assignee_id = task_payload.assignee_id  
-    print("Assignee IDs set on model:", todo_model.assignee_id)
 
 
     dataBase.add(todo_model)
     dataBase.commit()
     dataBase.refresh(todo_model)
     scheduler.remove_all_jobs()
-    print("After Save - Assignee IDs:", todo_model.assignee_id)  # Verify saved state
 
     assignee = None  
     assignee_email= None
@@ -240,7 +231,7 @@ async def update_todo(
         print("No assignee ID provided.")
 
     if assignee:
-        assignee_email = assignee.email  # Adjust according to your User model
+        assignee_email = assignee.email 
         print("The Assignee mail is:", assignee_email)
     else:
         print("No assignee provided.")
@@ -293,7 +284,7 @@ async def delete_todo(
     
     for photo in todo.photos:
         try:
-            photo_path = Path(photo.photo_url)  # Adjust if necessary to get the file path
+            photo_path = Path(photo.photo_url) 
             if photo_path.exists():
                 os.remove(photo_path)
             dataBase.delete(photo)
@@ -339,7 +330,6 @@ async def upload_file(todo_id: uuid.UUID, user: user_dependency, dataBase: dataB
         dataBase.add(photo)
         file_urls.append(photo_url)
 
-    # Commit transaction
     dataBase.commit()
     todo_model = dataBase.query(Todos).filter(Todos.id == todo_id).first()
     base_url = request.base_url
@@ -352,21 +342,17 @@ async def delete_photo(photo_id: int, user: user_dependency, dataBase: dataBase_
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Can't Validate the user")
 
-    # Find the photo by ID
     photo = dataBase.query(Photo).filter(Photo.id == photo_id).first()
     if photo is None:
         raise HTTPException(status_code=404, detail="Photo not found")
 
-    # Check if the user owns the associated todo
     todo = dataBase.query(Todos).filter(Todos.id == photo.todo_id).filter(Todos.owner_id == uuid.UUID(user.get('id'))).first()
     if todo is None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You don't have permission to delete this photo")
 
-    # Remove the photo from the database
     dataBase.delete(photo)
     dataBase.commit()
 
-    # Optionally, remove the photo file from the server
     if os.path.exists(photo.photo_path):
         os.remove(photo.photo_path)
 
@@ -375,9 +361,7 @@ async def delete_photo(photo_id: int, user: user_dependency, dataBase: dataBase_
 
 def list_uploaded_files(directory: str):
     try:
-        # List all files in the directory
         files = os.listdir(directory)
-        # Return full paths
         return [os.path.join(directory, file) for file in files]
     except Exception as e:
         print(f"Failed to list files: {e}")

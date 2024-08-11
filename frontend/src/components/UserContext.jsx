@@ -12,7 +12,6 @@ export const UserProvider = ({ children }) => {
   useEffect(() => {
     const token = AuthService.getToken();
     if (token) {
-      // Retrieve all user information from localStorage
       const username = localStorage.getItem("username");
       const email = localStorage.getItem("email");
       const firstName = localStorage.getItem("first_name");
@@ -34,7 +33,7 @@ export const UserProvider = ({ children }) => {
         company_name,
       });
     }
-    setLoading(false); // Set loading to false once the check is done
+    setLoading(false);
   }, []);
 
   const login = (userData) => {
@@ -42,7 +41,6 @@ export const UserProvider = ({ children }) => {
       ...prevUser,
       ...userData,
     }));
-    // Store user information in localStorage
     localStorage.setItem("token", userData.token);
     localStorage.setItem("username", userData.username);
     localStorage.setItem("email", userData.email);
@@ -57,7 +55,6 @@ export const UserProvider = ({ children }) => {
   const logout = () => {
     AuthService.logout();
     setUser(null);
-    // Clear user information from localStorage
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("email");
@@ -87,10 +84,9 @@ export const UserProvider = ({ children }) => {
       }
 
       const result = await response.json();
-      // console.log( icon);
       setUser((prevUser) => ({
         ...prevUser,
-        icon: icon, // Assuming the response contains the new icon
+        icon: icon,
       }));
       return result;
     } catch (error) {
@@ -128,7 +124,6 @@ export const UserProvider = ({ children }) => {
     }
   };
 
-  // Function to update the user's company name
   const updateCompanyById = async (userId, company_name, token) => {
     try {
       const response = await fetch(`${API_URL}/auth/id/${userId}/company`, {
@@ -141,14 +136,12 @@ export const UserProvider = ({ children }) => {
       });
 
       if (!response.ok) {
-        const errorDetails = await response.text(); // Get response text for more details
+        const errorDetails = await response.text();
         throw new Error(
           `Failed to update company name: ${response.status} - ${response.statusText}. Details: ${errorDetails}`,
         );
       }
-      console.log("fooooooooooooooooo");
       const result = await response.json();
-      // console.log( icon);
       setUser((prevUser) => ({
         ...prevUser,
         company_name: company_name,
@@ -181,14 +174,12 @@ export const UserProvider = ({ children }) => {
       }
 
       const result = await response.json();
-      // console.log("Result from API:", result); // Check what you are receiving from the API
 
-      // Assuming result contains user details
       setUser((prevUser) => ({
         ...prevUser,
         company_name: company_name,
       }));
-      return result; // Ensure this contains the full user details
+      return result;
     } catch (error) {
       console.error("Error updating company name:", error);
       return null;
@@ -213,13 +204,12 @@ export const UserProvider = ({ children }) => {
       }
 
       const result = await response.json();
-      // console.log("Result from API:", result); // Check what you are receiving from the API
 
       setUser((prevUser) => ({
         ...prevUser,
         role: role,
       }));
-      return result; // Ensure this contains the full user details
+      return result;
     } catch (error) {
       console.error("Error updating role:", error);
       return null;
@@ -290,7 +280,6 @@ export const UserProvider = ({ children }) => {
       }}
     >
       {!loading ? children : <div>Loading...</div>}{" "}
-      {/* Show loading indicator while loading */}
     </UserContext.Provider>
   );
 };

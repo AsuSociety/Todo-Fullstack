@@ -1,3 +1,4 @@
+// KanbanColumn.jsx
 import React from "react";
 import { Droppable } from "react-beautiful-dnd";
 import { KanbanCards } from "./KanbanCards";
@@ -17,11 +18,14 @@ export const KanbanColumn = ({ id, title, tasks, color }) => {
               ref={provided.innerRef}
               {...provided.droppableProps}
               className={containerClassName}
-              // style={{ backgroundColor: color }}
-
             >
               {tasks.map((task, index) => (
-                <KanbanCards key={task.id} index={index} task={task} color={color}/>
+                <KanbanCards
+                  key={task.id}
+                  index={index}
+                  task={task}
+                  color={color}
+                />
               ))}
               {provided.placeholder}
             </div>

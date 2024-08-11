@@ -1,16 +1,11 @@
 from fastapi_mail import ConnectionConfig
 
-# from dotenv import dotenv_values
 from dotenv import load_dotenv
 
-# credentiala = dotenv_values(".env")
 import os 
 load_dotenv()
 
 conf = ConnectionConfig(
-    # MAIL_USERNAME=credentiala['EMAIL'],
-    # MAIL_PASSWORD=credentiala['PASS'],
-    # MAIL_FROM=credentiala['EMAIL'],
 
     MAIL_USERNAME=os.getenv('EMAIL'),
     MAIL_PASSWORD=os.getenv('PASS'),

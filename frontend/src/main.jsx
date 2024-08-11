@@ -1,5 +1,4 @@
 import React from "react";
-// import ReactDOM from "react-dom";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App";
@@ -7,12 +6,11 @@ import { UserProvider } from "./components/UserContext";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ReactQueryDevtools } from "react-query/devtools";
 
-const queryClient = new QueryClient(); // Create an instance of QueryClient
+const queryClient = new QueryClient(); 
 const domNode = document.getElementById("root");
 const root = createRoot(domNode);
 
 root.render(
-  // <React.StrictMode>
   <>
     <QueryClientProvider client={queryClient}>
       <UserProvider>
@@ -20,7 +18,6 @@ root.render(
       </UserProvider>
       <ReactQueryDevtools />
     </QueryClientProvider>
-  {/* </React.StrictMode> */}
   </>
   ,
 

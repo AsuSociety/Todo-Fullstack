@@ -1,3 +1,4 @@
+// KanbanBoard.jsx
 import React, { useState, useEffect } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import { KanbanColumn } from "./KanbanColumn";
@@ -11,7 +12,7 @@ const statuses = [
 
 const getStatusColor = (status) => {
   const foundStatus = statuses.find(s => s.value === status);
-  return foundStatus ? foundStatus.color : "#ffffff"; // default color
+  return foundStatus ? foundStatus.color : "#ffffff";
 };
 
 export const KanbanBoard = ({ tasks, updateTaskStatus }) => {
@@ -35,7 +36,6 @@ export const KanbanBoard = ({ tasks, updateTaskStatus }) => {
     const task = findItemById(draggableId);
     if (!task) return;
 
-    // Remove the task from the current column
     switch (source.droppableId) {
       case "1":
         setIncomplete(removeItemById(draggableId, incomplete));
@@ -53,7 +53,6 @@ export const KanbanBoard = ({ tasks, updateTaskStatus }) => {
         return;
     }
 
-    // Update the task status and add it to the new column
     const updatedStatus = mapDroppableIdToStatus(destination.droppableId);
     const updatedTask = { ...task, status: updatedStatus };
     const updatedColor = getStatusColor(updatedStatus);
@@ -76,12 +75,10 @@ export const KanbanBoard = ({ tasks, updateTaskStatus }) => {
         return;
     }
 
-    // Update the task status on the server
     try {
       await updateTaskStatus(task.id, updatedColor, updatedStatus);
     } catch (error) {
       console.error('Failed to update task status:', error);
-      // Optionally revert the state change if the update fails
     }
   };
 

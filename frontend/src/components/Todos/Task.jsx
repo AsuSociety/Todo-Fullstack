@@ -1,7 +1,5 @@
 //Task.jsx
 import React, { useState, useEffect, useRef } from "react";
-// import axios from "axios";
-// import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +8,6 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-// import { ChevronRight } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -18,7 +15,6 @@ import {
   faMicrophone,
   faTrashAlt,
   faImage,
-  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { profiles } from "./profiles.js";
 import { useUser } from "../UserContext";
@@ -34,11 +30,25 @@ mic.continuous = true;
 mic.interimResults = true;
 mic.lang = "en-US";
 
+const useDebounce = (callback, delay) => {
+  const timerRef = useRef();
+
+  const debouncedCallback = (value) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => {
+      callback(value);
+    }, delay);
+  };
+
+  return debouncedCallback;
+};
+
 export const Task = ({
   open,
   onClose,
   task,
-  handleSave,
   handleDeletePhoto,
   updateAssignees,
   updateTaskStatus,
@@ -58,7 +68,7 @@ export const Task = ({
   const [photoUrls, setPhotoUrls] = useState([]);
   const [photoIds, setPhotoIds] = useState([]);
   const [error, setError] = useState(null);
-  
+
   const [isListening, setIsListening] = useState(false);
   const [activeField, setActiveField] = useState(null);
 
@@ -68,9 +78,35 @@ export const Task = ({
   const [showAddAssignees, setShowAddAssignees] = useState(false);
   const [selectedAssignees, setSelectedAssignees] = useState(null);
 
-
   const [selectedFiles, setSelectedFiles] = useState([]);
   const fileInputRef = useRef(null);
+
+  const [title, setTitle] = useState(task ? task.title : "");
+  const [body, setBody] = useState(task ? task.body : "");
+
+  const handleTitleChange = useDebounce((value) => {
+    if (task) {
+      updateTaskTitle(task.id, value);
+    }
+  }, 1000);
+
+  const handleBodyChange = useDebounce((value) => {
+    if (task) {
+      updateTaskDescription(task.id, value);
+    }
+  }, 1000);
+
+  const onTitleChange = (e) => {
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    handleTitleChange(newTitle);
+  };
+
+  const onBodyChange = (e) => {
+    const newBody = e.target.value;
+    setBody(newBody);
+    handleBodyChange(newBody);
+  };
 
   useEffect(() => {
     if (user && creator) {
@@ -83,6 +119,8 @@ export const Task = ({
 
   useEffect(() => {
     if (open && task) {
+      setTitle(task.title || "");
+      setBody(task.body || "");
       setPhotoUrls(task.photo_urls || []);
       setPhotoIds(task.photo_ids || []);
       setError(null);
@@ -95,7 +133,6 @@ export const Task = ({
         setShowAddAssignees(false);
       }
 
-      // Fetch user details if owner_id is present
       if (task.owner_id) {
         const fetchUserDetails = async () => {
           const token = user?.token;
@@ -127,10 +164,8 @@ export const Task = ({
         };
         fetchUserDetails();
       } else {
-        // Clear assignee state and icon if no assignee_id
         setAssignee(null);
         setSelectedUserIconSrc("");
-        // setSelectedAssignees(null);
       }
     }
   }, [open, task, getUserById, user]);
@@ -190,23 +225,6 @@ export const Task = ({
     }
   };
 
-  const handleSaveClick = () => {
-    handleSave(
-      {
-        title: task.title,
-        body: task.body,
-        color: task.color,
-        status: task.status,
-        deadline: task.deadline,
-        visibility: task.visibility,
-        assignee_id: selectedAssignees,
-      },
-      task.id,
-    );
-    // console.log("blaaaaaaa",assignee)
-    onClose();
-  };
-
   useEffect(() => {
     if (task && task.photos) {
       const ids = task.photos.map((photo) => photo.id);
@@ -226,8 +244,6 @@ export const Task = ({
       setPhotoUrls((prevUrls) =>
         prevUrls.filter((_, index) => index !== indexToRemove),
       );
-
-      console.log(`Successfully deleted photo with ID: ${photoId}`);
     } catch (error) {
       console.error("Error deleting photo:", error);
       setError("Failed to delete photo.");
@@ -260,19 +276,15 @@ export const Task = ({
     }
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const files = Array.from(e.target.files);
-    console.log("Selected files:", files); // Check selected files
+    console.log("Selected files:", files);
     setSelectedFiles(files);
-  };
 
-  const handleClick = async () => {
-    if (selectedFiles.length > 0) {
+    if (files.length > 0) {
       try {
-        // Call handleUploadClick with task.id and selectedFiles
-        await handleUploadClick(task.id, selectedFiles, task);
-        setSelectedFiles([]); // Clear selected files after upload
-        console.log("Files uploaded and task updated successfully");
+        await handleUploadClick(task.id, files, task);
+        setSelectedFiles([]);
       } catch (error) {
         console.error("Error uploading files:", error);
         setError("Failed to upload files.");
@@ -280,28 +292,10 @@ export const Task = ({
     }
   };
 
-  const handleTitleChange = (e) => {
-    updateTaskTitle(task.id, e.target.value);
-  };
-
-  const handleBodyChange = (e) => {
-    updateTaskDescription(task.id, e.target.value);
-  };
-
-  // useEffect(() => {
-  //   if (task && task.photo_ids && task.photo_urls) {
-  //     const ids = task.photos.map((photo) => photo.id);
-  //     const urls = task.photos.map((photo) => photo.url);
-  //     setPhotoIds(ids);
-  //     setPhotoUrls(urls);
-  //     console.log('Fetched photo URLs:', urls); // Log URLs
-  //   }
-  // }, [task]);
-
   const handleDeleteClick = () => {
     if (task.owner_id === user.id) {
       deleteTodo(task.id);
-      onClose(); // Close the dialog after deleting
+      onClose();
     } else {
       alert("You do not have permission to delete this task.");
     }
@@ -318,8 +312,8 @@ export const Task = ({
               <div className="flex items-center">
                 <input
                   type="text"
-                  value={task.title}
-                  onChange={handleTitleChange}
+                  value={title}
+                  onChange={onTitleChange}
                   className="text-xl font-semibold border border-gray-300 rounded px-2 py-1 w-full"
                 />
                 <FontAwesomeIcon
@@ -341,8 +335,8 @@ export const Task = ({
             <div className="mb-4 flex items-start">
               <div className="flex flex-col flex-grow">
                 <textarea
-                  value={task.body}
-                  onChange={handleBodyChange}
+                  value={body}
+                  onChange={onBodyChange}
                   className="border border-gray-300 rounded px-2 py-1 w-full h-32 resize-none"
                   placeholder="Enter task description here..."
                 />
@@ -456,7 +450,6 @@ export const Task = ({
 
           <div className="mb-4">
             <p className="font-medium">Deadline:</p>
-            {/* <p className="text-gray-700">{formattedDeadline}</p> */}
             {task.owner_id === user.id ? (
               <DatePicker
                 updateDeadline={updateDeadline}
@@ -493,16 +486,9 @@ export const Task = ({
               ref={fileInputRef}
               style={{ display: "none" }}
             />
-            <Button
-              variant="outline"
-              className="p-1 w-6 h-6 justify-center text-gray-600 cursor-pointer hover:text-yellow-500"
-              onClick={handleClick}
-            >
-              +
-            </Button>
           </div>
           <div className="absolute bottom-4 right-4">
-          <Button
+            <Button
               onClick={handleDeleteClick}
               variant="outline"
               className="text-red-500 hover:text-red-600 border-none"
@@ -510,15 +496,6 @@ export const Task = ({
               <FontAwesomeIcon icon={faTrashAlt} className="mr-2" />
             </Button>
           </div>
-
-          {/* <div className="mt-auto">
-            <button
-              onClick={handleSaveClick}
-              className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 w-full"
-            >
-              Save
-            </button>
-          </div> */}
         </div>
       </DialogContent>
     </Dialog>

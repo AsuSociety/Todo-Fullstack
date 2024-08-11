@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react"; // Import React and necessary hooks
-
+// ChangeVisibility.jsx
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -54,7 +54,6 @@ export const ChangeVisibility = (props) => {
             variant="outline"
             size="sm"
             className="w-[95px] justify-center border border-black"
-            // style={{ backgroundColor: "white"}}
           >
             {selectedVisibility ? (
               <>{selectedVisibility.label}</>
@@ -73,8 +72,6 @@ export const ChangeVisibility = (props) => {
                   <CommandItem
                     key={visibility.value}
                     value={visibility.value}
-                    // color={status.color}
-                    // style={{ backgroundColor: "white" }}
                     onSelect={(value) =>
                       handleVisibility(props.id, visibility.value)
                     }

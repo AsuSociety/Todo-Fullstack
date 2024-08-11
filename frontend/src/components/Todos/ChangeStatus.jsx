@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react"; // Import React and necessary hooks
-
+//ChangeStatus.jsx
+import React, { useState, useEffect } from "react"; 
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -16,10 +16,7 @@ import {
 } from "@/components/ui/popover";
 
 const statuses = [
-  // {
-  //   value: "backlog",
-  //   label: "Backlog",
-  // },
+
   {
     value: "todo",
     label: "Todo",
@@ -46,7 +43,6 @@ export const ChangeStatus = (props) => {
   const [open, setOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
 
-  // Set the initial state based on the current task status
   useEffect(() => {
     const initialStatus = statuses.find(
       (status) => status.value === props.currentStatus,

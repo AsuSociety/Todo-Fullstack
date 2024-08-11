@@ -12,8 +12,6 @@ from database import  SessionLocal
 from sqlalchemy.orm import Session
 
 
-
-# Create a APIRouter application
 router = APIRouter(
     prefix='/admin',
     tags=['admin'])
@@ -100,7 +98,6 @@ async def remove_user_from_company(
         if user.company_name != current_user['company_name']:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to remove users from other companies")
         
-        # Remove the user from the company by setting the company_name to None or an appropriate placeholder
         user.company_name = ""
         dataBase.commit()
         
@@ -121,17 +118,14 @@ async def update_user_role(
     token: str = Depends(oauth2_bearer)
 ):
     try:
-        # Decode the token to get the current user details
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('sub')
         current_role: str = payload.get('role')
-        user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+        user_uuid = uuid.UUID(str(user_id)) 
 
-        # Ensure the user has the admin role to perform this action
         if current_role != 'admin' and current_role != 'CEO':
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to change roles")
 
-        # Find the user in the database
         user = dataBase.query(Users).filter(Users.id == user_uuid).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")

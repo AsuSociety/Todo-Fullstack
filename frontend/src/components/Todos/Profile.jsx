@@ -1,3 +1,4 @@
+// Profile.jsx
 import React, { useState, useEffect } from "react";
 import { useUser } from "../UserContext";
 import { useNavigate } from "react-router-dom";
@@ -119,9 +120,9 @@ export const Profile = () => {
               <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
             </DropdownMenuItem>
             {hasCompany ? (
-              isAdmin||isCEO ? (
+              isAdmin || isCEO ? (
                 <DropdownMenuItem onClick={handleCompanyPage}>
-                  Company 
+                  Company
                   <DropdownMenuShortcut>⇧⌘W</DropdownMenuShortcut>
                 </DropdownMenuItem>
               ) : null

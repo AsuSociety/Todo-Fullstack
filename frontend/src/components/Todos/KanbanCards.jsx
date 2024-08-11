@@ -1,3 +1,4 @@
+// KanbanCards.jsx
 import React, { useState, useEffect } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

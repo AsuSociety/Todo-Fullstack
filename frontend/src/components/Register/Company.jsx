@@ -1,3 +1,4 @@
+// Company.jsx
 import React, { useState, useEffect } from "react";
 import AuthService from "../AuthService";
 import { useUser } from "../UserContext";
@@ -36,7 +37,6 @@ export const Company = () => {
     const fetchCompanyUsers = async () => {
       try {
         const users = await AuthService.getCompanyUsers(user.token);
-        // Filter out the current user and CEO
         const filteredUsers = users.filter(
           (companyUser) => companyUser.email !== user.email && companyUser.role !== 'CEO'
         );
@@ -73,7 +73,6 @@ export const Company = () => {
     try {
       const result = await deleteCompanyByMail(userId, user.token);
       if (result) {
-        // Remove user from the list
         setCompanyUsers((prevUsers) =>
           prevUsers.filter((user) => user.id !== userId),
         );

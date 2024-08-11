@@ -1,3 +1,4 @@
+// CompanyRegister.jsx
 import React, { useState } from "react";
 import AuthService from "../AuthService";
 import { useNavigate } from "react-router-dom";
@@ -23,15 +24,12 @@ export const CompanyRegister = () => {
 
   const handleRegister = async () => {
     try {
-      // Clear any existing session data or tokens
       AuthService.logout();
       console.log(user.id)
       await AuthService.companyRegister(company);
       updateCompanyById(user.id,company,user.token)
-      // Perform registration
       setCompany("");
       updateRole(user.id,'CEO',user.token)
-      // Navigate back to login screen
       navigate("/Company");
     } catch (error) {
       setError("Registration failed: " + error.message);
@@ -39,7 +37,6 @@ export const CompanyRegister = () => {
   };
 
   function backToTasks() {
-    // console.log(user)
     navigate("/todos");
   }
   return (

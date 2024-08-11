@@ -16,8 +16,6 @@ class AuthService {
     }
 
     const data = await response.json();
-    // console.log("Response Data:", data); // Log the response data
-
     localStorage.setItem("token", data.access_token);
     localStorage.setItem("username", data.username);
     localStorage.setItem("email", data.email);
@@ -55,9 +53,9 @@ class AuthService {
     password,
     firstName,
     lastName,
-    role ="user",
+    role = "user",
     icon = "",
-    company_name= null,
+    company_name = null,
   ) {
     const response = await fetch(`${API_URL}/auth/`, {
       method: "POST",
@@ -81,7 +79,6 @@ class AuthService {
     return { token: data.access_token };
   }
 
-
   static async companyRegister(name) {
     const response = await fetch(`${API_URL}/companies/register/`, {
       method: "POST",
@@ -92,11 +89,11 @@ class AuthService {
         name,
       }),
     });
-  
+
     if (!response.ok) {
       throw new Error("Failed to register company");
     }
-  
+
     const data = await response.json();
     return data;
   }
@@ -106,18 +103,17 @@ class AuthService {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
-  
+
     if (!response.ok) {
       throw new Error("Failed to fetch company users");
     }
-  
+
     const data = await response.json();
     return data;
   }
-  
 }
 
 export default AuthService;

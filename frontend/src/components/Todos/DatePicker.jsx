@@ -1,3 +1,4 @@
+// DatePicker.jsx
 import React, { useState, useEffect } from "react";
 import { format, differenceInHours } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -16,7 +17,6 @@ export const DatePicker = (props) => {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Check if the date prop is provided and update the state
     if (props.currentDeadline) {
       setDate(new Date(props.currentDeadline));
     }

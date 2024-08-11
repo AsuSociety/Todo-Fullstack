@@ -1,6 +1,5 @@
 // TodoWrapper.js
-// Import necessary modules and components
-import React, { useState, useEffect } from "react"; // Import React and necessary hooks
+import React, { useState, useEffect } from "react"; 
 import { useUser } from "../UserContext";
 import { TaskTable } from "./TaskTable";
 import { CalendarView } from "./CalendarView";
@@ -17,15 +16,11 @@ import {
 import { Profile } from "./Profile";
 import { Button } from "@/components/ui/button";
 
-// Define API_URL constant for API endpoint
 export const API_URL = "http://localhost:8000";
-// Define an array of colors
 const colors = ["#ffb3ba", "#ffdfba", "#baffc9", "#bae1ff"];
 
-// Function to fetch all todos from the API
 const fetchAllTodos = async (token) => {
   try {
-    // console.log("Fetching todos from:", url); // Log fetching todos URL
     const response = await fetch(`${API_URL}/todo/`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -38,17 +33,16 @@ const fetchAllTodos = async (token) => {
       );
     }
 
-    const data = await response.json(); // Parse response data
-    console.log("Response data:", data); // Log response data
+    const data = await response.json(); 
+    console.log("Response data:", data);
 
-    return data; // Return fetched todos data
+    return data;
   } catch (error) {
-    console.error(`Error fetching todos${""}:`, error); // Log error if fetching todos fails
-    return []; // Return empty array if fetching todos fails
+    console.error(`Error fetching todos${""}:`, error); 
+    return []; 
   }
 };
 
-// Function to add a new todo
 const addTodo = async (todo, token) => {
   try {
     const response = await fetch(`${API_URL}/todo`, {
@@ -57,7 +51,7 @@ const addTodo = async (todo, token) => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(todo), // Convert todo object to JSON string
+      body: JSON.stringify(todo), 
     });
 
     if (!response.ok) {
@@ -66,23 +60,21 @@ const addTodo = async (todo, token) => {
       );
     }
 
-    const data = await response.json(); // Parse response data
-    console.log("New todo data:", data); // Log new todo data
+    const data = await response.json(); 
+    console.log("New todo data:", data); 
 
-    return data; // Return new todo data
+    return data; 
   } catch (error) {
-    console.error("Error adding todo:", error); // Log error if adding todo fails
-    return null; // Return null if adding todo fails
+    console.error("Error adding todo:", error); 
+    return null; 
   }
 };
 
-// Function to delete a todo by ID
 const deleteTodo = async (id, token) => {
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
       method: "DELETE",
       headers: {
-        // "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
@@ -90,14 +82,13 @@ const deleteTodo = async (id, token) => {
       throw new Error("Failed to delete todo");
     }
 
-    return id; // Return deleted todo ID
+    return id; 
   } catch (error) {
-    console.error("Error deleting todo:", error); // Log error if deleting todo fails
-    return null; // Return null if deleting todo fails
+    console.error("Error deleting todo:", error); 
+    return null; 
   }
 };
 
-// Function to edit a todo
 const editTask = async (
   task,
   id,
@@ -120,7 +111,6 @@ const editTask = async (
     assignee_id: assignee_id,
   };
 
-  // console.log("Payload to be sent:", payload);
 
   try {
     const response = await fetch(`${API_URL}/todo/${id}`, {
@@ -134,14 +124,13 @@ const editTask = async (
 
     if (!response.ok) {
       const errorResponse = await response.json();
-      console.error("Error response:", errorResponse); // Check here for more details
+      console.error("Error response:", errorResponse); 
       throw new Error(
         `Failed to update task: ${response.status} - ${response.statusText}`,
       );
     }
 
     const updatedTodo = await response.json();
-    // console.log("Updated Task:", updatedTodo);
 
     return updatedTodo;
   } catch (error) {
@@ -154,7 +143,7 @@ const handleUpload = async (selectedFiles, todoId, token) => {
   const formData = new FormData();
 
   selectedFiles.forEach((file) => {
-    formData.append("files", file); // Append files to FormData
+    formData.append("files", file); 
   });
 
   try {
@@ -162,7 +151,6 @@ const handleUpload = async (selectedFiles, todoId, token) => {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        // Note: Content-Type is not set here, fetch will automatically set it when using FormData
       },
       body: formData,
     });
@@ -175,8 +163,7 @@ const handleUpload = async (selectedFiles, todoId, token) => {
       );
     }
 
-    // Assuming the response includes the updated task object
-    const updatedTask = await response.json(); // Adjust according to actual response structure
+    const updatedTask = await response.json(); 
     console.log("Files uploaded and task updated successfully", updatedTask);
 
     return updatedTask;
@@ -188,7 +175,6 @@ const handleUpload = async (selectedFiles, todoId, token) => {
 
 const deletePhoto = async (photoId, todoId, token) => {
   try {
-    // Send DELETE request to API
     const response = await axios.delete(`${API_URL}/todo/photos/${photoId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -209,7 +195,6 @@ const deletePhoto = async (photoId, todoId, token) => {
   }
 };
 
-// Function to normalize date to start of the day in local timezone
 
 const normalizeDate = (date) => {
   const newDate = new Date(date);
@@ -224,11 +209,8 @@ const normalizeDate = (date) => {
   return newDate;
 };
 
-// Convert local date to UTC ISO string, fix the problem with the different time
 const convertToUTCISO = (date) => {
-  // Assuming date is a Date object
   const localDate = new Date(date);
-  // Get year, month, date, hours, minutes, seconds, and milliseconds
   const year = localDate.getFullYear();
   const month = localDate.getMonth();
   const day = localDate.getDate();
@@ -237,33 +219,21 @@ const convertToUTCISO = (date) => {
   const seconds = localDate.getSeconds();
   const milliseconds = localDate.getMilliseconds();
 
-  // Create a new UTC date object
   const utcDate = new Date(
     Date.UTC(year, month, day, hours, minutes, seconds, milliseconds),
   );
   return utcDate.toISOString();
 };
 
-// Function to get the default deadline (3 days from now)
-// const getDefaultDeadline = () => {
-//   const today = new Date();
-//   today.setDate(today.getDate() + 3); // Add 3 days
-
-//   const normalizedDate = normalizeDate(today);
-//   return convertToUTCISO(normalizedDate);
-// };
-
-// TodoWrapper functional component
 export const TodoWrapper = () => {
   const { user } = useUser();
-  const [todos, setTodos] = useState([]); // State hook to store todos
-  const [selectedTask, setSelectedTask] = useState(null); // State for selected task to open Task component
-  const [view, setView] = useState("table"); // State for toggling view
+  const [todos, setTodos] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null); 
+  const [view, setView] = useState("table"); 
   const [filterTitle, setFilterTitle] = useState("");
   const [filterStatus, setFilterStatus] = useState([]);
   const [filterVisibility, setFilterVisibility] = useState("");
 
-  // useEffect hook to fetch todos when component mounts
   useEffect(() => {
     const fetchData = async () => {
       if (user && user.token) { 
@@ -272,22 +242,20 @@ export const TodoWrapper = () => {
           setTodos(fetchedTodos);
         } catch (error) {
           console.error("Error fetching todos:", error);
-          setTodos([]); // Clear todos on error to avoid showing stale data
+          setTodos([]); 
         }
       } else {
-        setTodos([]); // Clear todos when user is not authenticated
+        setTodos([]); 
       }
     };
-    // console.log("fooooooooooo",user)
     fetchData();
   }, [user]);
 
   const handleAddTask = async () => {
-    // const defaultDeadline = getDefaultDeadline();
     const newTask = {
       title: "New Task",
       body: "",
-      color: colors[3], // Default color
+      color: colors[3],
       status: "todo",
       deadline: null,
       remainder: true,
@@ -306,7 +274,7 @@ export const TodoWrapper = () => {
     const newTask = {
       title: "New Task",
       body: "",
-      color: colors[3], // Default color
+      color: colors[3], 
       status: "todo",
       deadline: date,
       remainder: true,
@@ -321,13 +289,12 @@ export const TodoWrapper = () => {
     }
   };
 
-  // Function to handle deleting a todo
   const handleDeleteTodo = async (id) => {
-    const deletedId = await deleteTodo(id, user.token); // Delete todo by ID
+    const deletedId = await deleteTodo(id, user.token); 
     if (deletedId) {
       setTodos((prevTodos) =>
         prevTodos.filter((todo) => todo.id !== deletedId),
-      ); // Update todos state by removing deleted todo
+      ); 
     }
   };
 
@@ -344,7 +311,6 @@ export const TodoWrapper = () => {
       task.assignee_id,
     );
 
-    // console.log("@#$@@#@#%@#%",updatedTask)
     if (updatedTask) {
       setTodos((prevTodos) =>
         prevTodos.map((todo) => (todo.id === id ? updatedTask : todo)),
@@ -376,7 +342,6 @@ export const TodoWrapper = () => {
     }
   };
 
-  // Function to update the deadline status
   const updateDeadline = async (taskId, deadline) => {
     const taskToUpdate = todos.find((todo) => todo.id === taskId);
     if (taskToUpdate) {
@@ -417,20 +382,26 @@ export const TodoWrapper = () => {
   const handleDeletePhoto = async (photoId, todoId) => {
     const deletedPhoto = await deletePhoto(photoId, todoId, user.token);
     if (deletedPhoto) {
-      setTodos((prevTodos) =>
-        prevTodos.map((todo) =>
-          todo.id === todoId
-            ? {
-                ...todo,
-                photos: Array.isArray(todo.photos)
-                  ? todo.photos.filter((photo) => photo.id !== photoId)
-                  : [],
-              }
-            : todo,
-        ),
+      const updatedTodos = todos.map((todo) =>
+        todo.id === todoId
+          ? {
+              ...todo,
+              photos: Array.isArray(todo.photos)
+                ? todo.photos.filter((photo) => photo.id !== photoId)
+                : [],
+            }
+          : todo,
       );
+      
+      setTodos(updatedTodos);
+      
+      const updatedTask = updatedTodos.find(todo => todo.id === todoId);
+      if (updatedTask) {
+        await handleSave(updatedTask, todoId);
+      }
     }
   };
+  
 
   const filteredTodos = todos.filter((todo) => {
     const matchesTitle = todo.title
@@ -447,7 +418,6 @@ export const TodoWrapper = () => {
   });
   
 
-  // JSX structure returned by the TodoWrapper component
   return (
     <div className="h-full flex flex-col p-8">
       <div className="sticky top-0 bg-white shadow-md z-10">

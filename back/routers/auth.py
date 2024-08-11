@@ -115,7 +115,6 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Cant Validate the user")
         
         token = create_access_token(user.username, user.id, user.role,user.email,user.company_name, timedelta(minutes=20))
-        # return {'access_token': token, 'type_of_token': 'bearer', 'username':user.username, 'email': user.email, 'first_name': user.firstname, 'last_name': user.lastname, 'role': user.role}
         response = {
         'access_token': token,
         'type_of_token': 'bearer',
@@ -128,7 +127,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         'icon': user.icon,
         'company_name': user.company_name,
         }
-        print("Response:", response)  # Log the response
+        print("Response:", response)  
         return response
 
 @router.delete("/{user_id}")
@@ -152,7 +151,7 @@ async def update_user_icon(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('sub')
-        user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+        user_uuid = uuid.UUID(str(user_id))  
         
         user = dataBase.query(Users).filter(Users.id == user_uuid).first()
         if not user:
@@ -178,22 +177,16 @@ async def update_user_role(
     token: str = Depends(oauth2_bearer)
 ):
     try:
-        # Decode the token to get the current user details
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('sub')
         current_role: str = payload.get('role')
-        user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+        user_uuid = uuid.UUID(str(user_id)) 
 
-        # Ensure the user has the admin role to perform this action
-        # if current_role != 'admin':
-        #     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Not authorized to change roles")
 
-        # Find the user in the database
         user = dataBase.query(Users).filter(Users.id == user_uuid).first()
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
-        # Update the role
         user.role = role_payload.role
         dataBase.commit()
 
@@ -218,7 +211,7 @@ async def update_user_company(
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get('sub')
-        user_uuid = uuid.UUID(str(user_id))  # Ensure user_id is a UUID object
+        user_uuid = uuid.UUID(str(user_id))  
         
         user = dataBase.query(Users).filter(Users.id == user_uuid).first()
         if not user:

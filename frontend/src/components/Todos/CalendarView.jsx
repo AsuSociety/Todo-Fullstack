@@ -5,22 +5,22 @@ import moment from "moment";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Card } from "@/components/ui/card"; // Adjust the import path if needed
-import { Task } from "./Task"; // Adjust the import path if needed
+import { Card } from "@/components/ui/card"; 
+import { Task } from "./Task"; 
 
 const localizer = momentLocalizer(moment);
 const DraggableCalendar = withDragAndDrop(Calendar);
 
 export const CalendarView = (props) => {
   const [events, setEvents] = useState([]);
-  const [selectedTodo, setSelectedTodo] = useState(null);
+  const [selectedTodoId, setSelectedTodoId] = useState(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (props.selectedTask) {
-      setSelectedTodo(props.selectedTask);
+      setSelectedTodoId(props.selectedTask.id);
       setOpen(true);
-      props.setSelectedTask(null); // Clear selected task after opening
+      props.setSelectedTask(null); 
     }
   }, [props.selectedTask]);
 
@@ -58,14 +58,14 @@ export const CalendarView = (props) => {
   const handleOpenDialog = (event) => {
     const task = props.tasks.find((task) => task.id === event.taskId);
     if (task) {
-      setSelectedTodo(task);
+      setSelectedTodoId(task.id);
       setOpen(true);
     }
   };
 
   const handleCloseDialog = () => {
     setOpen(false);
-    setSelectedTodo(null);
+    setSelectedTodoId(null);
   };
 
   const eventStyleGetter = (event) => {
@@ -82,9 +82,7 @@ export const CalendarView = (props) => {
 
   const onEventDrop = async ({ event, start, end }) => {
     const taskId = event.taskId;
-    const newDeadline = start; // Assuming start is the new deadline after drop
-
-    // Update the task with the new deadline
+    const newDeadline = start; 
     await props.updateDeadline(taskId, newDeadline);
   };
 
@@ -109,7 +107,7 @@ export const CalendarView = (props) => {
       <Task
         open={open}
         onClose={handleCloseDialog}
-        task={selectedTodo}
+        task={props.tasks.find(todo => todo.id === selectedTodoId)} 
         handleSave={props.handleSave}
         handleDeletePhoto={props.handleDeletePhoto}
         updateAssignees={props.updateAssignees}
@@ -117,6 +115,12 @@ export const CalendarView = (props) => {
         handleUploadClick={props.handleUploadClick}
         updateTaskDescription={props.updateTaskDescription}
         updateTaskTitle={props.updateTaskTitle}
+        updateDeadline={props.updateDeadline}
+        updateRemainder={props.updateRemainder}
+        normalizeDate={props.normalizeDate}
+        convertToUTCISO={props.convertToUTCISO}
+        updateVisibility={props.updateVisibility}
+        deleteTodo={props.deleteTodo}
       />
     </Card>
   );
