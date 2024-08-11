@@ -7,9 +7,15 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-fastapi = "^0.95.02"
+fastapi = "^0.100.0"
 uvicorn = {extras = ["standard"], version = "^0.21.1"}
 tortoise-orm = "^0.20.0"
+pydantic = "^2.0.0"
+fastapi-mail = "^1.4.1"
+sqlalchemy = "^2.0.31"
+passlib = "^1.7.4"
+python-jose = "^3.3.0"
+python-multipart = "^0.0.9"
 
 
 [build-system]
