@@ -31,3 +31,4 @@ yarn-error.log*
 /uploads
 .vercel
 .env*.local
+.alembic.ini
