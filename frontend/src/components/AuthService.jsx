@@ -1,5 +1,7 @@
 // AuthService.js
-export const API_URL = "http://localhost:8000";
+// export const API_URL = "http://localhost:8000";
+export const API_URL = "";
+
 
 class AuthService {
   static async login(username, password) {
