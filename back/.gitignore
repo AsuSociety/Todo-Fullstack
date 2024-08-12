@@ -29,3 +29,5 @@ yarn-error.log*
 
 # Ignore upload folder
 /uploads
+.vercel
+.env*.local
