@@ -26,17 +26,17 @@ app.include_router(user.router)
 app.include_router(company.router)
 
 
-# if os.getenv("NODE_ENV")== 'production':
-app.mount("/", StaticFiles(directory="public", html=True), name="public")
+if os.getenv("NODE_ENV")== 'production':
+    app.mount("/", StaticFiles(directory="public", html=True), name="public")
 
-# else:
+else:
 
-#     origins = ["http://localhost:5173"]
-#     app.add_middleware(
-#         CORSMiddleware,
-#         allow_origins=origins,
-#         allow_credentials=True,
-#         allow_methods=["*"],
-#         allow_headers=["*"],
-#     )
+    origins = ["http://localhost:5173"]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 

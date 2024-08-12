@@ -3,8 +3,8 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import AuthService from "./AuthService";
 
 const UserContext = createContext();
-// export const API_URL = "http://localhost:8000";
-export const API_URL = "";
+export const API_URL = "http://localhost:8000";
+// export const API_URL = "";
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
