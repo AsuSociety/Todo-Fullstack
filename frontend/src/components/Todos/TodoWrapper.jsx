@@ -16,8 +16,8 @@ import {
 import { Profile } from "./Profile";
 import { Button } from "@/components/ui/button";
 
-// export const API_URL = "http://localhost:8000";
-export const API_URL = "";
+export const API_URL = "http://localhost:8000";
+// export const API_URL = "";
 
 const colors = ["#ffb3ba", "#ffdfba", "#baffc9", "#bae1ff"];
 
