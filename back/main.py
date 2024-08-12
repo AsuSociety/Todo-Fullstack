@@ -10,7 +10,10 @@ from fastapi.staticfiles import StaticFiles
 import models
 from database import engine, SessionLocal
 from routers import auth, todos, admin, user, company
+from dotenv import load_dotenv
 
+import os 
+load_dotenv()
 
 app = FastAPI()
 
@@ -23,12 +26,17 @@ app.include_router(user.router)
 app.include_router(company.router)
 
 
+if os.getenv("NODE_ENV")== 'production':
+    app.mount("/", StaticFiles(directory="public", html=True), name="public")
 
-origins = ["http://localhost:5173"]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+else:
+
+    origins = ["http://localhost:5173"]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
